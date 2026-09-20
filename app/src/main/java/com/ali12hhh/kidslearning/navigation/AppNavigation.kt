@@ -57,7 +57,6 @@ fun AppNavigation() {
             HomePage(
                 onArabic = { navController.navigate(AppRoutes.ARABIC_LETTERS) },
                 onEnglish = { navController.navigate(AppRoutes.ENGLISH_LETTERS) },
-                onNumbers = { navController.navigate(AppRoutes.NUMBERS) },
                 onPlay = { navController.navigate(AppRoutes.PLAY) }
             )
         }
@@ -80,7 +79,6 @@ fun AppNavigation() {
 private fun HomePage(
     onArabic: () -> Unit,
     onEnglish: () -> Unit,
-    onNumbers: () -> Unit,
     onPlay: () -> Unit
 ) {
     var darkMode by remember { mutableStateOf(false) }
@@ -183,20 +181,6 @@ private fun HomePage(
                         )
                     }
 
-                    Spacer(Modifier.height(10.dp))
-
-                    LearningCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        icon = "١٢٣",
-                        title = "الأرقام والعدّ",
-                        subtitle = "تعلّم الأرقام من 0 إلى 9",
-                        selected = selected == "numbers",
-                        onClick = {
-                            selected = "numbers"
-                            onNumbers()
-                        }
-                    )
-
                     Spacer(Modifier.height(12.dp))
 
                     Row(
@@ -207,7 +191,7 @@ private fun HomePage(
                             modifier = Modifier.weight(1f),
                             icon = "🎮",
                             title = "استراحة",
-                            subtitle = "ألعاب ممتعة",
+                            subtitle = "",
                             onClick = onPlay
                         )
                         BottomCard(
@@ -393,7 +377,9 @@ private fun BottomCard(
             Spacer(Modifier.width(8.dp))
             Column {
                 Text(title, fontWeight = FontWeight.ExtraBold)
-                Text(subtitle, fontSize = 11.sp)
+                if (subtitle.isNotBlank()) {
+                    Text(subtitle, fontSize = 11.sp)
+                }
             }
         }
     }
