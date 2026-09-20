@@ -15,14 +15,18 @@ android {
         versionName = "1.0.0"
     }
 
-    sourceSets["main"].assets.srcDir("assets/characters/KayKit/Mannequin Character/characters")
+    sourceSets["main"].assets.directories.add("assets/characters/KayKit/Mannequin Character/characters")
 
     buildFeatures { compose = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
 }
 
 dependencies {
