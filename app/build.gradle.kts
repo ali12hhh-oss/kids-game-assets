@@ -10,11 +10,13 @@ android {
 
     defaultConfig {
         applicationId = "com.ali12hhh.kidslearning"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
     }
+
+    sourceSets["main"].assets.srcDir("assets/characters/KayKit/Mannequin Character/characters")
 
     buildFeatures { compose = true }
     compileOptions {
@@ -32,6 +34,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation("io.github.sceneview:sceneview:4.37.0")
     testImplementation("junit:junit:4.13.2")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
