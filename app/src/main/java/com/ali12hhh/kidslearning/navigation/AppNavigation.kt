@@ -56,7 +56,8 @@ import androidx.navigation.compose.rememberNavController
 import com.ali12hhh.kidslearning.core.LearningCatalog
 
 private const val CLIP_IDLE = 0
-private val REACTION_CLIPS = listOf(6, 7, 2, 9)
+// All 10 non-idle clips are played in order on each tap.
+private val REACTION_CLIPS = (1 until 11).toList()
 private const val ANIMATION_COUNT = 11
 
 @Composable
