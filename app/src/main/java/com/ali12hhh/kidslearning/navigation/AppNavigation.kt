@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -179,7 +180,7 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
     }
     val cameraNode = rememberCameraNode(engine) { position = Position(x = 0f, y = 0f, z = 3.2f) }
     val characterNode = remember(model) {
-        model?.let { instance -> ModelNode(modelInstance = instance, autoAnimate = false, scaleToUnits = 2.8f, centerOrigin = Position(x = 0f, y = 0f, z = 0f)).also { it.position = Position(x = 0f, y = -0.65f, z = 0f) } }
+        model?.let { instance -> ModelNode(modelInstance = instance, autoAnimate = false, scaleToUnits = 2.8f, centerOrigin = Position(x = 0f, y = 0f, z = 0f)).also { it.position = Position(x = 0f, y = 0f, z = 0f) } }
     }
     var taps by remember { mutableStateOf(0) }
     LaunchedEffect(characterNode, taps) {
@@ -195,7 +196,7 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
         }
     }
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Scene(modifier = Modifier.fillMaxSize(), engine = engine, modelLoader = modelLoader, cameraNode = cameraNode, cameraManipulator = null, isOpaque = false, childNodes = listOfNotNull(characterNode))
+        Scene(modifier = Modifier.fillMaxSize().offset(y = 150.dp), engine = engine, modelLoader = modelLoader, cameraNode = cameraNode, cameraManipulator = null, isOpaque = false, childNodes = listOfNotNull(characterNode))
         Box(Modifier.matchParentSize().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { taps += 1 })
     }
 }
