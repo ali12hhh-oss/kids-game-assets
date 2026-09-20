@@ -49,7 +49,6 @@ import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberNodes
 import io.github.sceneview.node.ModelNode
-import io.github.sceneview.rememberNode
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -325,13 +324,19 @@ private fun RealCharacterHero() {
         }.getOrNull()
     }
 
-    val modelNode = model?.let { instance ->
-        rememberNode {
-            ModelNode(
-                modelInstance = instance,
-                autoAnimate = false,
-                scaleToUnits = 1.15f
-            )
+    val nodes = rememberNodes()
+
+    LaunchedEffect(model) {
+        model?.let { instance ->
+            if (nodes.isEmpty()) {
+                nodes.add(
+                    ModelNode(
+                        modelInstance = instance,
+                        autoAnimate = false,
+                        scaleToUnits = 1.15f
+                    )
+                )
+            }
         }
     }
 
@@ -345,7 +350,7 @@ private fun RealCharacterHero() {
             modifier = Modifier.size(190.dp),
             engine = engine,
             modelLoader = modelLoader,
-            childNodes = listOfNotNull(modelNode)
+            childNodes = nodes
         )
     }
 }
