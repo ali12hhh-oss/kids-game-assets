@@ -312,10 +312,11 @@ private fun ProfileCard(
 private fun RealCharacterHero() {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    val model = io.github.sceneview.rememberModelInstance(
-        modelLoader,
-        "Mannequin_Medium.glb"
-    )
+    val model = remember(modelLoader) {
+        runCatching {
+            modelLoader.createModelInstance("Mannequin_Medium.glb")
+        }.getOrNull()
+    }
 
     val characterNode = remember(model) {
         model?.let { instance ->
