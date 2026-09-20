@@ -48,6 +48,7 @@ import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberNodes
 import io.github.sceneview.node.ModelNode
+import io.github.sceneview.math.Position
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -323,7 +324,9 @@ private fun RealCharacterHero() {
             ModelNode(
                 modelInstance = instance,
                 autoAnimate = false,
-                scaleToUnits = 1.05f
+                scaleToUnits = 1.05f,
+                centerOrigin = Position(y = -1f),
+                position = Position(y = -0.15f)
             )
         }
     }
