@@ -50,7 +50,6 @@ import io.github.sceneview.Scene
 import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
-import io.github.sceneview.rememberNodes
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.math.Position
 import kotlinx.coroutines.delay
@@ -60,15 +59,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ali12hhh.kidslearning.core.LearningCatalog
 
-// Animation indices inside Mannequin_Medium_Anim.glb. The order is defined in
-// tools/merge-animations.mjs:
-// 0 Idle_A, 1 Idle_B, 2 Interact, 3 PickUp, 4 Use_Item, 5 Spawn_Ground,
-// 6 Waving, 7 Cheering, 8 Sit_Floor_Idle, 9 Jump_Full_Short, 10 Walking_A
+// Animation indices inside Mannequin_Medium_Anim.glb.
 private const val CLIP_IDLE = 0
-
-// Played one after another each time the child taps the character:
-// Waving, Cheering, Interact, Jump_Full_Short
 private val REACTION_CLIPS = listOf(6, 7, 2, 9)
+private const val ANIMATION_COUNT = 11
 
 @Composable
 fun AppNavigation() {
@@ -122,8 +116,6 @@ private fun HomePage(
                     .fillMaxSize()
                     .background(background)
             ) {
-                // Fixed page: no vertical scrolling. The character area takes
-                // the remaining height via weight(1f).
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -151,98 +143,60 @@ private fun HomePage(
                     }
 
                     Spacer(Modifier.height(10.dp))
-
                     ProfileCard(
                         avatar = avatar,
                         onProfileClick = { showProfile = true },
                         onCollectionClick = { showCollection = true }
                     )
-
                     Spacer(Modifier.height(12.dp))
-
                     Text(
                         "مرحبًا يا صديقي! اختر ماذا نتعلم اليوم.",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         textAlign = TextAlign.Center
                     )
-
                     Spacer(Modifier.height(6.dp))
-
                     RealCharacterHero(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                        modifier = Modifier.weight(1f).fillMaxWidth()
                     )
-
                     Spacer(Modifier.height(10.dp))
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         LearningCard(
-                            modifier = Modifier.weight(1f),
-                            icon = "A",
-                            title = "English",
-                            subtitle = "الحروف الإنجليزية",
-                            selected = selected == "en",
-                            onClick = {
-                                selected = "en"
-                                onEnglish()
-                            }
+                            modifier = Modifier.weight(1f), icon = "A", title = "English",
+                            subtitle = "الحروف الإنجليزية", selected = selected == "en",
+                            onClick = { selected = "en"; onEnglish() }
                         )
                         LearningCard(
-                            modifier = Modifier.weight(1f),
-                            icon = "أ",
-                            title = "العربية",
-                            subtitle = "الحروف العربية",
-                            selected = selected == "ar",
-                            onClick = {
-                                selected = "ar"
-                                onArabic()
-                            }
+                            modifier = Modifier.weight(1f), icon = "أ", title = "العربية",
+                            subtitle = "الحروف العربية", selected = selected == "ar",
+                            onClick = { selected = "ar"; onArabic() }
                         )
                     }
-
                     Spacer(Modifier.height(12.dp))
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         BottomCard(
-                            modifier = Modifier.weight(1f),
-                            icon = "🎮",
-                            title = "استراحة",
-                            subtitle = "",
-                            onClick = onPlay
+                            modifier = Modifier.weight(1f), icon = "🎮", title = "استراحة",
+                            subtitle = "", onClick = onPlay
                         )
                         BottomCard(
-                            modifier = Modifier.weight(1f),
-                            icon = "🛍️",
-                            title = "المتجر",
-                            subtitle = "استخدم نجومك",
-                            onClick = { showCollection = true }
+                            modifier = Modifier.weight(1f), icon = "🛍️", title = "المتجر",
+                            subtitle = "استخدم نجومك", onClick = { showCollection = true }
                         )
                     }
-
                     Spacer(Modifier.height(12.dp))
                 }
 
                 if (showSettings) {
-                    InfoDialog(
-                        title = "الإعدادات",
-                        text = "إعدادات التطبيق ستتوسع هنا لاحقًا، مع الحفاظ على وظائف التعلم واللعب."
-                    ) { showSettings = false }
+                    InfoDialog("الإعدادات", "إعدادات التطبيق ستتوسع هنا لاحقًا، مع الحفاظ على وظائف التعلم واللعب.") { showSettings = false }
                 }
                 if (showCollection) {
-                    InfoDialog(
-                        title = "مقتنياتي",
-                        text = "ستظهر هنا المقتنيات التي يشتريها الطفل بالنجوم."
-                    ) { showCollection = false }
+                    InfoDialog("مقتنياتي", "ستظهر هنا المقتنيات التي يشتريها الطفل بالنجوم.") { showCollection = false }
                 }
                 if (showProfile) {
                     AlertDialog(
@@ -255,25 +209,13 @@ private fun HomePage(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceEvenly
                                 ) {
-                                    TextButton(onClick = {
-                                        avatar = "👦"
-                                        showProfile = false
-                                    }) { Text("👦 ولد") }
-                                    TextButton(onClick = {
-                                        avatar = "👧"
-                                        showProfile = false
-                                    }) { Text("👧 بنت") }
+                                    TextButton(onClick = { avatar = "👦"; showProfile = false }) { Text("👦 ولد") }
+                                    TextButton(onClick = { avatar = "👧"; showProfile = false }) { Text("👧 بنت") }
                                 }
-                                Text(
-                                    "يمكن إضافة اختيار صورة من معرض الهاتف في مرحلة ربط الملف الشخصي."
-                                )
+                                Text("يمكن إضافة اختيار صورة من معرض الهاتف في مرحلة ربط الملف الشخصي.")
                             }
                         },
-                        confirmButton = {
-                            TextButton(onClick = { showProfile = false }) {
-                                Text("إغلاق")
-                            }
-                        }
+                        confirmButton = { TextButton(onClick = { showProfile = false }) { Text("إغلاق") } }
                     )
                 }
             }
@@ -284,35 +226,23 @@ private fun HomePage(
 @Composable
 private fun TopAction(icon: String, label: String, onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        TextButton(onClick = onClick) {
-            Text(icon, fontSize = 24.sp)
-        }
+        TextButton(onClick = onClick) { Text(icon, fontSize = 24.sp) }
         Text(label, fontSize = 10.sp)
     }
 }
 
 @Composable
-private fun ProfileCard(
-    avatar: String,
-    onProfileClick: () -> Unit,
-    onCollectionClick: () -> Unit
-) {
+private fun ProfileCard(avatar: String, onProfileClick: () -> Unit, onCollectionClick: () -> Unit) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(6.dp, RoundedCornerShape(22.dp)),
+        modifier = Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(22.dp)),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.92f))
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(onClick = onProfileClick) {
-                Text(avatar, fontSize = 36.sp)
-            }
+            TextButton(onClick = onProfileClick) { Text(avatar, fontSize = 36.sp) }
             Column(modifier = Modifier.weight(1f)) {
                 Text("صديقي الصغير", fontWeight = FontWeight.Bold)
                 Text("ملف الطفل", fontSize = 12.sp)
@@ -322,9 +252,7 @@ private fun ProfileCard(
                 Text("نجومي", fontSize = 11.sp)
             }
             Spacer(Modifier.width(8.dp))
-            OutlinedButton(onClick = onCollectionClick) {
-                Text("مقتنياتي")
-            }
+            OutlinedButton(onClick = onCollectionClick) { Text("مقتنياتي") }
         }
     }
 }
@@ -333,89 +261,70 @@ private fun ProfileCard(
 private fun RealCharacterHero(modifier: Modifier = Modifier) {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    // Prefer the model merged with the educational animations (built by Gradle);
-    // fall back to the static mannequin if it is not available.
+    // Use exactly one ModelInstance: animated asset when available, static fallback otherwise.
     val model = remember(modelLoader) {
-        runCatching {
-            modelLoader.createModelInstance("Mannequin_Medium_Anim.glb")
-        }.getOrNull() ?: runCatching {
-            modelLoader.createModelInstance("Mannequin_Medium.glb")
-        }.getOrNull()
+        runCatching { modelLoader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull()
+            ?: runCatching { modelLoader.createModelInstance("Mannequin_Medium.glb") }.getOrNull()
     }
 
-    // Camera closer than before so the character fills the available area.
+    // Pull the camera back to include the head and feet, then place the model a little lower.
     val cameraNode = rememberCameraNode(engine) {
-        position = Position(x = 0f, y = 0f, z = 2.4f)
+        position = Position(x = 0f, y = 0f, z = 3.0f)
     }
-
     val characterNode = remember(model) {
         model?.let { instance ->
             ModelNode(
                 modelInstance = instance,
                 autoAnimate = false,
-                scaleToUnits = 1.5f,
-                centerOrigin = Position(x = 0f, y = 0f, z = 0f)
+                scaleToUnits = 1.25f,
+                centerOrigin = Position(x = 0f, y = 0f, z = 0f),
+                position = Position(x = 0f, y = -0.18f, z = 0f)
             )
         }
     }
 
-    // taps == 0: loop the idle clip. Each tap plays the next reaction clip
-    // (wave, cheer, interact, jump) once, then returns to idle.
     var taps by remember { mutableStateOf(0) }
     LaunchedEffect(characterNode, taps) {
         val node = characterNode ?: return@LaunchedEffect
+        // Explicitly stop every previous clip before starting another so poses cannot overlap.
+        for (index in 0 until ANIMATION_COUNT) runCatching { node.stopAnimation(index) }
         if (taps == 0) {
             runCatching { node.playAnimation(CLIP_IDLE) }
         } else {
             val clip = REACTION_CLIPS[(taps - 1) % REACTION_CLIPS.size]
             runCatching { node.playAnimation(clip, 1f, false) }
             delay(3000)
+            for (index in 0 until ANIMATION_COUNT) runCatching { node.stopAnimation(index) }
             runCatching { node.playAnimation(CLIP_IDLE) }
         }
     }
 
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Scene(
             modifier = Modifier.fillMaxSize(),
             engine = engine,
             modelLoader = modelLoader,
             cameraNode = cameraNode,
-            // Disable the default orbit manipulator: it overrides cameraNode
-            // and re-frames the model too close.
             cameraManipulator = null,
             isOpaque = false,
             childNodes = listOfNotNull(characterNode)
         )
-        // Transparent tap layer above the 3D view.
         Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { taps += 1 }
+            modifier = Modifier.matchParentSize().clickable(
+                interactionSource = remember { MutableInteractionSource() }, indication = null
+            ) { taps += 1 }
         )
     }
 }
 
 @Composable
 private fun LearningCard(
-    modifier: Modifier,
-    icon: String,
-    title: String,
-    subtitle: String,
-    selected: Boolean,
-    onClick: () -> Unit
+    modifier: Modifier, icon: String, title: String, subtitle: String, selected: Boolean, onClick: () -> Unit
 ) {
     val shape = RoundedCornerShape(24.dp)
     Button(
         onClick = onClick,
-        modifier = modifier
-            .height(112.dp)
-            .shadow(if (selected) 12.dp else 6.dp, shape),
+        modifier = modifier.height(112.dp).shadow(if (selected) 12.dp else 6.dp, shape),
         shape = shape,
         colors = ButtonDefaults.buttonColors(
             containerColor = if (selected) Color(0xFFFFD76A) else Color.White.copy(alpha = 0.96f),
@@ -432,34 +341,22 @@ private fun LearningCard(
 }
 
 @Composable
-private fun BottomCard(
-    modifier: Modifier,
-    icon: String,
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit
-) {
+private fun BottomCard(modifier: Modifier, icon: String, title: String, subtitle: String, onClick: () -> Unit) {
     Card(
-        modifier = modifier
-            .height(96.dp)
-            .shadow(6.dp, RoundedCornerShape(22.dp)),
+        modifier = modifier.height(96.dp).shadow(6.dp, RoundedCornerShape(22.dp)),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.94f)),
         onClick = onClick
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp),
+            modifier = Modifier.fillMaxSize().padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(icon, fontSize = 30.sp)
             Spacer(Modifier.width(8.dp))
             Column {
                 Text(title, fontWeight = FontWeight.ExtraBold)
-                if (subtitle.isNotBlank()) {
-                    Text(subtitle, fontSize = 11.sp)
-                }
+                if (subtitle.isNotBlank()) Text(subtitle, fontSize = 11.sp)
             }
         }
     }
@@ -479,10 +376,7 @@ private fun InfoDialog(title: String, text: String, onClose: () -> Unit) {
 private fun ContentPage(title: String, content: String) {
     Scaffold { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(24.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
