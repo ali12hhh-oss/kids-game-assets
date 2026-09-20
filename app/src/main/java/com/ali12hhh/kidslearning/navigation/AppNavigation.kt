@@ -323,8 +323,7 @@ private fun RealCharacterHero() {
             ModelNode(
                 modelInstance = instance,
                 autoAnimate = false,
-                scaleToUnits = 1.05f,
-                position = io.github.sceneview.math.Position(y = -0.30f)
+                scaleToUnits = 1.05f
             )
         }
     }
