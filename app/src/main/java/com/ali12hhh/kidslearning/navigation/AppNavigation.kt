@@ -28,7 +28,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,9 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import android.util.Log
 import io.github.sceneview.Scene
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
@@ -313,47 +310,13 @@ private fun ProfileCard(
 
 @Composable
 private fun RealCharacterHero() {
-    val context = LocalContext.current
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    var model by remember { mutableStateOf<io.github.sceneview.model.ModelInstance?>(null) }
+    val model = io.github.sceneview.rememberModelInstance(
+        modelLoader,
+        "Mannequin_Medium.glb"
+    )
 
-    // Detailed diagnostics: never hide asset/model failures.
-    LaunchedEffect(modelLoader) {
-        try {
-            context.assets.open("Mannequin_Medium.glb").use {
-                Log.d("RealCharacterHero", "Asset found: Mannequin_Medium.glb")
-            }
-
-            val loadedModel = modelLoader.createModelInstance("Mannequin_Medium.glb")
-            if (loadedModel == null) {
-                Log.e(
-                    "RealCharacterHero",
-                    "Model loading returned null: Mannequin_Medium.glb"
-                )
-            } else {
-                Log.d("RealCharacterHero", "Model loaded successfully: Mannequin_Medium.glb")
-            }
-            model = loadedModel
-        } catch (e: Exception) {
-            Log.e(
-                "RealCharacterHero",
-                "FAILED to load Mannequin_Medium.glb. Check APK assets/path/SceneView.",
-                e
-            )
-        } catch (t: Throwable) {
-            Log.e(
-                "RealCharacterHero",
-                "FATAL model loading error for Mannequin_Medium.glb",
-                t
-            )
-        }
-    }
-
-    // Do not mutate a remembered node list after composition: Scene() receives
-    // the list reference through AndroidView and that mutation may not trigger
-    // its update block. Build the node from Compose state so the Scene is updated
-    // when the model becomes available.
     val characterNode = remember(model) {
         model?.let { instance ->
             ModelNode(
