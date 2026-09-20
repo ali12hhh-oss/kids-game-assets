@@ -53,6 +53,14 @@ android {
                 check(entry != null && entry.size > 0L) {
                     "BUILD FAILED: Mannequin_Medium.glb is not packaged in the APK at $packagedPath"
                 }
+
+                ZipFile(apk).getInputStream(entry).use { input ->
+                    val header = ByteArray(4)
+                    val read = input.read(header)
+                    check(read == 4 && header.contentEquals(byteArrayOf(0x67, 0x6C, 0x54, 0x46))) {
+                        "BUILD FAILED: Packaged Mannequin_Medium.glb is not a valid GLB file (missing glTF header)."
+                    }
+                }
             }
 
             println("3D ASSET VERIFICATION PASSED: Mannequin_Medium.glb is present, referenced, and packaged.")
