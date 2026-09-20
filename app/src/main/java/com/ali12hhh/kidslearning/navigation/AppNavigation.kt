@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalLayoutDirection
 import io.github.sceneview.Scene
+import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberNodes
@@ -319,13 +320,20 @@ private fun RealCharacterHero() {
         }.getOrNull()
     }
 
+    // Explicit camera pulled back and looking at the origin so the whole body fits.
+    val cameraNode = rememberCameraNode(engine) {
+        position = Position(x = 0f, y = 0f, z = 4.0f)
+    }
+
     val characterNode = remember(model) {
         model?.let { instance ->
             ModelNode(
                 modelInstance = instance,
                 autoAnimate = false,
-                scaleToUnits = 1.05f,
-                centerOrigin = Position(y = 0.10f)
+                scaleToUnits = 1.5f,
+                // Center the model on the origin (no vertical offset) so the
+                // feet are not placed at the middle of the view.
+                centerOrigin = Position(x = 0f, y = 0f, z = 0f)
             )
         }
     }
@@ -333,13 +341,17 @@ private fun RealCharacterHero() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(190.dp),
+            .height(260.dp),
         contentAlignment = Alignment.Center
     ) {
         Scene(
-            modifier = Modifier.size(190.dp),
+            modifier = Modifier.size(260.dp),
             engine = engine,
             modelLoader = modelLoader,
+            cameraNode = cameraNode,
+            // Disable the default orbit manipulator: it overrides cameraNode
+            // and re-frames the model too close.
+            cameraManipulator = null,
             isOpaque = false,
             childNodes = listOfNotNull(characterNode)
         )
