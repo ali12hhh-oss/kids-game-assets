@@ -17,11 +17,55 @@ android {
 
     sourceSets["main"].assets.directories.add("assets/characters/KayKit/Mannequin Character/characters")
 
+    // Build gate: fail the build if the required 3D asset is missing,
+    // not referenced by the app, or not packaged into the APK.
+    val verifyCharacterAssets = tasks.register("verifyCharacterAssets") {
+        doLast {
+            val assetRelativePath =
+                "assets/characters/KayKit/Mannequin Character/characters/Mannequin_Medium.glb"
+            val assetFile = file(assetRelativePath)
+            check(assetFile.isFile && assetFile.length() > 0L) {
+                "BUILD FAILED: Required 3D asset is missing or empty: $assetRelativePath"
+            }
+
+            val navigationFile =
+                file("src/main/java/com/ali12hhh/kidslearning/navigation/AppNavigation.kt")
+            check(navigationFile.isFile) {
+                "BUILD FAILED: AppNavigation.kt was not found; cannot verify 3D asset reference."
+            }
+            check(navigationFile.readText().contains("Mannequin_Medium.glb")) {
+                "BUILD FAILED: Mannequin_Medium.glb is not referenced by AppNavigation.kt."
+            }
+
+            val apk = layout.buildDirectory
+                .file("outputs/apk/debug/app-debug.apk")
+                .get()
+                .asFile
+            check(apk.isFile && apk.length() > 0L) {
+                "BUILD FAILED: Debug APK was not produced before asset verification."
+            }
+
+            java.util.zip.ZipFile(apk).use { zip ->
+                val packagedPath = "assets/Mannequin_Medium.glb"
+                val entry = zip.getEntry(packagedPath)
+                check(entry != null && entry.size > 0L) {
+                    "BUILD FAILED: Mannequin_Medium.glb is not packaged in the APK at $packagedPath"
+                }
+            }
+
+            println("3D ASSET VERIFICATION PASSED: Mannequin_Medium.glb is present, referenced, and packaged.")
+        }
+    }
+
     buildFeatures { compose = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    tasks.named("assembleDebug") {
+        finalizedBy(verifyCharacterAssets)
+    }
+
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
