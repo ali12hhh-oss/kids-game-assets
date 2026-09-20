@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -59,7 +59,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ali12hhh.kidslearning.core.LearningCatalog
 
-// Animation indices inside Mannequin_Medium_Anim.glb.
 private const val CLIP_IDLE = 0
 private val REACTION_CLIPS = listOf(6, 7, 2, 9)
 private const val ANIMATION_COUNT = 11
@@ -111,15 +110,9 @@ private fun HomePage(
 
     Surface(modifier = Modifier.fillMaxSize()) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(background)
-            ) {
+            Box(modifier = Modifier.fillMaxSize().background(background)) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(
@@ -131,23 +124,15 @@ private fun HomePage(
                         Text(
                             "تعلّم مع دبدوب",
                             style = MaterialTheme.typography.headlineSmall.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 24.sp
+                                fontWeight = FontWeight.ExtraBold, fontSize = 24.sp
                             ),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.weight(1f)
                         )
-                        TopAction(if (darkMode) "☀️" else "🌙", "الوضع") {
-                            darkMode = !darkMode
-                        }
+                        TopAction(if (darkMode) "☀️" else "🌙", "الوضع") { darkMode = !darkMode }
                     }
-
                     Spacer(Modifier.height(10.dp))
-                    ProfileCard(
-                        avatar = avatar,
-                        onProfileClick = { showProfile = true },
-                        onCollectionClick = { showCollection = true }
-                    )
+                    ProfileCard(avatar, { showProfile = true }, { showCollection = true })
                     Spacer(Modifier.height(12.dp))
                     Text(
                         "مرحبًا يا صديقي! اختر ماذا نتعلم اليوم.",
@@ -155,49 +140,29 @@ private fun HomePage(
                         textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(6.dp))
-                    RealCharacterHero(
-                        modifier = Modifier.weight(1f).fillMaxWidth()
-                    )
+                    RealCharacterHero(Modifier.weight(1f).fillMaxWidth())
                     Spacer(Modifier.height(10.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        LearningCard(
-                            modifier = Modifier.weight(1f), icon = "A", title = "English",
-                            subtitle = "الحروف الإنجليزية", selected = selected == "en",
-                            onClick = { selected = "en"; onEnglish() }
-                        )
-                        LearningCard(
-                            modifier = Modifier.weight(1f), icon = "أ", title = "العربية",
-                            subtitle = "الحروف العربية", selected = selected == "ar",
-                            onClick = { selected = "ar"; onArabic() }
-                        )
+                        LearningCard(Modifier.weight(1f), "A", "English", "الحروف الإنجليزية", selected == "en") {
+                            selected = "en"; onEnglish()
+                        }
+                        LearningCard(Modifier.weight(1f), "أ", "العربية", "الحروف العربية", selected == "ar") {
+                            selected = "ar"; onArabic()
+                        }
                     }
                     Spacer(Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        BottomCard(
-                            modifier = Modifier.weight(1f), icon = "🎮", title = "استراحة",
-                            subtitle = "", onClick = onPlay
-                        )
-                        BottomCard(
-                            modifier = Modifier.weight(1f), icon = "🛍️", title = "المتجر",
-                            subtitle = "استخدم نجومك", onClick = { showCollection = true }
-                        )
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        BottomCard(Modifier.weight(1f), "🎮", "استراحة", "", onPlay)
+                        BottomCard(Modifier.weight(1f), "🛍️", "المتجر", "استخدم نجومك") { showCollection = true }
                     }
                     Spacer(Modifier.height(12.dp))
                 }
-
-                if (showSettings) {
-                    InfoDialog("الإعدادات", "إعدادات التطبيق ستتوسع هنا لاحقًا، مع الحفاظ على وظائف التعلم واللعب.") { showSettings = false }
-                }
-                if (showCollection) {
-                    InfoDialog("مقتنياتي", "ستظهر هنا المقتنيات التي يشتريها الطفل بالنجوم.") { showCollection = false }
-                }
+                if (showSettings) InfoDialog("الإعدادات", "إعدادات التطبيق ستتوسع هنا لاحقًا، مع الحفاظ على وظائف التعلم واللعب.") { showSettings = false }
+                if (showCollection) InfoDialog("مقتنياتي", "ستظهر هنا المقتنيات التي يشتريها الطفل بالنجوم.") { showCollection = false }
                 if (showProfile) {
                     AlertDialog(
                         onDismissRequest = { showProfile = false },
@@ -205,10 +170,7 @@ private fun HomePage(
                         text = {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text("اختر صورة بسيطة للطفل:")
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceEvenly
-                                ) {
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                                     TextButton(onClick = { avatar = "👦"; showProfile = false }) { Text("👦 ولد") }
                                     TextButton(onClick = { avatar = "👧"; showProfile = false }) { Text("👧 بنت") }
                                 }
@@ -238,12 +200,9 @@ private fun ProfileCard(avatar: String, onProfileClick: () -> Unit, onCollection
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.92f))
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onProfileClick) { Text(avatar, fontSize = 36.sp) }
-            Column(modifier = Modifier.weight(1f)) {
+            Column(Modifier.weight(1f)) {
                 Text("صديقي الصغير", fontWeight = FontWeight.Bold)
                 Text("ملف الطفل", fontSize = 12.sp)
             }
@@ -261,13 +220,10 @@ private fun ProfileCard(avatar: String, onProfileClick: () -> Unit, onCollection
 private fun RealCharacterHero(modifier: Modifier = Modifier) {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    // Use exactly one ModelInstance: animated asset when available, static fallback otherwise.
+    // Deliberately load only the merged animated model. Never silently add a static duplicate/fallback.
     val model = remember(modelLoader) {
         runCatching { modelLoader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull()
-            ?: runCatching { modelLoader.createModelInstance("Mannequin_Medium.glb") }.getOrNull()
     }
-
-    // Pull the camera back to include the head and feet, then place the model a little lower.
     val cameraNode = rememberCameraNode(engine) {
         position = Position(x = 0f, y = 0f, z = 3.0f)
     }
@@ -286,7 +242,6 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
     var taps by remember { mutableStateOf(0) }
     LaunchedEffect(characterNode, taps) {
         val node = characterNode ?: return@LaunchedEffect
-        // Explicitly stop every previous clip before starting another so poses cannot overlap.
         for (index in 0 until ANIMATION_COUNT) runCatching { node.stopAnimation(index) }
         if (taps == 0) {
             runCatching { node.playAnimation(CLIP_IDLE) }
@@ -301,12 +256,8 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Scene(
-            modifier = Modifier.fillMaxSize(),
-            engine = engine,
-            modelLoader = modelLoader,
-            cameraNode = cameraNode,
-            cameraManipulator = null,
-            isOpaque = false,
+            modifier = Modifier.fillMaxSize(), engine = engine, modelLoader = modelLoader,
+            cameraNode = cameraNode, cameraManipulator = null, isOpaque = false,
             childNodes = listOfNotNull(characterNode)
         )
         Box(
@@ -348,10 +299,7 @@ private fun BottomCard(modifier: Modifier, icon: String, title: String, subtitle
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.94f)),
         onClick = onClick
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize().padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(Modifier.fillMaxSize().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(icon, fontSize = 30.sp)
             Spacer(Modifier.width(8.dp))
             Column {
@@ -365,9 +313,7 @@ private fun BottomCard(modifier: Modifier, icon: String, title: String, subtitle
 @Composable
 private fun InfoDialog(title: String, text: String, onClose: () -> Unit) {
     AlertDialog(
-        onDismissRequest = onClose,
-        title = { Text(title) },
-        text = { Text(text) },
+        onDismissRequest = onClose, title = { Text(title) }, text = { Text(text) },
         confirmButton = { TextButton(onClick = onClose) { Text("إغلاق") } }
     )
 }
