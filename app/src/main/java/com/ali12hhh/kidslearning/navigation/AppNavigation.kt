@@ -315,28 +315,26 @@ private fun RealCharacterHero() {
     val modelLoader = rememberModelLoader(engine)
     var model by remember { mutableStateOf<io.github.sceneview.model.ModelInstance?>(null) }
 
-    // Load only after the screen is composed. Filament model creation stays on the
-    // main thread, and any normal loader exception is contained instead of crashing
-    // the composition.
+    // SceneView 2.3.1 exposes createModelInstance() as a synchronous Filament
+    // operation. Keep it on the main thread and update Compose state only after
+    // the instance has been created.
     LaunchedEffect(modelLoader) {
         model = runCatching {
             modelLoader.createModelInstance("Mannequin_Medium.glb")
         }.getOrNull()
     }
 
-    val nodes = rememberNodes()
-
-    LaunchedEffect(model) {
+    // Do not mutate a remembered node list after composition: Scene() receives
+    // the list reference through AndroidView and that mutation may not trigger
+    // its update block. Build the node from Compose state so the Scene is updated
+    // when the model becomes available.
+    val characterNode = remember(model) {
         model?.let { instance ->
-            if (nodes.isEmpty()) {
-                nodes.add(
-                    ModelNode(
-                        modelInstance = instance,
-                        autoAnimate = false,
-                        scaleToUnits = 1.15f
-                    )
-                )
-            }
+            ModelNode(
+                modelInstance = instance,
+                autoAnimate = false,
+                scaleToUnits = 1.15f
+            )
         }
     }
 
@@ -350,7 +348,7 @@ private fun RealCharacterHero() {
             modifier = Modifier.size(190.dp),
             engine = engine,
             modelLoader = modelLoader,
-            childNodes = nodes
+            childNodes = listOfNotNull(characterNode)
         )
     }
 }
