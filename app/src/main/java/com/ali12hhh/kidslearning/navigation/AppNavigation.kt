@@ -323,7 +323,7 @@ private fun RealCharacterHero() {
             ModelNode(
                 modelInstance = instance,
                 autoAnimate = false,
-                scaleToUnits = 1.15f
+                scaleToUnits = 0.70f
             )
         }
     }
