@@ -18,6 +18,20 @@ android {
     }
 
     sourceSets["main"].assets.directories.add("../assets/characters/KayKit/Mannequin Character/characters")
+    // Generated at build time: the mannequin merged with the educational animations.
+    sourceSets["main"].assets.directories.add("build/generated/anim-assets")
+
+    // Merges the selected educational/encouraging clips into Mannequin_Medium_Anim.glb.
+    // Failure is tolerated: the app falls back to the static Mannequin_Medium.glb.
+    val mergeAnimations = tasks.register<Exec>("mergeAnimations") {
+        workingDir = rootProject.projectDir
+        commandLine(
+            "bash", "-c",
+            "npm install --no-save --prefix tools @gltf-transform/core && " +
+                "node tools/merge-animations.mjs app/build/generated/anim-assets/Mannequin_Medium_Anim.glb"
+        )
+        isIgnoreExitValue = true
+    }
 
     // Build gate: fail the build if the required 3D asset is missing,
     // not referenced by the app, or not packaged into the APK.
@@ -61,6 +75,14 @@ android {
                         "BUILD FAILED: Packaged Mannequin_Medium.glb is not a valid GLB file (missing glTF header)."
                     }
                 }
+
+                // Informational only: report whether the animated model was packaged.
+                val animated = zip.getEntry("assets/Mannequin_Medium_Anim.glb")
+                if (animated != null && animated.size > 0L) {
+                    println("ANIMATED MODEL PACKAGED: Mannequin_Medium_Anim.glb (${animated.size} bytes)")
+                } else {
+                    println("WARNING: Mannequin_Medium_Anim.glb was not packaged; app will use the static model.")
+                }
             }
 
             println("3D ASSET VERIFICATION PASSED: Mannequin_Medium.glb is present, referenced, and packaged.")
@@ -78,6 +100,9 @@ android {
     tasks.configureEach {
         if (name == "assembleDebug") {
             finalizedBy(verifyCharacterAssets)
+        }
+        if (name.startsWith("merge") && name.endsWith("Assets")) {
+            dependsOn(mergeAnimations)
         }
     }
 
