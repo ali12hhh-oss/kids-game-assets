@@ -24,7 +24,7 @@ android {
     val verifyCharacterAssets = tasks.register("verifyCharacterAssets") {
         doLast {
             val assetRelativePath =
-                "assets/characters/KayKit/Mannequin Character/characters/Mannequin_Medium.glb"
+                "../assets/characters/KayKit/Mannequin Character/characters/Mannequin_Medium.glb"
             val assetFile = file(assetRelativePath)
             check(assetFile.isFile && assetFile.length() > 0L) {
                 "BUILD FAILED: Required 3D asset is missing or empty: $assetRelativePath"
