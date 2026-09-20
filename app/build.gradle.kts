@@ -1,3 +1,5 @@
+import java.util.zip.ZipFile
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -45,7 +47,7 @@ android {
                 "BUILD FAILED: Debug APK was not produced before asset verification."
             }
 
-            java.util.zip.ZipFile(apk).use { zip ->
+            ZipFile(apk).use { zip ->
                 val packagedPath = "assets/Mannequin_Medium.glb"
                 val entry = zip.getEntry(packagedPath)
                 check(entry != null && entry.size > 0L) {
