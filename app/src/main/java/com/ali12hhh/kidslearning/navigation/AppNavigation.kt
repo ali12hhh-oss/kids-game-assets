@@ -43,10 +43,11 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalLayoutDirection
-import io.github.sceneview.SceneView
+import io.github.sceneview.Scene
 import io.github.sceneview.rememberEngine
-import io.github.sceneview.rememberModelInstance
 import io.github.sceneview.rememberModelLoader
+import io.github.sceneview.rememberNodes
+import io.github.sceneview.node.ModelNode
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -311,10 +312,18 @@ private fun ProfileCard(
 private fun RealCharacterHero() {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    val model = rememberModelInstance(
-        modelLoader,
-        "Mannequin_Medium.glb"
-    )
+    val model = remember(modelLoader) {
+        modelLoader.createModelInstance("Mannequin_Medium.glb")
+    }
+    val nodes = rememberNodes {
+        add(
+            ModelNode(
+                modelInstance = model,
+                autoAnimate = true,
+                scaleToUnits = 1.15f
+            )
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -322,19 +331,12 @@ private fun RealCharacterHero() {
             .height(190.dp),
         contentAlignment = Alignment.Center
     ) {
-        SceneView(
+        Scene(
             modifier = Modifier.size(190.dp),
             engine = engine,
-            modelLoader = modelLoader
-        ) {
-            model?.let {
-                io.github.sceneview.node.ModelNode(
-                    modelInstance = it,
-                    autoAnimate = true,
-                    scaleToUnits = 1.15f
-                )
-            }
-        }
+            modelLoader = modelLoader,
+            childNodes = nodes
+        )
     }
 }
 
