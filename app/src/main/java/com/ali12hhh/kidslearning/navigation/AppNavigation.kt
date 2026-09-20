@@ -43,7 +43,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import android.util.Log
 import io.github.sceneview.Scene
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
@@ -311,17 +313,41 @@ private fun ProfileCard(
 
 @Composable
 private fun RealCharacterHero() {
+    val context = LocalContext.current
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
     var model by remember { mutableStateOf<io.github.sceneview.model.ModelInstance?>(null) }
 
-    // SceneView 2.3.1 exposes createModelInstance() as a synchronous Filament
-    // operation. Keep it on the main thread and update Compose state only after
-    // the instance has been created.
+    // Detailed diagnostics: never hide asset/model failures.
     LaunchedEffect(modelLoader) {
-        model = runCatching {
-            modelLoader.createModelInstance("Mannequin_Medium.glb")
-        }.getOrNull()
+        try {
+            context.assets.open("Mannequin_Medium.glb").use {
+                Log.d("RealCharacterHero", "Asset found: Mannequin_Medium.glb")
+            }
+
+            val loadedModel = modelLoader.createModelInstance("Mannequin_Medium.glb")
+            if (loadedModel == null) {
+                Log.e(
+                    "RealCharacterHero",
+                    "Model loading returned null: Mannequin_Medium.glb"
+                )
+            } else {
+                Log.d("RealCharacterHero", "Model loaded successfully: Mannequin_Medium.glb")
+            }
+            model = loadedModel
+        } catch (e: Exception) {
+            Log.e(
+                "RealCharacterHero",
+                "FAILED to load Mannequin_Medium.glb. Check APK assets/path/SceneView.",
+                e
+            )
+        } catch (t: Throwable) {
+            Log.e(
+                "RealCharacterHero",
+                "FATAL model loading error for Mannequin_Medium.glb",
+                t
+            )
+        }
     }
 
     // Do not mutate a remembered node list after composition: Scene() receives
