@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.ali12hhh.kidslearning"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.ali12hhh.kidslearning"
