@@ -348,6 +348,7 @@ private fun RealCharacterHero() {
             modifier = Modifier.size(190.dp),
             engine = engine,
             modelLoader = modelLoader,
+            isOpaque = false,
             childNodes = listOfNotNull(characterNode)
         )
     }
