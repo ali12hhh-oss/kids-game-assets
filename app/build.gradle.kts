@@ -6,11 +6,11 @@ plugins {
 
 android {
     namespace = "com.ali12hhh.kidslearning"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.ali12hhh.kidslearning"
-        minSdk = 24
+        minSdk = 23
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
