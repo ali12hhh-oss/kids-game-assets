@@ -1,6 +1,8 @@
 package com.ali12hhh.kidslearning.navigation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,11 +53,22 @@ import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberNodes
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.math.Position
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ali12hhh.kidslearning.core.LearningCatalog
+
+// Animation indices inside Mannequin_Medium_Anim.glb. The order is defined in
+// tools/merge-animations.mjs:
+// 0 Idle_A, 1 Idle_B, 2 Interact, 3 PickUp, 4 Use_Item, 5 Spawn_Ground,
+// 6 Waving, 7 Cheering, 8 Sit_Floor_Idle, 9 Jump_Full_Short, 10 Walking_A
+private const val CLIP_IDLE = 0
+
+// Played one after another each time the child taps the character:
+// Waving, Cheering, Interact, Jump_Full_Short
+private val REACTION_CLIPS = listOf(6, 7, 2, 9)
 
 @Composable
 fun AppNavigation() {
@@ -319,8 +333,12 @@ private fun ProfileCard(
 private fun RealCharacterHero(modifier: Modifier = Modifier) {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
+    // Prefer the model merged with the educational animations (built by Gradle);
+    // fall back to the static mannequin if it is not available.
     val model = remember(modelLoader) {
         runCatching {
+            modelLoader.createModelInstance("Mannequin_Medium_Anim.glb")
+        }.getOrNull() ?: runCatching {
             modelLoader.createModelInstance("Mannequin_Medium.glb")
         }.getOrNull()
     }
@@ -334,11 +352,25 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
         model?.let { instance ->
             ModelNode(
                 modelInstance = instance,
-                // Plays the model's embedded animation if it has one.
-                autoAnimate = true,
+                autoAnimate = false,
                 scaleToUnits = 1.5f,
                 centerOrigin = Position(x = 0f, y = 0f, z = 0f)
             )
+        }
+    }
+
+    // taps == 0: loop the idle clip. Each tap plays the next reaction clip
+    // (wave, cheer, interact, jump) once, then returns to idle.
+    var taps by remember { mutableStateOf(0) }
+    LaunchedEffect(characterNode, taps) {
+        val node = characterNode ?: return@LaunchedEffect
+        if (taps == 0) {
+            runCatching { node.playAnimation(CLIP_IDLE) }
+        } else {
+            val clip = REACTION_CLIPS[(taps - 1) % REACTION_CLIPS.size]
+            runCatching { node.playAnimation(clip, 1f, false) }
+            delay(3000)
+            runCatching { node.playAnimation(CLIP_IDLE) }
         }
     }
 
@@ -356,6 +388,15 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
             cameraManipulator = null,
             isOpaque = false,
             childNodes = listOfNotNull(characterNode)
+        )
+        // Transparent tap layer above the 3D view.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { taps += 1 }
         )
     }
 }
