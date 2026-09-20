@@ -9,15 +9,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -90,24 +86,18 @@ fun AppNavigation() {
 }
 
 @Composable
-private fun HomePage(
-    onArabic: () -> Unit,
-    onEnglish: () -> Unit,
-    onPlay: () -> Unit
-) {
+private fun HomePage(onArabic: () -> Unit, onEnglish: () -> Unit, onPlay: () -> Unit) {
     var darkMode by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     var showProfile by remember { mutableStateOf(false) }
     var showCollection by remember { mutableStateOf(false) }
     var avatar by remember { mutableStateOf("👦") }
     var selected by remember { mutableStateOf<String?>(null) }
-
     val background = if (darkMode) {
         Brush.verticalGradient(listOf(Color(0xFF172033), Color(0xFF253552)))
     } else {
         Brush.verticalGradient(listOf(Color(0xFFF7FBFF), Color(0xFFE8F3FF)))
     }
-
     Surface(modifier = Modifier.fillMaxSize()) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             Box(modifier = Modifier.fillMaxSize().background(background)) {
@@ -115,47 +105,24 @@ private fun HomePage(
                     modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         TopAction("⚙️", "الإعدادات") { showSettings = true }
-                        Text(
-                            "تعلّم مع دبدوب",
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontWeight = FontWeight.ExtraBold, fontSize = 24.sp
-                            ),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f)
-                        )
+                        Text("تعلّم مع دبدوب", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold, fontSize = 24.sp), textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
                         TopAction(if (darkMode) "☀️" else "🌙", "الوضع") { darkMode = !darkMode }
                     }
                     Spacer(Modifier.height(10.dp))
                     ProfileCard(avatar, { showProfile = true }, { showCollection = true })
                     Spacer(Modifier.height(12.dp))
-                    Text(
-                        "مرحبًا يا صديقي! اختر ماذا نتعلم اليوم.",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        textAlign = TextAlign.Center
-                    )
+                    Text("مرحبًا يا صديقي! اختر ماذا نتعلم اليوم.", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), textAlign = TextAlign.Center)
                     Spacer(Modifier.height(6.dp))
                     RealCharacterHero(Modifier.weight(1f).fillMaxWidth())
                     Spacer(Modifier.height(10.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        LearningCard(Modifier.weight(1f), "A", "English", "الحروف الإنجليزية", selected == "en") {
-                            selected = "en"; onEnglish()
-                        }
-                        LearningCard(Modifier.weight(1f), "أ", "العربية", "الحروف العربية", selected == "ar") {
-                            selected = "ar"; onArabic()
-                        }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        LearningCard(Modifier.weight(1f), "A", "English", "الحروف الإنجليزية", selected == "en") { selected = "en"; onEnglish() }
+                        LearningCard(Modifier.weight(1f), "أ", "العربية", "الحروف العربية", selected == "ar") { selected = "ar"; onArabic() }
                     }
                     Spacer(Modifier.height(12.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         BottomCard(Modifier.weight(1f), "🎮", "استراحة", "", onPlay)
                         BottomCard(Modifier.weight(1f), "🛍️", "المتجر", "استخدم نجومك") { showCollection = true }
                     }
@@ -164,21 +131,16 @@ private fun HomePage(
                 if (showSettings) InfoDialog("الإعدادات", "إعدادات التطبيق ستتوسع هنا لاحقًا، مع الحفاظ على وظائف التعلم واللعب.") { showSettings = false }
                 if (showCollection) InfoDialog("مقتنياتي", "ستظهر هنا المقتنيات التي يشتريها الطفل بالنجوم.") { showCollection = false }
                 if (showProfile) {
-                    AlertDialog(
-                        onDismissRequest = { showProfile = false },
-                        title = { Text("ملف الطفل") },
-                        text = {
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Text("اختر صورة بسيطة للطفل:")
-                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                                    TextButton(onClick = { avatar = "👦"; showProfile = false }) { Text("👦 ولد") }
-                                    TextButton(onClick = { avatar = "👧"; showProfile = false }) { Text("👧 بنت") }
-                                }
-                                Text("يمكن إضافة اختيار صورة من معرض الهاتف في مرحلة ربط الملف الشخصي.")
+                    AlertDialog(onDismissRequest = { showProfile = false }, title = { Text("ملف الطفل") }, text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text("اختر صورة بسيطة للطفل:")
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                                TextButton(onClick = { avatar = "👦"; showProfile = false }) { Text("👦 ولد") }
+                                TextButton(onClick = { avatar = "👧"; showProfile = false }) { Text("👧 بنت") }
                             }
-                        },
-                        confirmButton = { TextButton(onClick = { showProfile = false }) { Text("إغلاق") } }
-                    )
+                            Text("يمكن إضافة اختيار صورة من معرض الهاتف في مرحلة ربط الملف الشخصي.")
+                        }
+                    }, confirmButton = { TextButton(onClick = { showProfile = false }) { Text("إغلاق") } })
                 }
             }
         }
@@ -195,21 +157,11 @@ private fun TopAction(icon: String, label: String, onClick: () -> Unit) {
 
 @Composable
 private fun ProfileCard(avatar: String, onProfileClick: () -> Unit, onCollectionClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(22.dp)),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.92f))
-    ) {
+    Card(Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(22.dp)), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.92f))) {
         Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onProfileClick) { Text(avatar, fontSize = 36.sp) }
-            Column(Modifier.weight(1f)) {
-                Text("صديقي الصغير", fontWeight = FontWeight.Bold)
-                Text("ملف الطفل", fontSize = 12.sp)
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("⭐ 0", fontWeight = FontWeight.ExtraBold)
-                Text("نجومي", fontSize = 11.sp)
-            }
+            Column(Modifier.weight(1f)) { Text("صديقي الصغير", fontWeight = FontWeight.Bold); Text("ملف الطفل", fontSize = 12.sp) }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("⭐ 0", fontWeight = FontWeight.ExtraBold); Text("نجومي", fontSize = 11.sp) }
             Spacer(Modifier.width(8.dp))
             OutlinedButton(onClick = onCollectionClick) { Text("مقتنياتي") }
         }
@@ -220,32 +172,20 @@ private fun ProfileCard(avatar: String, onProfileClick: () -> Unit, onCollection
 private fun RealCharacterHero(modifier: Modifier = Modifier) {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    // Deliberately load only the merged animated model. Never silently add a static duplicate/fallback.
+    // Only use the merged animated model. No static fallback is allowed.
     val model = remember(modelLoader) {
         runCatching { modelLoader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull()
     }
-    val cameraNode = rememberCameraNode(engine) {
-        position = Position(x = 0f, y = 0f, z = 3.0f)
-    }
+    val cameraNode = rememberCameraNode(engine) { position = Position(x = 0f, y = 0f, z = 3.0f) }
     val characterNode = remember(model) {
-        model?.let { instance ->
-            ModelNode(
-                modelInstance = instance,
-                autoAnimate = false,
-                scaleToUnits = 1.25f,
-                centerOrigin = Position(x = 0f, y = 0f, z = 0f),
-                position = Position(x = 0f, y = -0.18f, z = 0f)
-            )
-        }
+        model?.let { instance -> ModelNode(modelInstance = instance, autoAnimate = false, scaleToUnits = 1.25f, centerOrigin = Position(x = 0f, y = 0f, z = 0f), position = Position(x = 0f, y = -0.18f, z = 0f)) }
     }
-
     var taps by remember { mutableStateOf(0) }
     LaunchedEffect(characterNode, taps) {
         val node = characterNode ?: return@LaunchedEffect
         for (index in 0 until ANIMATION_COUNT) runCatching { node.stopAnimation(index) }
-        if (taps == 0) {
-            runCatching { node.playAnimation(CLIP_IDLE) }
-        } else {
+        if (taps == 0) runCatching { node.playAnimation(CLIP_IDLE) }
+        else {
             val clip = REACTION_CLIPS[(taps - 1) % REACTION_CLIPS.size]
             runCatching { node.playAnimation(clip, 1f, false) }
             delay(3000)
@@ -253,82 +193,39 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
             runCatching { node.playAnimation(CLIP_IDLE) }
         }
     }
-
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Scene(
-            modifier = Modifier.fillMaxSize(), engine = engine, modelLoader = modelLoader,
-            cameraNode = cameraNode, cameraManipulator = null, isOpaque = false,
-            childNodes = listOfNotNull(characterNode)
-        )
-        Box(
-            modifier = Modifier.matchParentSize().clickable(
-                interactionSource = remember { MutableInteractionSource() }, indication = null
-            ) { taps += 1 }
-        )
+        Scene(modifier = Modifier.fillMaxSize(), engine = engine, modelLoader = modelLoader, cameraNode = cameraNode, cameraManipulator = null, isOpaque = false, childNodes = listOfNotNull(characterNode))
+        Box(Modifier.matchParentSize().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { taps += 1 })
     }
 }
 
 @Composable
-private fun LearningCard(
-    modifier: Modifier, icon: String, title: String, subtitle: String, selected: Boolean, onClick: () -> Unit
-) {
+private fun LearningCard(modifier: Modifier, icon: String, title: String, subtitle: String, selected: Boolean, onClick: () -> Unit) {
     val shape = RoundedCornerShape(24.dp)
-    Button(
-        onClick = onClick,
-        modifier = modifier.height(112.dp).shadow(if (selected) 12.dp else 6.dp, shape),
-        shape = shape,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (selected) Color(0xFFFFD76A) else Color.White.copy(alpha = 0.96f),
-            contentColor = Color(0xFF24324A)
-        ),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(10.dp)
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(icon, fontSize = 34.sp, fontWeight = FontWeight.ExtraBold)
-            Text(title, fontWeight = FontWeight.ExtraBold)
-            Text(subtitle, fontSize = 11.sp, textAlign = TextAlign.Center)
-        }
+    Button(onClick = onClick, modifier = modifier.height(112.dp).shadow(if (selected) 12.dp else 6.dp, shape), shape = shape, colors = ButtonDefaults.buttonColors(containerColor = if (selected) Color(0xFFFFD76A) else Color.White.copy(alpha = 0.96f), contentColor = Color(0xFF24324A)), contentPadding = androidx.compose.foundation.layout.PaddingValues(10.dp)) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) { Text(icon, fontSize = 34.sp, fontWeight = FontWeight.ExtraBold); Text(title, fontWeight = FontWeight.ExtraBold); Text(subtitle, fontSize = 11.sp, textAlign = TextAlign.Center) }
     }
 }
 
 @Composable
 private fun BottomCard(modifier: Modifier, icon: String, title: String, subtitle: String, onClick: () -> Unit) {
-    Card(
-        modifier = modifier.height(96.dp).shadow(6.dp, RoundedCornerShape(22.dp)),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.94f)),
-        onClick = onClick
-    ) {
+    Card(modifier.height(96.dp).shadow(6.dp, RoundedCornerShape(22.dp)), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.94f)), onClick = onClick) {
         Row(Modifier.fillMaxSize().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(icon, fontSize = 30.sp)
-            Spacer(Modifier.width(8.dp))
-            Column {
-                Text(title, fontWeight = FontWeight.ExtraBold)
-                if (subtitle.isNotBlank()) Text(subtitle, fontSize = 11.sp)
-            }
+            Text(icon, fontSize = 30.sp); Spacer(Modifier.width(8.dp)); Column { Text(title, fontWeight = FontWeight.ExtraBold); if (subtitle.isNotBlank()) Text(subtitle, fontSize = 11.sp) }
         }
     }
 }
 
 @Composable
 private fun InfoDialog(title: String, text: String, onClose: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onClose, title = { Text(title) }, text = { Text(text) },
-        confirmButton = { TextButton(onClick = onClose) { Text("إغلاق") } }
-    )
+    AlertDialog(onDismissRequest = onClose, title = { Text(title) }, text = { Text(text) }, confirmButton = { TextButton(onClick = onClose) { Text("إغلاق") } })
 }
 
 @Composable
 private fun ContentPage(title: String, content: String) {
     Scaffold { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(title, style = MaterialTheme.typography.headlineMedium)
-            Text(content, textAlign = TextAlign.Center)
-            Text("المحتوى التعليمي الأولي — ستتم إضافة الصوت والتفاعل في المرحلة التالية.")
+        Column(Modifier.fillMaxSize().padding(padding).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(title, style = MaterialTheme.typography.headlineMedium); Text(content, textAlign = TextAlign.Center); Text("المحتوى التعليمي الأولي — ستتم إضافة الصوت والتفاعل في المرحلة التالية.")
         }
     }
 }
