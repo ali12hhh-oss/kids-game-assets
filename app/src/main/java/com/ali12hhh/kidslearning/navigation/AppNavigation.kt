@@ -43,6 +43,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalLayoutDirection
+import io.github.sceneview.SceneView
+import io.github.sceneview.rememberEngine
+import io.github.sceneview.rememberModelInstance
+import io.github.sceneview.rememberModelLoader
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -148,7 +152,7 @@ private fun HomePage(
 
                     Spacer(Modifier.height(6.dp))
 
-                    TeddyHero()
+                    RealCharacterHero()
 
                     Spacer(Modifier.height(10.dp))
 
@@ -304,20 +308,33 @@ private fun ProfileCard(
 }
 
 @Composable
-private fun TeddyHero() {
+private fun RealCharacterHero() {
+    val engine = rememberEngine()
+    val modelLoader = rememberModelLoader(engine)
+    val model = rememberModelInstance(
+        modelLoader,
+        "Mannequin_Medium.glb"
+    )
+
     Box(
         modifier = Modifier
-            .size(150.dp)
-            .shadow(14.dp, CircleShape)
-            .background(
-                Brush.radialGradient(
-                    listOf(Color(0xFFFFE7B8), Color(0xFFFFC96B))
-                ),
-                CircleShape
-            ),
+            .fillMaxWidth()
+            .height(190.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text("🧸", fontSize = 88.sp)
+        SceneView(
+            modifier = Modifier.size(190.dp),
+            engine = engine,
+            modelLoader = modelLoader
+        ) {
+            model?.let {
+                io.github.sceneview.node.ModelNode(
+                    modelInstance = it,
+                    autoAnimate = true,
+                    scaleToUnits = 1.15f
+                )
+            }
+        }
     }
 }
 
