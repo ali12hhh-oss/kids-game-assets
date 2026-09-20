@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +49,7 @@ import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberNodes
 import io.github.sceneview.node.ModelNode
+import io.github.sceneview.rememberNode
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -312,17 +314,25 @@ private fun ProfileCard(
 private fun RealCharacterHero() {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    val model = remember(modelLoader) {
-        modelLoader.createModelInstance("Mannequin_Medium.glb")
+    var model by remember { mutableStateOf<io.github.sceneview.model.ModelInstance?>(null) }
+
+    // Load only after the screen is composed. Filament model creation stays on the
+    // main thread, and any normal loader exception is contained instead of crashing
+    // the composition.
+    LaunchedEffect(modelLoader) {
+        model = runCatching {
+            modelLoader.createModelInstance("Mannequin_Medium.glb")
+        }.getOrNull()
     }
-    val nodes = rememberNodes {
-        add(
+
+    val modelNode = model?.let { instance ->
+        rememberNode {
             ModelNode(
-                modelInstance = model,
+                modelInstance = instance,
                 autoAnimate = false,
                 scaleToUnits = 1.15f
             )
-        )
+        }
     }
 
     Box(
@@ -335,7 +345,7 @@ private fun RealCharacterHero() {
             modifier = Modifier.size(190.dp),
             engine = engine,
             modelLoader = modelLoader,
-            childNodes = nodes
+            childNodes = listOfNotNull(modelNode)
         )
     }
 }
