@@ -17,7 +17,7 @@ android {
         versionName = "1.0.0"
     }
 
-    sourceSets["main"].assets.directories.add("assets/characters/KayKit/Mannequin Character/characters")
+    sourceSets["main"].assets.directories.add("../assets/characters/KayKit/Mannequin Character/characters")
 
     // Build gate: fail the build if the required 3D asset is missing,
     // not referenced by the app, or not packaged into the APK.
