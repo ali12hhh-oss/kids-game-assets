@@ -178,7 +178,7 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
     }
     val cameraNode = rememberCameraNode(engine) { position = Position(x = 0f, y = 0f, z = 3.0f) }
     val characterNode = remember(model) {
-        model?.let { instance -> ModelNode(modelInstance = instance, autoAnimate = false, scaleToUnits = 1.25f, centerOrigin = Position(x = 0f, y = 0f, z = 0f), position = Position(x = 0f, y = -0.18f, z = 0f)) }
+        model?.let { instance -> ModelNode(modelInstance = instance, autoAnimate = false, scaleToUnits = 1.25f, centerOrigin = Position(x = 0f, y = 0f, z = 0f)) }
     }
     var taps by remember { mutableStateOf(0) }
     LaunchedEffect(characterNode, taps) {
@@ -209,7 +209,7 @@ private fun LearningCard(modifier: Modifier, icon: String, title: String, subtit
 
 @Composable
 private fun BottomCard(modifier: Modifier, icon: String, title: String, subtitle: String, onClick: () -> Unit) {
-    Card(modifier.height(96.dp).shadow(6.dp, RoundedCornerShape(22.dp)), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.94f)), onClick = onClick) {
+    Card(modifier = modifier.height(96.dp).shadow(6.dp, RoundedCornerShape(22.dp)), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.94f)), onClick = onClick) {
         Row(Modifier.fillMaxSize().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(icon, fontSize = 30.sp); Spacer(Modifier.width(8.dp)); Column { Text(title, fontWeight = FontWeight.ExtraBold); if (subtitle.isNotBlank()) Text(subtitle, fontSize = 11.sp) }
         }
