@@ -22,7 +22,7 @@ fun AppNavigation() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = AppRoutes.HOME) {
         composable(AppRoutes.HOME) {
-            PlaceholderPage(title = "براعم المعرفة", subtitle = "اختر نشاطك") {
+            PlaceholderPage(title = "تعلّم مع دبدوب", subtitle = "اختر نشاطك") {
                 RouteButton("الحروف العربية") { navController.navigate(AppRoutes.ARABIC_LETTERS) }
                 RouteButton("English Letters") { navController.navigate(AppRoutes.ENGLISH_LETTERS) }
                 RouteButton("الأرقام والعدّ") { navController.navigate(AppRoutes.NUMBERS) }
