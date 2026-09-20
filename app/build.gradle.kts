@@ -18,11 +18,9 @@ android {
     }
 
     sourceSets["main"].assets.directories.add("../assets/characters/KayKit/Mannequin Character/characters")
-    // Generated at build time: the mannequin merged with the educational animations.
     sourceSets["main"].assets.directories.add("build/generated/anim-assets")
 
-    // Merges the selected educational/encouraging clips into Mannequin_Medium_Anim.glb.
-    // Failure is tolerated: the app falls back to the static Mannequin_Medium.glb.
+    // Merge must succeed. Never permit a silent static-model fallback.
     val mergeAnimations = tasks.register<Exec>("mergeAnimations") {
         workingDir = rootProject.projectDir
         commandLine(
@@ -30,62 +28,40 @@ android {
             "npm install --no-save --prefix tools @gltf-transform/core && " +
                 "node tools/merge-animations.mjs app/build/generated/anim-assets/Mannequin_Medium_Anim.glb"
         )
-        isIgnoreExitValue = true
+        isIgnoreExitValue = false
     }
 
-    // Build gate: fail the build if the required 3D asset is missing,
-    // not referenced by the app, or not packaged into the APK.
     val verifyCharacterAssets = tasks.register("verifyCharacterAssets") {
         doLast {
-            val assetRelativePath =
-                "../assets/characters/KayKit/Mannequin Character/characters/Mannequin_Medium.glb"
-            val assetFile = file(assetRelativePath)
-            check(assetFile.isFile && assetFile.length() > 0L) {
-                "BUILD FAILED: Required 3D asset is missing or empty: $assetRelativePath"
+            val navigationFile = file("src/main/java/com/ali12hhh/kidslearning/navigation/AppNavigation.kt")
+            check(navigationFile.isFile && navigationFile.readText().contains("Mannequin_Medium_Anim.glb")) {
+                "BUILD FAILED: AppNavigation.kt must reference the merged animated model."
+            }
+            check(!navigationFile.readText().contains("createModelInstance(\"Mannequin_Medium.glb\")")) {
+                "BUILD FAILED: Static model fallback is forbidden; it can cause an idle duplicate behind the animated character."
             }
 
-            val navigationFile =
-                file("src/main/java/com/ali12hhh/kidslearning/navigation/AppNavigation.kt")
-            check(navigationFile.isFile) {
-                "BUILD FAILED: AppNavigation.kt was not found; cannot verify 3D asset reference."
-            }
-            check(navigationFile.readText().contains("Mannequin_Medium.glb")) {
-                "BUILD FAILED: Mannequin_Medium.glb is not referenced by AppNavigation.kt."
+            val generatedModel = layout.buildDirectory.file("generated/anim-assets/Mannequin_Medium_Anim.glb").get().asFile
+            check(generatedModel.isFile && generatedModel.length() > 0L) {
+                "BUILD FAILED: Merged animated character was not generated."
             }
 
-            val apk = layout.buildDirectory
-                .file("outputs/apk/debug/app-debug.apk")
-                .get()
-                .asFile
-            check(apk.isFile && apk.length() > 0L) {
-                "BUILD FAILED: Debug APK was not produced before asset verification."
-            }
-
+            val apk = layout.buildDirectory.file("outputs/apk/debug/app-debug.apk").get().asFile
+            check(apk.isFile && apk.length() > 0L) { "BUILD FAILED: Debug APK was not produced." }
             ZipFile(apk).use { zip ->
-                val packagedPath = "assets/Mannequin_Medium.glb"
-                val entry = zip.getEntry(packagedPath)
+                val entry = zip.getEntry("assets/Mannequin_Medium_Anim.glb")
                 check(entry != null && entry.size > 0L) {
-                    "BUILD FAILED: Mannequin_Medium.glb is not packaged in the APK at $packagedPath"
+                    "BUILD FAILED: Animated character is not packaged in the APK."
                 }
-
-                ZipFile(apk).getInputStream(entry).use { input ->
+                zip.getInputStream(entry).use { input ->
                     val header = ByteArray(4)
                     val read = input.read(header)
                     check(read == 4 && header.contentEquals(byteArrayOf(0x67, 0x6C, 0x54, 0x46))) {
-                        "BUILD FAILED: Packaged Mannequin_Medium.glb is not a valid GLB file (missing glTF header)."
+                        "BUILD FAILED: Packaged animated character is not a valid GLB."
                     }
                 }
-
-                // Informational only: report whether the animated model was packaged.
-                val animated = zip.getEntry("assets/Mannequin_Medium_Anim.glb")
-                if (animated != null && animated.size > 0L) {
-                    println("ANIMATED MODEL PACKAGED: Mannequin_Medium_Anim.glb (${animated.size} bytes)")
-                } else {
-                    println("WARNING: Mannequin_Medium_Anim.glb was not packaged; app will use the static model.")
-                }
             }
-
-            println("3D ASSET VERIFICATION PASSED: Mannequin_Medium.glb is present, referenced, and packaged.")
+            println("ANIMATED CHARACTER VERIFIED: merged GLB generated and packaged; static fallback is disabled.")
         }
     }
 
@@ -94,24 +70,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
-    // Configure lazily so the tasks listing can evaluate the project before
-    // Android creates the assembleDebug task.
     tasks.configureEach {
-        if (name == "assembleDebug") {
-            finalizedBy(verifyCharacterAssets)
-        }
-        if (name.startsWith("merge") && name.endsWith("Assets")) {
-            dependsOn(mergeAnimations)
-        }
+        if (name == "assembleDebug") finalizedBy(verifyCharacterAssets)
+        if (name.startsWith("merge") && name.endsWith("Assets")) dependsOn(mergeAnimations)
     }
-
     kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
+        compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
     }
 }
+
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
     implementation("androidx.activity:activity-compose:1.10.0")
