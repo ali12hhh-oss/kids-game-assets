@@ -325,8 +325,7 @@ private fun RealCharacterHero() {
                 modelInstance = instance,
                 autoAnimate = false,
                 scaleToUnits = 1.05f,
-                centerOrigin = Position(y = -1f),
-                position = Position(y = -0.15f)
+                centerOrigin = Position(y = 0.10f)
             )
         }
     }
