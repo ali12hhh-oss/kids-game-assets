@@ -64,8 +64,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    tasks.named("assembleDebug") {
-        finalizedBy(verifyCharacterAssets)
+
+    // Configure lazily so the tasks listing can evaluate the project before
+    // Android creates the assembleDebug task.
+    tasks.configureEach {
+        if (name == "assembleDebug") {
+            finalizedBy(verifyCharacterAssets)
+        }
     }
 
     kotlin {
