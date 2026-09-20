@@ -108,10 +108,11 @@ private fun HomePage(
                     .fillMaxSize()
                     .background(background)
             ) {
+                // Fixed page: no vertical scrolling. The character area takes
+                // the remaining height via weight(1f).
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -155,7 +156,11 @@ private fun HomePage(
 
                     Spacer(Modifier.height(6.dp))
 
-                    RealCharacterHero()
+                    RealCharacterHero(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    )
 
                     Spacer(Modifier.height(10.dp))
 
@@ -311,7 +316,7 @@ private fun ProfileCard(
 }
 
 @Composable
-private fun RealCharacterHero() {
+private fun RealCharacterHero(modifier: Modifier = Modifier) {
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
     val model = remember(modelLoader) {
@@ -320,32 +325,29 @@ private fun RealCharacterHero() {
         }.getOrNull()
     }
 
-    // Explicit camera pulled back and looking at the origin so the whole body fits.
+    // Camera closer than before so the character fills the available area.
     val cameraNode = rememberCameraNode(engine) {
-        position = Position(x = 0f, y = 0f, z = 4.0f)
+        position = Position(x = 0f, y = 0f, z = 2.4f)
     }
 
     val characterNode = remember(model) {
         model?.let { instance ->
             ModelNode(
                 modelInstance = instance,
-                autoAnimate = false,
+                // Plays the model's embedded animation if it has one.
+                autoAnimate = true,
                 scaleToUnits = 1.5f,
-                // Center the model on the origin (no vertical offset) so the
-                // feet are not placed at the middle of the view.
                 centerOrigin = Position(x = 0f, y = 0f, z = 0f)
             )
         }
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(260.dp),
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         Scene(
-            modifier = Modifier.size(260.dp),
+            modifier = Modifier.fillMaxSize(),
             engine = engine,
             modelLoader = modelLoader,
             cameraNode = cameraNode,
