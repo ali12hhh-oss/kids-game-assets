@@ -28,13 +28,6 @@ android {
         }
     }
 }
-
-configurations.configureEach {
-    resolutionStrategy.force("org.jetbrains.kotlin:kotlin-stdlib:2.2.10")
-    resolutionStrategy.force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.2.10")
-    resolutionStrategy.force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.2.10")
-}
-
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
     implementation("androidx.activity:activity-compose:1.10.0")
@@ -43,7 +36,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose:2.8.5")
-    implementation("io.github.sceneview:sceneview:4.35.0")
+    implementation("io.github.sceneview:sceneview:2.3.1")
     testImplementation("junit:junit:4.13.2")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
