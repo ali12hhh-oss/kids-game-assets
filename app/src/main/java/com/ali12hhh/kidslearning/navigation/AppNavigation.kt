@@ -176,9 +176,9 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
     val model = remember(modelLoader) {
         runCatching { modelLoader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull()
     }
-    val cameraNode = rememberCameraNode(engine) { position = Position(x = 0f, y = 0f, z = 3.0f) }
+    val cameraNode = rememberCameraNode(engine) { position = Position(x = 0f, y = 0f, z = 3.2f) }
     val characterNode = remember(model) {
-        model?.let { instance -> ModelNode(modelInstance = instance, autoAnimate = false, scaleToUnits = 1.25f, centerOrigin = Position(x = 0f, y = 0f, z = 0f)) }
+        model?.let { instance -> ModelNode(modelInstance = instance, autoAnimate = false, scaleToUnits = 2.8f, centerOrigin = Position(x = 0f, y = 0f, z = 0f)).also { it.position = Position(x = 0f, y = -0.12f, z = 0f) } }
     }
     var taps by remember { mutableStateOf(0) }
     LaunchedEffect(characterNode, taps) {
