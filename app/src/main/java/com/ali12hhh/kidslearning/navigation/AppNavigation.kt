@@ -1,5 +1,11 @@
 package com.ali12hhh.kidslearning.navigation
 
+import android.content.Context
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -23,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import io.github.sceneview.Scene
 import io.github.sceneview.rememberCameraNode
@@ -53,18 +61,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ali12hhh.kidslearning.core.LearningCatalog
+import java.util.Locale
 
 private const val CLIP_IDLE = 0
+private const val CLIP_WAVE = 7
 private val REACTION_CLIPS = (1 until 11).toList()
 private const val ANIMATION_COUNT = 11
 
-// The 3D model's visual center sits above the center of its Scene view. Instead of moving
-// the character inside the Scene (which can clip it), the whole Scene box (with its tap
-// layer) is shifted down by this fraction of its own height. Tune this one value:
-// larger = character lower on the page, smaller = higher.
 private const val CHARACTER_BOX_SHIFT_DOWN = 0.19f
+private const val GREETING_UTTERANCE_ID = "home_greeting"
+private const val GREETING_TEXT = "مرحبا صديقي. اختر ماذا نتعلم اليوم."
 
-/** Moves the composable down by [fraction] of its own height, without changing its size. */
 private fun Modifier.shiftDownByFraction(fraction: Float): Modifier = layout { measurable, constraints ->
     val placeable = measurable.measure(constraints)
     layout(placeable.width, placeable.height) {
@@ -111,18 +118,13 @@ private fun HomePage(
     Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             Box(modifier = Modifier.fillMaxSize().background(background)) {
-                // Layer 1: the character fills the whole page, exactly as before, so its
-                // position and size are unchanged. Taps on it trigger the animations.
                 RealCharacterHero(Modifier.fillMaxSize().shiftDownByFraction(CHARACTER_BOX_SHIFT_DOWN))
 
-                // Layer 2: the page sections drawn over the character layer.
-                // Right-to-left layout: the first item of every Row is on the RIGHT.
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
-                    // Top bar: settings on the right, day/night mode on the left.
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -137,14 +139,9 @@ private fun HomePage(
                     }
 
                     Spacer(Modifier.height(4.dp))
-
-                    // Child identity card.
                     ChildProfileCard(cardColor, textColor)
-
-                    // The character lives in this free space in the middle.
                     Spacer(Modifier.weight(1f))
 
-                    // Row 1: Arabic (right) and English (left).
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -171,7 +168,6 @@ private fun HomePage(
 
                     Spacer(Modifier.height(10.dp))
 
-                    // Row 2: Break (right) and Shop (left).
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -321,22 +317,44 @@ private fun InfoDialog(title: String, text: String, onClose: () -> Unit) {
 
 @Composable
 private fun RealCharacterHero(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
     val model = remember(modelLoader) {
         runCatching { modelLoader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull()
     }
-    // Keep the model at its existing large scale; move the camera back to fit the entire figure.
-    val cameraNode = rememberCameraNode(engine) { position = Position(x = 0f, y = 0f, z = 5.5f) }
-    val characterNode = remember(model) {
-        model?.let { instance -> ModelNode(modelInstance = instance, autoAnimate = false, scaleToUnits = 2.2f, centerOrigin = Position(x = 0f, y = 0f, z = 0f)).also { it.position = Position(x = 0f, y = 0f, z = 0f) } }
+    val cameraNode = rememberCameraNode(engine) {
+        position = Position(x = 0f, y = 0f, z = 5.5f)
     }
+    val characterNode = remember(model) {
+        model?.let { instance ->
+            ModelNode(
+                modelInstance = instance,
+                autoAnimate = false,
+                scaleToUnits = 2.2f,
+                centerOrigin = Position(x = 0f, y = 0f, z = 0f)
+            ).also { it.position = Position(x = 0f, y = 0f, z = 0f) }
+        }
+    }
+
     var taps by remember { mutableStateOf(0) }
-    LaunchedEffect(characterNode, taps) {
+    var greetingActive by remember { mutableStateOf(false) }
+
+    // The greeting is spoken once each time the Home screen is created.
+    // Wave animation is kept active for the complete TTS utterance, then returns to idle.
+    LaunchedEffect(Unit) {
+        greetingActive = true
+    }
+
+    LaunchedEffect(characterNode, taps, greetingActive) {
         val node = characterNode ?: return@LaunchedEffect
         for (index in 0 until ANIMATION_COUNT) runCatching { node.stopAnimation(index) }
-        if (taps == 0) runCatching { node.playAnimation(CLIP_IDLE) }
-        else {
+
+        if (greetingActive) {
+            runCatching { node.playAnimation(CLIP_WAVE, 1f, true) }
+        } else if (taps == 0) {
+            runCatching { node.playAnimation(CLIP_IDLE) }
+        } else {
             val clip = REACTION_CLIPS[(taps - 1) % REACTION_CLIPS.size]
             runCatching { node.playAnimation(clip, 1f, false) }
             delay(3000)
@@ -344,16 +362,156 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
             runCatching { node.playAnimation(CLIP_IDLE) }
         }
     }
+
+    DisposableEffect(context) {
+        val mainHandler = Handler(Looper.getMainLooper())
+        var tts: TextToSpeech? = null
+        var released = false
+
+        fun finishGreeting() {
+            if (!released) {
+                mainHandler.post {
+                    if (!released) greetingActive = false
+                }
+            }
+        }
+
+        val initListener = TextToSpeech.OnInitListener { status ->
+            if (released) return@OnInitListener
+            val speaker = tts ?: return@OnInitListener
+
+            if (status != TextToSpeech.SUCCESS) {
+                finishGreeting()
+                return@OnInitListener
+            }
+
+            val arabicLocale = Locale("ar", "SA")
+            speaker.language = arabicLocale
+            speaker.setSpeechRate(0.92f)
+
+            val selectedVoice = selectArabicVoice(speaker)
+            if (selectedVoice != null) {
+                speaker.voice = selectedVoice
+                // A child voice is preferred when the installed TTS engine exposes one.
+                // Otherwise a lower pitch is used for the adult fallback.
+                speaker.setPitch(if (looksLikeChildVoice(selectedVoice.name)) 1.16f else 0.92f)
+            } else {
+                speaker.setPitch(0.96f)
+            }
+
+            speaker.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                override fun onStart(utteranceId: String?) {
+                    if (utteranceId == GREETING_UTTERANCE_ID) {
+                        mainHandler.post { if (!released) greetingActive = true }
+                    }
+                }
+
+                override fun onDone(utteranceId: String?) {
+                    if (utteranceId == GREETING_UTTERANCE_ID) finishGreeting()
+                }
+
+                @Deprecated("Deprecated by Android; kept for API compatibility.")
+                override fun onError(utteranceId: String?) {
+                    if (utteranceId == GREETING_UTTERANCE_ID) finishGreeting()
+                }
+
+                override fun onError(utteranceId: String?, errorCode: Int) {
+                    if (utteranceId == GREETING_UTTERANCE_ID) finishGreeting()
+                }
+            })
+
+            val params = Bundle().apply {
+                putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, GREETING_UTTERANCE_ID)
+            }
+            val result = speaker.speak(GREETING_TEXT, TextToSpeech.QUEUE_FLUSH, params, GREETING_UTTERANCE_ID)
+            if (result == TextToSpeech.ERROR) finishGreeting()
+        }
+
+        // Prefer Google's Android TTS engine when it is installed, otherwise use
+        // whatever Arabic TTS engine is available on the device.
+        val googleEngine = speakerEnginePackage(context)
+        tts = if (googleEngine != null) {
+            TextToSpeech(context, initListener, googleEngine)
+        } else {
+            TextToSpeech(context, initListener)
+        }
+
+        onDispose {
+            released = true
+            mainHandler.removeCallbacksAndMessages(null)
+            tts?.stop()
+            tts?.shutdown()
+        }
+    }
+
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Scene(modifier = Modifier.fillMaxSize(), engine = engine, modelLoader = modelLoader, cameraNode = cameraNode, cameraManipulator = null, isOpaque = false, childNodes = listOfNotNull(characterNode))
-        Box(Modifier.fillMaxSize().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { taps += 1 })
+        Scene(
+            modifier = Modifier.fillMaxSize(),
+            engine = engine,
+            modelLoader = modelLoader,
+            cameraNode = cameraNode,
+            cameraManipulator = null,
+            isOpaque = false,
+            childNodes = listOfNotNull(characterNode)
+        )
+        Box(
+            Modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    if (!greetingActive) taps += 1
+                }
+        )
+    }
+}
+
+private fun speakerEnginePackage(context: Context): String? {
+    return runCatching {
+        context.packageManager
+            .queryIntentServices(android.content.Intent(TextToSpeech.Engine.INTENT_ACTION_TTS_SERVICE), 0)
+            .firstOrNull { it.serviceInfo.packageName == "com.google.android.tts" }
+            ?.serviceInfo
+            ?.packageName
+    }.getOrNull()
+}
+
+private fun selectArabicVoice(tts: TextToSpeech): android.speech.tts.Voice? {
+    val voices = tts.voices.orEmpty()
+        .filter { it.locale.language == "ar" }
+        .filterNot { it.isNetworkConnectionRequired }
+
+    val child = voices.firstOrNull { looksLikeChildVoice(it.name) }
+    if (child != null) return child
+
+    val male = voices.firstOrNull { looksLikeMaleVoice(it.name) }
+    if (male != null) return male
+
+    return voices.firstOrNull { it.locale == Locale("ar", "SA") }
+        ?: voices.firstOrNull()
+}
+
+private fun looksLikeChildVoice(name: String): Boolean {
+    val normalized = name.lowercase(Locale.ROOT)
+    return listOf("child", "kid", "junior", "boy", "girl", "young").any { normalized.contains(it) }
+}
+
+private fun looksLikeMaleVoice(name: String): Boolean {
+    val normalized = name.lowercase(Locale.ROOT)
+    return listOf("male", "man", "boy", "david", "george", "maged", "tarik", "tarik").any {
+        normalized.contains(it)
     }
 }
 
 @Composable
 private fun ContentPage(title: String, content: String) {
     Scaffold { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier.fillMaxSize().padding(padding).padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(title, style = MaterialTheme.typography.headlineMedium)
             Text(content, textAlign = TextAlign.Center)
             Text("المحتوى التعليمي الأولي — ستتم إضافة الصوت والتفاعل في المرحلة التالية.")
