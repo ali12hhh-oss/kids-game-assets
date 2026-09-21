@@ -76,7 +76,8 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
     val model = remember(modelLoader) {
         runCatching { modelLoader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull()
     }
-    val cameraNode = rememberCameraNode(engine) { position = Position(x = 0f, y = 0f, z = 3.2f) }
+    // Keep the model at its existing large scale; move the camera back to fit the entire figure.
+    val cameraNode = rememberCameraNode(engine) { position = Position(x = 0f, y = 0f, z = 5.5f) }
     val characterNode = remember(model) {
         model?.let { instance -> ModelNode(modelInstance = instance, autoAnimate = false, scaleToUnits = 2.2f, centerOrigin = Position(x = 0f, y = 0f, z = 0f)).also { it.position = Position(x = 0f, y = 0f, z = 0f) } }
     }
