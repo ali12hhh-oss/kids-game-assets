@@ -52,6 +52,7 @@ import io.github.sceneview.Scene
 import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
+import io.github.sceneview.rememberModelInstance
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.math.Position
 import kotlin.math.roundToInt
@@ -64,9 +65,11 @@ import com.ali12hhh.kidslearning.core.LearningCatalog
 import java.util.Locale
 
 private const val CLIP_IDLE = 0
-private const val CLIP_WAVE = 7
-private val REACTION_CLIPS = (1 until 11).toList()
-private const val ANIMATION_COUNT = 11
+// The merge script defines: 0 Idle_A, 1 Idle_B, 2 Interact, 3 PickUp,
+// 4 Use_Item, 5 Spawn_Ground, 6 Waving, 7 Cheering, 8 Sit_Floor_Idle,
+// 9 Jump_Full_Short, 10 Walking_A.
+private const val CLIP_WAVE = 6
+private val REACTION_CLIPS = listOf(1, 2, 3, 4, 5, 7, 8, 9, 10)
 
 private const val CHARACTER_BOX_SHIFT_DOWN = 0.19f
 private const val GREETING_UTTERANCE_ID = "home_greeting"
@@ -320,9 +323,10 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    val model = remember(modelLoader) {
-        runCatching { modelLoader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull()
-    }
+    // SceneView's rememberModelInstance keeps GLB loading asynchronous and lifecycle-safe.
+    // This avoids doing native model creation inside composition, which can cause startup
+    // crashes and makes the first frame wait for the 3D asset.
+    val model = rememberModelInstance(modelLoader, "Mannequin_Medium_Anim.glb")
     val cameraNode = rememberCameraNode(engine) {
         position = Position(x = 0f, y = 0f, z = 5.5f)
     }
@@ -339,44 +343,26 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
 
     var taps by remember { mutableStateOf(0) }
     var greetingActive by remember { mutableStateOf(false) }
-    var speechGestureTick by remember { mutableStateOf(0) }
-
-    // The greeting is spoken once each time the Home screen is created.
-    // The wave stays active for the complete TTS utterance. While speech is active,
-    // we also alternate short upper-body gestures to make the delivery feel alive.
-    LaunchedEffect(Unit) {
-        greetingActive = true
-    }
-
-    LaunchedEffect(greetingActive) {
-        if (!greetingActive) return@LaunchedEffect
-        while (greetingActive) {
-            speechGestureTick += 1
-            delay(850)
-        }
-    }
-
-    LaunchedEffect(characterNode, taps, greetingActive, speechGestureTick) {
+    // Greeting is intentionally a single animation: Waving. It remains looping for the
+    // complete TTS utterance and is never replaced by another clip.
+    LaunchedEffect(characterNode, taps, greetingActive) {
         val node = characterNode ?: return@LaunchedEffect
-        for (index in 0 until ANIMATION_COUNT) runCatching { node.stopAnimation(index) }
+
+        // Stop only the clips we actually use. Repeatedly stopping/starting every
+        // animation on every speech tick was unnecessary and could destabilize startup.
+        runCatching { node.stopAnimation(CLIP_IDLE) }
+        REACTION_CLIPS.forEach { index -> runCatching { node.stopAnimation(index) } }
 
         if (greetingActive) {
-            // Wave remains the primary synchronized greeting animation. The alternating
-            // reaction clips add subtle conversational movement without interrupting TTS.
             runCatching { node.playAnimation(CLIP_WAVE, 1f, true) }
-            if (speechGestureTick > 0 && speechGestureTick % 3 == 0) {
-                val gesture = REACTION_CLIPS[(speechGestureTick / 3) % REACTION_CLIPS.size]
-                runCatching { node.playAnimation(gesture, 0.82f, false) }
-                runCatching { node.playAnimation(CLIP_WAVE, 0.92f, true) }
-            }
         } else if (taps == 0) {
-            runCatching { node.playAnimation(CLIP_IDLE) }
+            runCatching { node.playAnimation(CLIP_IDLE, 1f, true) }
         } else {
             val clip = REACTION_CLIPS[(taps - 1) % REACTION_CLIPS.size]
             runCatching { node.playAnimation(clip, 1f, false) }
-            delay(3000)
-            for (index in 0 until ANIMATION_COUNT) runCatching { node.stopAnimation(index) }
-            runCatching { node.playAnimation(CLIP_IDLE) }
+            delay(2200)
+            runCatching { node.stopAnimation(clip) }
+            runCatching { node.playAnimation(CLIP_IDLE, 1f, true) }
         }
     }
 
@@ -402,19 +388,19 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
                 return@OnInitListener
             }
 
-            val arabicLocale = Locale("ar", "SA")
-            speaker.language = arabicLocale
-            speaker.setSpeechRate(0.92f)
-
-            val selectedVoice = selectArabicVoice(speaker)
-            if (selectedVoice != null) {
-                speaker.voice = selectedVoice
-                // A child voice is preferred when the installed TTS engine exposes one.
-                // Otherwise a lower pitch is used for the adult fallback.
-                speaker.setPitch(if (looksLikeChildVoice(selectedVoice.name)) 1.16f else 0.92f)
-            } else {
-                speaker.setPitch(0.96f)
+            // Use Modern Standard Arabic when the engine exposes it, then fall back to
+            // Saudi Arabic. The voice selector explicitly prefers male voice identifiers.
+            val arabicLocale = Locale.forLanguageTag("ar-XA")
+            val localeResult = speaker.setLanguage(arabicLocale)
+            if (localeResult == TextToSpeech.LANG_NOT_SUPPORTED ||
+                localeResult == TextToSpeech.LANG_MISSING_DATA
+            ) {
+                speaker.language = Locale("ar", "SA")
             }
+            speaker.setSpeechRate(0.88f)
+            speaker.setPitch(0.96f)
+
+            selectArabicMaleVoice(speaker)?.let { speaker.voice = it }
 
             speaker.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onStart(utteranceId: String?) {
@@ -494,31 +480,28 @@ private fun speakerEnginePackage(context: Context): String? {
     }.getOrNull()
 }
 
-private fun selectArabicVoice(tts: TextToSpeech): android.speech.tts.Voice? {
+private fun selectArabicMaleVoice(tts: TextToSpeech): android.speech.tts.Voice? {
     val voices = tts.voices.orEmpty()
         .filter { it.locale.language == "ar" }
         .filterNot { it.isNetworkConnectionRequired }
 
-    val child = voices.firstOrNull { looksLikeChildVoice(it.name) }
-    if (child != null) return child
+    // Android does not expose a reliable gender property for every installed voice,
+    // so only choose identifiers that conventionally denote known male variants.
+    val maleMarkers = listOf(
+        "male", "man", "maged", "majed", "tarik",
+        "standard-b", "standard-c", "wavenet-b", "wavenet-c",
+        "chirp3-hd-achird", "chirp3-hd-algenib", "chirp3-hd-algieba",
+        "chirp3-hd-alnilam", "chirp3-hd-charon", "chirp3-hd-enceladus",
+        "chirp3-hd-fenrir", "chirp3-hd-iapetus", "chirp3-hd-orus",
+        "chirp3-hd-puck", "chirp3-hd-rasalgethi", "chirp3-hd-sadachbia",
+        "chirp3-hd-sadaltager", "chirp3-hd-schedar", "chirp3-hd-umbriel",
+        "chirp3-hd-zubenelgenubi"
+    )
 
-    val male = voices.firstOrNull { looksLikeMaleVoice(it.name) }
-    if (male != null) return male
-
-    return voices.firstOrNull { it.locale == Locale("ar", "SA") }
-        ?: voices.firstOrNull()
-}
-
-private fun looksLikeChildVoice(name: String): Boolean {
-    val normalized = name.lowercase(Locale.ROOT)
-    return listOf("child", "kid", "junior", "boy", "girl", "young").any { normalized.contains(it) }
-}
-
-private fun looksLikeMaleVoice(name: String): Boolean {
-    val normalized = name.lowercase(Locale.ROOT)
-    return listOf("male", "man", "boy", "david", "george", "maged", "tarik", "tarik").any {
-        normalized.contains(it)
-    }
+    return voices.firstOrNull { voice ->
+        val name = voice.name.lowercase(Locale.ROOT)
+        maleMarkers.any(name::contains)
+    } ?: voices.firstOrNull { it.locale == Locale.forLanguageTag("ar-XA") }
 }
 
 @Composable
