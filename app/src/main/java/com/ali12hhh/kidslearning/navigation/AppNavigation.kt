@@ -6,12 +6,22 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,12 +30,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalLayoutDirection
 import io.github.sceneview.Scene
 import io.github.sceneview.rememberCameraNode
@@ -63,7 +76,13 @@ private fun Modifier.shiftDownByFraction(fraction: Float): Modifier = layout { m
 fun AppNavigation() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = AppRoutes.HOME) {
-        composable(AppRoutes.HOME) { HomePage() }
+        composable(AppRoutes.HOME) {
+            HomePage(
+                onArabic = { navController.navigate(AppRoutes.ARABIC_LETTERS) },
+                onEnglish = { navController.navigate(AppRoutes.ENGLISH_LETTERS) },
+                onPlay = { navController.navigate(AppRoutes.PLAY) }
+            )
+        }
         composable(AppRoutes.ARABIC_LETTERS) { ContentPage("الحروف العربية", LearningCatalog.arabicLetters.joinToString("  ")) }
         composable(AppRoutes.ENGLISH_LETTERS) { ContentPage("English Letters", LearningCatalog.englishLetters.joinToString("  ")) }
         composable(AppRoutes.NUMBERS) { ContentPage("الأرقام والعدّ", LearningCatalog.digits.joinToString("  ")) }
@@ -72,17 +91,232 @@ fun AppNavigation() {
 }
 
 @Composable
-private fun HomePage() {
+private fun HomePage(
+    onArabic: () -> Unit,
+    onEnglish: () -> Unit,
+    onPlay: () -> Unit
+) {
+    var darkMode by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
+    var showShop by remember { mutableStateOf(false) }
+
+    val background = if (darkMode) {
+        Brush.verticalGradient(listOf(Color(0xFF172033), Color(0xFF253552)))
+    } else {
+        Brush.verticalGradient(listOf(Color(0xFFF7FBFF), Color(0xFFE8F3FF)))
+    }
+    val textColor = if (darkMode) Color.White else Color(0xFF24324A)
+    val cardColor = if (darkMode) Color(0xFF2E3E5C) else Color.White.copy(alpha = 0.95f)
+
     Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            Box(
-                modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFFF7FBFF), Color(0xFFE8F3FF)))),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(modifier = Modifier.fillMaxSize().background(background)) {
+                // Layer 1: the character fills the whole page, exactly as before, so its
+                // position and size are unchanged. Taps on it trigger the animations.
                 RealCharacterHero(Modifier.fillMaxSize().shiftDownByFraction(CHARACTER_BOX_SHIFT_DOWN))
+
+                // Layer 2: the page sections drawn over the character layer.
+                // Right-to-left layout: the first item of every Row is on the RIGHT.
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    // Top bar: settings on the right, day/night mode on the left.
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TopAction("⚙️", "الإعدادات", textColor) { showSettings = true }
+                        TopAction(
+                            icon = if (darkMode) "☀️" else "🌙",
+                            label = if (darkMode) "نهاري" else "ليلي",
+                            textColor = textColor
+                        ) { darkMode = !darkMode }
+                    }
+
+                    Spacer(Modifier.height(4.dp))
+
+                    // Child identity card.
+                    ChildProfileCard(cardColor, textColor)
+
+                    // The character lives in this free space in the middle.
+                    Spacer(Modifier.weight(1f))
+
+                    // Row 1: Arabic (right) and English (left).
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        LearningCard(
+                            modifier = Modifier.weight(1f),
+                            icon = "أ",
+                            title = "العربية",
+                            subtitle = "تعلّم الحروف والأرقام والكلمات",
+                            cardColor = cardColor,
+                            textColor = textColor,
+                            onClick = onArabic
+                        )
+                        LearningCard(
+                            modifier = Modifier.weight(1f),
+                            icon = "a",
+                            title = "English",
+                            subtitle = "تعلّم الحروف والأرقام",
+                            cardColor = cardColor,
+                            textColor = textColor,
+                            onClick = onEnglish
+                        )
+                    }
+
+                    Spacer(Modifier.height(10.dp))
+
+                    // Row 2: Break (right) and Shop (left).
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        BottomCard(
+                            modifier = Modifier.weight(1f),
+                            icon = "🎮",
+                            title = "استراحة",
+                            subtitle = "",
+                            cardColor = cardColor,
+                            textColor = textColor,
+                            onClick = onPlay
+                        )
+                        BottomCard(
+                            modifier = Modifier.weight(1f),
+                            icon = "🛍️",
+                            title = "المتجر",
+                            subtitle = "استخدم نجومك",
+                            cardColor = cardColor,
+                            textColor = textColor,
+                            onClick = { showShop = true }
+                        )
+                    }
+
+                    Spacer(Modifier.height(4.dp))
+                }
+
+                if (showSettings) {
+                    InfoDialog("الإعدادات", "ستتوسع الإعدادات هنا لاحقًا.") { showSettings = false }
+                }
+                if (showShop) {
+                    InfoDialog("المتجر", "المتجر قيد التجهيز، وسيتمكن الطفل من استخدام نجومه لشراء المقتنيات.") { showShop = false }
+                }
             }
         }
     }
+}
+
+@Composable
+private fun TopAction(icon: String, label: String, textColor: Color, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier.clickable(onClick = onClick).padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(icon, fontSize = 26.sp)
+        Text(label, fontSize = 11.sp, color = textColor)
+    }
+}
+
+@Composable
+private fun ChildProfileCard(cardColor: Color, textColor: Color) {
+    val shape = RoundedCornerShape(22.dp)
+    Card(
+        modifier = Modifier.fillMaxWidth().shadow(6.dp, shape),
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = cardColor, contentColor = textColor)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("👦", fontSize = 38.sp)
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text("صديقي الصغير", fontWeight = FontWeight.Bold, color = textColor)
+                Text("ملف الطفل", fontSize = 12.sp, color = textColor)
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("⭐ 0", fontWeight = FontWeight.ExtraBold, color = textColor)
+                Text("نجومي", fontSize = 11.sp, color = textColor)
+            }
+        }
+    }
+}
+
+@Composable
+private fun LearningCard(
+    modifier: Modifier,
+    icon: String,
+    title: String,
+    subtitle: String,
+    cardColor: Color,
+    textColor: Color,
+    onClick: () -> Unit
+) {
+    val shape = RoundedCornerShape(24.dp)
+    Card(
+        onClick = onClick,
+        modifier = modifier.height(108.dp).shadow(6.dp, shape),
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = cardColor, contentColor = textColor)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(icon, fontSize = 36.sp, fontWeight = FontWeight.ExtraBold, color = textColor)
+            Text(title, fontWeight = FontWeight.ExtraBold, color = textColor)
+            Text(subtitle, fontSize = 11.sp, textAlign = TextAlign.Center, color = textColor)
+        }
+    }
+}
+
+@Composable
+private fun BottomCard(
+    modifier: Modifier,
+    icon: String,
+    title: String,
+    subtitle: String,
+    cardColor: Color,
+    textColor: Color,
+    onClick: () -> Unit
+) {
+    val shape = RoundedCornerShape(22.dp)
+    Card(
+        onClick = onClick,
+        modifier = modifier.height(80.dp).shadow(6.dp, shape),
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = cardColor, contentColor = textColor)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize().padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(icon, fontSize = 30.sp)
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text(title, fontWeight = FontWeight.ExtraBold, color = textColor)
+                if (subtitle.isNotBlank()) {
+                    Text(subtitle, fontSize = 11.sp, color = textColor)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InfoDialog(title: String, text: String, onClose: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onClose,
+        title = { Text(title) },
+        text = { Text(text) },
+        confirmButton = { TextButton(onClick = onClose) { Text("إغلاق") } }
+    )
 }
 
 @Composable
