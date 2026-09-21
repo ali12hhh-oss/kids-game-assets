@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -196,7 +195,7 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
         }
     }
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Scene(modifier = Modifier.fillMaxSize().offset(y = 150.dp), engine = engine, modelLoader = modelLoader, cameraNode = cameraNode, cameraManipulator = null, isOpaque = false, childNodes = listOfNotNull(characterNode))
+        Scene(modifier = Modifier.fillMaxSize(), engine = engine, modelLoader = modelLoader, cameraNode = cameraNode, cameraManipulator = null, isOpaque = false, childNodes = listOfNotNull(characterNode))
         Box(Modifier.matchParentSize().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { taps += 1 })
     }
 }
