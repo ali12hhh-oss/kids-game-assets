@@ -52,7 +52,6 @@ import io.github.sceneview.Scene
 import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
-import io.github.sceneview.rememberModelInstance
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.math.Position
 import kotlin.math.roundToInt
@@ -323,10 +322,8 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    // SceneView's rememberModelInstance keeps GLB loading asynchronous and lifecycle-safe.
-    // This avoids doing native model creation inside composition, which can cause startup
-    // crashes and makes the first frame wait for the 3D asset.
-    val model = rememberModelInstance(modelLoader, "Mannequin_Medium_Anim.glb")
+    // SceneView 2.3.1 does not expose rememberModelInstance. Keep model creation on the
+    // Compose/main thread and reuse the instance across recompositions.
     val cameraNode = rememberCameraNode(engine) {
         position = Position(x = 0f, y = 0f, z = 5.5f)
     }
