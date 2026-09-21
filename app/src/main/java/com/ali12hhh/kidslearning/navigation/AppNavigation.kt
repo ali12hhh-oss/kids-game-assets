@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -32,6 +33,7 @@ import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.math.Position
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.navigation.compose.NavHost
@@ -42,6 +44,20 @@ import com.ali12hhh.kidslearning.core.LearningCatalog
 private const val CLIP_IDLE = 0
 private val REACTION_CLIPS = (1 until 11).toList()
 private const val ANIMATION_COUNT = 11
+
+// The 3D model's visual center sits above the center of its Scene view. Instead of moving
+// the character inside the Scene (which can clip it), the whole Scene box (with its tap
+// layer) is shifted down by this fraction of its own height. Tune this one value:
+// larger = character lower on the page, smaller = higher.
+private const val CHARACTER_BOX_SHIFT_DOWN = 0.19f
+
+/** Moves the composable down by [fraction] of its own height, without changing its size. */
+private fun Modifier.shiftDownByFraction(fraction: Float): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    layout(placeable.width, placeable.height) {
+        placeable.place(0, (placeable.height * fraction).roundToInt())
+    }
+}
 
 @Composable
 fun AppNavigation() {
@@ -63,7 +79,7 @@ private fun HomePage() {
                 modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFFF7FBFF), Color(0xFFE8F3FF)))),
                 contentAlignment = Alignment.Center
             ) {
-                RealCharacterHero(Modifier.fillMaxSize())
+                RealCharacterHero(Modifier.fillMaxSize().shiftDownByFraction(CHARACTER_BOX_SHIFT_DOWN))
             }
         }
     }
