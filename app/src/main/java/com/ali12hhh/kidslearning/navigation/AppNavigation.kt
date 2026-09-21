@@ -324,6 +324,7 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
     val modelLoader = rememberModelLoader(engine)
     // SceneView 2.3.1 does not expose rememberModelInstance. Keep model creation on the
     // Compose/main thread and reuse the instance across recompositions.
+    val model = remember { runCatching { modelLoader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull() }
     val cameraNode = rememberCameraNode(engine) {
         position = Position(x = 0f, y = 0f, z = 5.5f)
     }
