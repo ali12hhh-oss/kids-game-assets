@@ -116,7 +116,7 @@ private fun HomePage(onArabic: () -> Unit, onEnglish: () -> Unit, onPlay: () -> 
                     Spacer(Modifier.height(12.dp))
                     Text("مرحبًا يا صديقي! اختر ماذا نتعلم اليوم.", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), textAlign = TextAlign.Center)
                     Spacer(Modifier.height(6.dp))
-                    RealCharacterHero(Modifier.weight(1f).fillMaxWidth())
+                    RealCharacterHero(Modifier.weight(1.45f).fillMaxWidth())
                     Spacer(Modifier.height(10.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                         LearningCard(Modifier.weight(1f), "A", "English", "الحروف الإنجليزية", selected == "en") { selected = "en"; onEnglish() }
