@@ -339,19 +339,36 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
 
     var taps by remember { mutableStateOf(0) }
     var greetingActive by remember { mutableStateOf(false) }
+    var speechGestureTick by remember { mutableStateOf(0) }
 
     // The greeting is spoken once each time the Home screen is created.
-    // Wave animation is kept active for the complete TTS utterance, then returns to idle.
+    // The wave stays active for the complete TTS utterance. While speech is active,
+    // we also alternate short upper-body gestures to make the delivery feel alive.
     LaunchedEffect(Unit) {
         greetingActive = true
     }
 
-    LaunchedEffect(characterNode, taps, greetingActive) {
+    LaunchedEffect(greetingActive) {
+        if (!greetingActive) return@LaunchedEffect
+        while (greetingActive) {
+            speechGestureTick += 1
+            delay(850)
+        }
+    }
+
+    LaunchedEffect(characterNode, taps, greetingActive, speechGestureTick) {
         val node = characterNode ?: return@LaunchedEffect
         for (index in 0 until ANIMATION_COUNT) runCatching { node.stopAnimation(index) }
 
         if (greetingActive) {
+            // Wave remains the primary synchronized greeting animation. The alternating
+            // reaction clips add subtle conversational movement without interrupting TTS.
             runCatching { node.playAnimation(CLIP_WAVE, 1f, true) }
+            if (speechGestureTick > 0 && speechGestureTick % 3 == 0) {
+                val gesture = REACTION_CLIPS[(speechGestureTick / 3) % REACTION_CLIPS.size]
+                runCatching { node.playAnimation(gesture, 0.82f, false) }
+                runCatching { node.playAnimation(CLIP_WAVE, 0.92f, true) }
+            }
         } else if (taps == 0) {
             runCatching { node.playAnimation(CLIP_IDLE) }
         } else {
