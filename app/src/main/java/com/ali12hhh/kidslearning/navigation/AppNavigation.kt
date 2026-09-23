@@ -217,7 +217,7 @@ private fun StoreDialog(context: android.content.Context, onDismiss: () -> Unit)
     var refresh by remember { mutableIntStateOf(0) }
     AlertDialog(onDismissRequest = onDismiss, title = { Text("🛍️ متجر المقتنيات") }, text = {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("نجوم الطفل: ⭐ " + AppSettings.childStars(context), fontWeight = FontWeight.ExtraBold)
+            Text("نجوم الطفل: ⭐ " + (AppSettings.childStars(context) + refresh * 0), fontWeight = FontWeight.ExtraBold)
             items.forEach { (id, item) ->
                 val owned = id in AppSettings.ownedItems(context)
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
