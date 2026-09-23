@@ -66,7 +66,7 @@ fun ArabicReadingPage(onBack: () -> Unit) {
     val colors = listOf(Color(0xFFEF476F), Color(0xFF118AB2), Color(0xFF06A77D), Color(0xFFFF9F1C), Color(0xFF7353BA), Color(0xFF3A86FF))
     val letterColor = colors[index % colors.size]
     val pop by animateFloatAsState(targetValue = 1f, animationSpec = tween(420), label = "letterPop")
-    fun speak(text: String) { if (ttsReady) tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "arabic_lesson") }
+    fun speak(text: String) { if (ttsReady) if (AppSettings.isSpeechEnabled(context)) tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "arabic_lesson") }
 
     CompositionLocalProvider(androidx.compose.ui.platform.LocalLayoutDirection provides LayoutDirection.Rtl) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFFFFF7E8), Color(0xFFE5F5FF)))).padding(14.dp)) {
