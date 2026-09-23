@@ -11,7 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalContext\nimport androidx.activity.compose.rememberLauncherForActivityResult\nimport androidx.activity.result.contract.ActivityResultContracts\nimport coil.compose.AsyncImage
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -84,9 +84,9 @@ private fun MainSettings(context: Context, onBack: () -> Unit, onOpen: (Settings
 
 @Composable private fun ProfileSettings(context: Context, onBack: () -> Unit) {
     var name by remember { mutableStateOf(AppSettings.childName(context)) }
-    var saved by remember { mutableStateOf(false) }
+    var saved by remember { mutableStateOf(false) }\n    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->\n        if (uri != null) {\n            try { context.contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}\n            AppSettings.setChildImageUri(context, uri.toString())\n        }\n    }
     DetailScaffold("👤 ملف الطفل", onBack) {
-        Text("اسم الطفل", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text("صورة الطفل", fontWeight = FontWeight.Bold, fontSize = 18.sp)\n        val imageUri = AppSettings.childImageUri(context)\n        if (imageUri != null) AsyncImage(model = imageUri, contentDescription = "صورة الطفل", modifier = Modifier.size(120.dp))\n        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {\n            Button(onClick = { launcher.launch(arrayOf("image/*")) }) { Text("اختيار من المعرض") }\n            OutlinedButton(onClick = { AppSettings.setChildImageUri(context, null) }) { Text("إزالة") }\n        }\n        Text("اسم الطفل", fontWeight = FontWeight.Bold, fontSize = 18.sp)
         OutlinedTextField(name, { name = it }, singleLine = true, modifier = Modifier.fillMaxWidth())
         Text("النجوم الحالية: ⭐ " + AppSettings.childStars(context), fontWeight = FontWeight.Bold)
         Button({ AppSettings.setChildName(context, name); saved = true }, Modifier.fillMaxWidth()) { Text("حفظ الملف") }
