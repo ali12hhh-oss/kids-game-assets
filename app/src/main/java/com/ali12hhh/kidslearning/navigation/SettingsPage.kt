@@ -88,7 +88,7 @@ private fun MainSettings(context: Context, onBack: () -> Unit, onOpen: (Settings
     DetailScaffold("👤 ملف الطفل", onBack) {
         Text("صورة الطفل", fontWeight = FontWeight.Bold, fontSize = 18.sp)\n        val imageUri = AppSettings.childImageUri(context)\n        if (imageUri != null) AsyncImage(model = imageUri, contentDescription = "صورة الطفل", modifier = Modifier.size(120.dp))\n        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {\n            Button(onClick = { launcher.launch(arrayOf("image/*")) }) { Text("اختيار من المعرض") }\n            OutlinedButton(onClick = { AppSettings.setChildImageUri(context, null) }) { Text("إزالة") }\n        }\n        Text("اسم الطفل", fontWeight = FontWeight.Bold, fontSize = 18.sp)
         OutlinedTextField(name, { name = it }, singleLine = true, modifier = Modifier.fillMaxWidth())
-        Text("النجوم الحالية: ⭐ " + AppSettings.childStars(context), fontWeight = FontWeight.Bold)
+        Text("النجوم الحالية: ⭐ " + AppSettings.childStars(context), fontWeight = FontWeight.Bold)\n        Spacer(Modifier.height(10.dp))\n        Text("🛍️ مقتنياتي", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)\n        val owned = AppSettings.ownedItems(context)\n        Text(if (owned.isEmpty()) "لا توجد مقتنيات بعد." else owned.joinToString(" • ") {\n            when (it) { "hat" -> "🎩 قبعة الدب"; "balloon" -> "🎈 بالون ملوّن"; "toy" -> "🧸 دمية صغيرة"; "car" -> "🚗 سيارة لعبة"; else -> it }\n        }, color = Color(0xFF68788F))
         Button({ AppSettings.setChildName(context, name); saved = true }, Modifier.fillMaxWidth()) { Text("حفظ الملف") }
         if (saved) Text("تم حفظ ملف الطفل.", color = Color(0xFF16803C), fontWeight = FontWeight.Bold)
     }
