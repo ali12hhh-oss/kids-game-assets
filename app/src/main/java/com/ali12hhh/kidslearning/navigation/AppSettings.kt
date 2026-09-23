@@ -8,7 +8,7 @@ object AppSettings {
     private const val SPEECH_ENABLED = "speech_enabled"
     private const val SPEECH_RATE = "speech_rate"
     private const val CHILD_NAME = "child_name"
-    private const val CHILD_STARS = "child_stars"
+    private const val CHILD_STARS = "child_stars"\n    private const val CHILD_IMAGE_URI = "child_image_uri"\n    private const val LAST_SESSION_ID = "last_session_id"\n    private const val OWNED_ITEMS = "owned_items"
     private const val PARENT_PIN = "parent_pin"
 
     private fun prefs(context: Context) =
@@ -30,7 +30,7 @@ object AppSettings {
     fun setChildName(context: Context, value: String) =
         prefs(context).edit().putString(CHILD_NAME, value.trim().ifBlank { "صديقي الصغير" }).apply()
 
-    fun childStars(context: Context): Int = prefs(context).getInt(CHILD_STARS, 0)
+    fun childStars(context: Context): Int = prefs(context).getInt(CHILD_STARS, 0)\n    fun addStars(context: Context, amount: Int) = prefs(context).edit().putInt(CHILD_STARS, (childStars(context) + amount).coerceAtLeast(0)).apply()\n    fun awardSessionStars(context: Context, sessionId: String) {\n        if (prefs(context).getString(LAST_SESSION_ID, null) != sessionId) {\n            addStars(context, 10)\n            prefs(context).edit().putString(LAST_SESSION_ID, sessionId).apply()\n        }\n    }\n    fun awardCorrectAnswer(context: Context) = addStars(context, 3)\n    fun childImageUri(context: Context): String? = prefs(context).getString(CHILD_IMAGE_URI, null)\n    fun setChildImageUri(context: Context, uri: String?) = prefs(context).edit().putString(CHILD_IMAGE_URI, uri).apply()\n    fun ownedItems(context: Context): Set<String> = prefs(context).getStringSet(OWNED_ITEMS, emptySet()) ?: emptySet()\n    fun buyItem(context: Context, itemId: String, price: Int): Boolean {\n        val owned = ownedItems(context)\n        if (itemId in owned || childStars(context) < price) return false\n        prefs(context).edit().putInt(CHILD_STARS, childStars(context) - price).putStringSet(OWNED_ITEMS, owned + itemId).apply()\n        return true\n    }
     fun resetProgress(context: Context) =
         prefs(context).edit().putInt(CHILD_STARS, 0).apply()
 
