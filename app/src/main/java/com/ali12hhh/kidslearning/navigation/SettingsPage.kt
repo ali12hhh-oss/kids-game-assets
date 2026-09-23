@@ -35,10 +35,7 @@ fun SettingsPage(onBack: () -> Unit) {
         SettingsScreen.DATA -> DataProgressPage(context) { screen = SettingsScreen.MAIN }
         SettingsScreen.TERMS -> SimpleInfoPage("📜 شروط الاستخدام", "استخدام التطبيق مخصص للتعلّم والترفيه للأطفال تحت إشراف ولي الأمر.") { screen = SettingsScreen.MAIN }
         SettingsScreen.PRIVACY_POLICY -> SimpleInfoPage("🔐 سياسة الخصوصية", "الإعدادات وملف الطفل الحاليان يُحفظان محليًا على الجهاز. لا نضع هنا ادعاءات عن جمع بيانات أو خدمات لم يتم تنفيذها فعليًا.") { screen = SettingsScreen.MAIN }
-        SettingsScreen.ABOUT -> SimpleInfoPage("ℹ️ عن التطبيق", "تعلّم مع دبدوب
-تطبيق تعليمي وترفيهي للأطفال.
-
-الإعدادات الظاهرة هنا مرتبطة بوظائف حقيقية داخل التطبيق.") { screen = SettingsScreen.MAIN }
+        SettingsScreen.ABOUT -> SimpleInfoPage("ℹ️ عن التطبيق", "تعلّم مع دبدوب\nتطبيق تعليمي وترفيهي للأطفال.\n\nالإعدادات الظاهرة هنا مرتبطة بوظائف حقيقية داخل التطبيق.") { screen = SettingsScreen.MAIN }
     }
 }
 
