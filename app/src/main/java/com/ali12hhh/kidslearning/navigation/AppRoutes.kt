@@ -13,6 +13,7 @@ object AppRoutes {
     const val ENGLISH_LEVEL_PAGE = "english_level_page/{level}"
     const val ARABIC_LEVEL_TWO_READING = "arabic_level_two_reading"
     const val ARABIC_LEVEL_ONE_MATH = "arabic_level_one_math"
+    const val ARABIC_LEVEL_TWO_MATH = "arabic_level_two_math"
     const val ARABIC_LEVEL_THREE_READING = "arabic_level_three_reading"
     const val NUMBERS = "numbers"
     const val PLAY = "play"
