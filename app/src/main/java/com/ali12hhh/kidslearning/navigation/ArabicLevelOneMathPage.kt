@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import java.util.Locale
 
 private fun arabicDigits(value: Int): String =
-    value.toString().map { if (it.isDigit()) ('٠'.code + (it - '0'.code)).toChar() else it }.joinToString("")
+    value.toString().map { if (it in '0'..'9') ('٠'.code + (it.code - '0'.code)).toChar() else it }.joinToString("")
 
 private fun ones(v: Int) = v % 10
 private fun tens(v: Int) = (v / 10) % 10
