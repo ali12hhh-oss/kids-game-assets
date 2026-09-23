@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,16 +92,20 @@ private fun Modifier.shiftDownByFraction(fraction: Float): Modifier = layout { m
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    var hasGreetedOnAppLaunch by rememberSaveable { mutableStateOf(false) }
     NavHost(navController = navController, startDestination = AppRoutes.HOME) {
         composable(AppRoutes.SETTINGS) {
             SettingsPage(onBack = { navController.popBackStack() })
         }
         composable(AppRoutes.HOME) {
+            val greetOnThisHomeEntry = !hasGreetedOnAppLaunch
+            LaunchedEffect(Unit) { hasGreetedOnAppLaunch = true }
             HomePage(
                 onArabic = { navController.navigate(AppRoutes.ARABIC_LEVELS) },
                 onEnglish = { navController.navigate(AppRoutes.ENGLISH_LEVELS) },
                 onPlay = { navController.navigate(AppRoutes.PLAY) },
-                onSettings = { navController.navigate(AppRoutes.SETTINGS) }
+                onSettings = { navController.navigate(AppRoutes.SETTINGS) },
+                greetOnEntry = greetOnThisHomeEntry
             )
         }
         composable(AppRoutes.ARABIC_LETTERS) {
@@ -240,7 +245,8 @@ private fun HomePage(
     onArabic: () -> Unit,
     onEnglish: () -> Unit,
     onPlay: () -> Unit,
-    onSettings: () -> Unit
+    onSettings: () -> Unit,
+    greetOnEntry: Boolean
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -270,7 +276,10 @@ private fun HomePage(
     Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             Box(modifier = Modifier.fillMaxSize().background(background)) {
-                RealCharacterHero(Modifier.fillMaxSize().shiftDownByFraction(CHARACTER_BOX_SHIFT_DOWN))
+                RealCharacterHero(
+                    modifier = Modifier.fillMaxSize().shiftDownByFraction(CHARACTER_BOX_SHIFT_DOWN),
+                    greetOnEntry = greetOnEntry
+                )
 
                 Column(
                     modifier = Modifier
@@ -466,7 +475,10 @@ private fun InfoDialog(title: String, text: String, onClose: () -> Unit) {
 }
 
 @Composable
-private fun RealCharacterHero(modifier: Modifier = Modifier) {
+private fun RealCharacterHero(
+    modifier: Modifier = Modifier,
+    greetOnEntry: Boolean
+) {
     val context = LocalContext.current
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
@@ -488,7 +500,7 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
     }
 
     var taps by remember { mutableStateOf(0) }
-    var greetingActive by remember { mutableStateOf(false) }
+    var greetingActive by remember(greetOnEntry) { mutableStateOf(greetOnEntry) }
     // Greeting is intentionally a single animation: Waving. It remains looping for the
     // complete TTS utterance and is never replaced by another clip.
     LaunchedEffect(characterNode, taps, greetingActive) {
@@ -497,6 +509,7 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
         // Stop only the clips we actually use. Repeatedly stopping/starting every
         // animation on every speech tick was unnecessary and could destabilize startup.
         runCatching { node.stopAnimation(CLIP_IDLE) }
+        runCatching { node.stopAnimation(CLIP_WAVE) }
         REACTION_CLIPS.forEach { index -> runCatching { node.stopAnimation(index) } }
 
         if (greetingActive) {
@@ -512,7 +525,7 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
         }
     }
 
-    DisposableEffect(context) {
+    DisposableEffect(context, greetOnEntry) {
         val mainHandler = Handler(Looper.getMainLooper())
         var tts: TextToSpeech? = null
         var released = false
@@ -526,7 +539,7 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
         }
 
         val initListener = TextToSpeech.OnInitListener { status ->
-            if (released) return@OnInitListener
+            if (released || !greetOnEntry) return@OnInitListener
             val speaker = tts ?: return@OnInitListener
 
             if (status != TextToSpeech.SUCCESS) {
@@ -576,8 +589,18 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
             val params = Bundle().apply {
                 putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, GREETING_UTTERANCE_ID)
             }
-            val result = speaker.speak(GREETING_TEXT, TextToSpeech.QUEUE_FLUSH, params, GREETING_UTTERANCE_ID)
+            val childName = AppSettings.childName(context).trim()
+            val greetingText = if (childName.isBlank() || childName == "صديقي الصغير") {
+                GREETING_TEXT
+            } else {
+                "مرحبا $childName. اختر ماذا نتعلم اليوم."
+            }
+            val result = speaker.speak(greetingText, TextToSpeech.QUEUE_FLUSH, params, GREETING_UTTERANCE_ID)
             if (result == TextToSpeech.ERROR) finishGreeting()
+        }
+
+        if (!greetOnEntry) {
+            return@DisposableEffect onDispose { }
         }
 
         // Prefer Google's Android TTS engine when it is installed, otherwise use
