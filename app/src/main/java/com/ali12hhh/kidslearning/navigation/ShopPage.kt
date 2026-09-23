@@ -324,8 +324,8 @@ private fun StoreArtwork(art: Int, description: String, modifier: Modifier = Mod
             5 -> { // trophy
                 drawRoundRect(accent,androidx.compose.ui.geometry.Offset(cX-r*.48f,cY-r*.55f),androidx.compose.ui.geometry.Size(r*.96f,r*1.05f),cornerRadius=androidx.compose.ui.geometry.CornerRadius(12f,12f))
                 drawLine(dark,androidx.compose.ui.geometry.Offset(cX,cY+r*.5f),androidx.compose.ui.geometry.Offset(cX,cY+r*.82f),7f); drawLine(dark,androidx.compose.ui.geometry.Offset(cX-r*.45f,cY+r*.86f),androidx.compose.ui.geometry.Offset(cX+r*.45f,cY+r*.86f),8f)
-                drawArc(accent,androidx.compose.ui.geometry.Offset(cX-r*.9f,cY-r*.45f).x, androidx.compose.ui.geometry.Offset(cX-r*.15f,cY+r*.35f).y,90f,180f,false,style=Stroke(7f))
-                drawArc(accent,androidx.compose.ui.geometry.Offset(cX+r*.15f,cY-r*.45f).x, androidx.compose.ui.geometry.Offset(cX+r*.9f,cY+r*.35f).y,270f,180f,false,style=Stroke(7f))
+                drawArc(accent, androidx.compose.ui.geometry.Offset(cX-r*.9f,cY-r*.45f), androidx.compose.ui.geometry.Size(r*.75f,r*.8f),90f,180f,false,style=Stroke(7f))
+                drawArc(accent, androidx.compose.ui.geometry.Offset(cX+r*.15f,cY-r*.45f), androidx.compose.ui.geometry.Size(r*.75f,r*.8f),270f,180f,false,style=Stroke(7f))
             }
             6 -> { // magic wand
                 drawLine(accent,androidx.compose.ui.geometry.Offset(cX-r*.55f,cY+r*.62f),androidx.compose.ui.geometry.Offset(cX+r*.5f,cY-r*.5f),9f)
