@@ -59,7 +59,7 @@ fun ArabicLevelOneMathPage(onBack: () -> Unit) {
                     Text(arabicDigits(number), fontSize = 88.sp, fontWeight = FontWeight.Black, color = numberColor(number))
                 }
                 if (number >= 10) PlaceValueCard(number) else SimpleUnitsCard(number)
-                Button(onClick = { if (ready) tts?.speak(numberSpeech(number), TextToSpeech.QUEUE_FLUSH, null, "number_" + number) }, modifier = Modifier.height(54.dp), shape = RoundedCornerShape(18.dp)) {
+                Button(onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(numberSpeech(number), TextToSpeech.QUEUE_FLUSH, null, "number_" + number) }, modifier = Modifier.height(54.dp), shape = RoundedCornerShape(18.dp)) {
                     Text("🔊  نطق العدد", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
                 }
                 Text(arabicDigits(number) + " / ١٠٠", fontSize = 14.sp, color = Color(0xFF718099), fontWeight = FontWeight.Bold)
