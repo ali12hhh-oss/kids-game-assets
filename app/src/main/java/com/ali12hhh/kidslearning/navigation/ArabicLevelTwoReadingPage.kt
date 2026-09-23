@@ -195,7 +195,7 @@ private fun LetterFormsSection(
                     LetterFormCard("أخري", lesson.final, Modifier.weight(1f))
                 }
                 Button(
-                    onClick = { if (ready) tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
+                    onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
                     shape = RoundedCornerShape(18.dp)
                 ) { Text("🔊  سماع اسم الحرف", fontWeight = FontWeight.ExtraBold) }
                 Text("${index + 1} / ${levelTwoLetters.size}", color = Color(0xFF718099), fontWeight = FontWeight.Bold)
