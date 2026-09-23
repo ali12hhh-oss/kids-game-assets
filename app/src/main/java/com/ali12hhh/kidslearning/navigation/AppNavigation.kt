@@ -112,16 +112,34 @@ fun AppNavigation() {
             LanguageLevelsPage(
                 language = "ar",
                 onBack = { navController.popBackStack() },
-                onSelectLevel = { /* Intentionally not connected yet. */ },
-                onSpeak = { _, _ -> /* Intentionally not connected yet. */ }
+                onSelectLevel = { level -> navController.navigate("${AppRoutes.ARABIC_LEVEL_PAGE}".replace("{level}", level.toString())) },
+                onSpeak = { _, _ -> /* Section-page speech will be added later. */ }
             )
         }
         composable(AppRoutes.ENGLISH_LEVELS) {
             LanguageLevelsPage(
                 language = "en",
                 onBack = { navController.popBackStack() },
-                onSelectLevel = { /* Intentionally not connected yet. */ },
-                onSpeak = { _, _ -> /* Intentionally not connected yet. */ }
+                onSelectLevel = { level -> navController.navigate("${AppRoutes.ENGLISH_LEVEL_PAGE}".replace("{level}", level.toString())) },
+                onSpeak = { _, _ -> /* Section-page speech will be added later. */ }
+            )
+        }
+        composable(AppRoutes.ARABIC_LEVEL_PAGE) { entry ->
+            val level = entry.arguments?.getString("level")?.toIntOrNull() ?: 1
+            LevelSectionsPage(
+                language = "ar",
+                level = level,
+                onBack = { navController.popBackStack() },
+                onSelectSection = { /* Section content will be connected later. */ }
+            )
+        }
+        composable(AppRoutes.ENGLISH_LEVEL_PAGE) { entry ->
+            val level = entry.arguments?.getString("level")?.toIntOrNull() ?: 1
+            LevelSectionsPage(
+                language = "en",
+                level = level,
+                onBack = { navController.popBackStack() },
+                onSelectSection = { /* Section content will be connected later. */ }
             )
         }
         composable(AppRoutes.NUMBERS) { ContentPage("الأرقام والعدّ", LearningCatalog.digits.joinToString("  ")) }
