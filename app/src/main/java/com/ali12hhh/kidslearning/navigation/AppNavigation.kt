@@ -104,7 +104,10 @@ fun AppNavigation() {
             ShopPage(initialCollection = true, onBack = { navController.popBackStack() })
         }
         composable(AppRoutes.HOME) {
-            val greetOnThisHomeEntry = !hasGreetedOnAppLaunch
+            // Freeze the greeting decision for this Home composition. Without remember,
+            // the flag update below recomposes Home immediately and can dispose TTS before
+            // the engine finishes initializing, which makes the greeting disappear.
+            val greetOnThisHomeEntry = remember { !hasGreetedOnAppLaunch }
             LaunchedEffect(Unit) { hasGreetedOnAppLaunch = true }
             HomePage(
                 onArabic = { navController.navigate(AppRoutes.ARABIC_LEVELS) },
