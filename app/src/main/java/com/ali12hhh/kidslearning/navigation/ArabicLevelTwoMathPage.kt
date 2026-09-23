@@ -171,7 +171,7 @@ private fun PlaceValueLearn() {
                 Spacer(Modifier.height(12.dp))
                 Text(ex.third, fontSize = 18.sp, lineHeight = 29.sp, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(14.dp))
-                Button(onClick = { if (ready) tts?.speak(ex.third, TextToSpeech.QUEUE_FLUSH, null, "learn_${index}") }) { Text("🔊 اسمع الشرح", fontWeight = FontWeight.ExtraBold) }
+                Button(onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(ex.third, TextToSpeech.QUEUE_FLUSH, null, "learn_${index}") }) { Text("🔊 اسمع الشرح", fontWeight = FontWeight.ExtraBold) }
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -207,7 +207,7 @@ private fun PlaceValueQuiz() {
         Text("اختبار ${index + 1} / ${placeQuizzes.size}", fontWeight = FontWeight.Bold, color = Color(0xFF65738A))
         Text("العدد ${arDigits(quiz.number)}", fontSize = 48.sp, fontWeight = FontWeight.Black, color = numberColor(index + 1))
         Text(quiz.asked, Modifier.fillMaxWidth(), fontSize = 19.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
-        OutlinedButton(onClick = { if (ready) tts?.speak(quiz.asked, TextToSpeech.QUEUE_FLUSH, null, "question_${index}") }) { Text("🔊 صوت السؤال") }
+        OutlinedButton(onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(quiz.asked, TextToSpeech.QUEUE_FLUSH, null, "question_${index}") }) { Text("🔊 صوت السؤال") }
         quiz.options.forEach { option ->
             val color = when {
                 selected == option && option == quiz.correct -> Color(0xFF2EAD67)
@@ -220,10 +220,10 @@ private fun PlaceValueQuiz() {
                     if (option == quiz.correct) {
                         score++
                         reaction = 1
-                        if (ready) tts?.speak("أحسنت! إجابة صحيحة", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
+                        if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak("أحسنت! إجابة صحيحة", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
                     } else {
                         reaction = -1
-                        if (ready) tts?.speak("حاول مرة أخرى", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
+                        if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak("حاول مرة أخرى", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
                     }
                 }
             }, Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(containerColor = color, contentColor = if (selected != null) Color.White else Color(0xFF24324A))) {
