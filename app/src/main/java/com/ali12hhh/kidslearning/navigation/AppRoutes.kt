@@ -5,6 +5,10 @@ object AppRoutes {
     const val HOME = "home"
     const val ARABIC_LETTERS = "arabic_letters"
     const val ENGLISH_LETTERS = "english_letters"
+    const val ARABIC_LEVELS = "arabic_levels"
+    const val ENGLISH_LEVELS = "english_levels"
+    const val ARABIC_LEVEL_CONTENT = "arabic_level_content/{level}"
+    const val ENGLISH_LEVEL_CONTENT = "english_level_content/{level}"
     const val NUMBERS = "numbers"
     const val PLAY = "play"
 }
