@@ -123,9 +123,9 @@ private fun EnglishLettersSection() {
     DisposableEffect(context) {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                engine.language = Locale.ENGLISH
-                engine.setSpeechRate(0.82f)
-                engine.setPitch(1.0f)
+                tts?.language = Locale.ENGLISH
+                tts?.setSpeechRate(0.82f)
+                tts?.setPitch(1.0f)
             }
         }
         tts = engine
@@ -198,9 +198,9 @@ private fun EnglishNumbersSection() {
     DisposableEffect(context) {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                engine.language = Locale.ENGLISH
-                engine.setSpeechRate(0.82f)
-                engine.setPitch(1.0f)
+                tts?.language = Locale.ENGLISH
+                tts?.setSpeechRate(0.82f)
+                tts?.setPitch(1.0f)
             }
         }
         tts = engine
