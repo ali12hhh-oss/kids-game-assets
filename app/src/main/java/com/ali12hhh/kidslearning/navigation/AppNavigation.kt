@@ -184,7 +184,8 @@ fun AppNavigation() {
             )
         }
         composable(AppRoutes.ENGLISH_LEVEL_ONE_LETTERS) { EnglishLevelOnePage(onBack = { navController.popBackStack() }, initialSection = 0) }
-        composable(AppRoutes.ENGLISH_LEVEL_ONE_NUMBERS) { EnglishLevelOnePage(onBack = { navController.popBackStack() }, initialSection = 1) }\n        composable(AppRoutes.NUMBERS) { ContentPage("الأرقام والعدّ", LearningCatalog.digits.joinToString("  ")) }
+        composable(AppRoutes.ENGLISH_LEVEL_ONE_NUMBERS) { EnglishLevelOnePage(onBack = { navController.popBackStack() }, initialSection = 1) }
+        composable(AppRoutes.NUMBERS) { ContentPage("الأرقام والعدّ", LearningCatalog.digits.joinToString("  ")) }
         composable(AppRoutes.PLAY) { ContentPage("وقت اللعب", "منطقة الألعاب قيد التجهيز") }
     }
 }
