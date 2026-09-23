@@ -206,7 +206,7 @@ private fun LearnReadingSection(
                         Button(
                             onClick = {
                                 if (ready) {
-                                    tts?.speak(
+                                    if (AppSettings.isSpeechEnabled(context)) tts?.speak(
                                         "حرف ${lesson.first} مع حرف ${lesson.second} يساوي ${lesson.result}",
                                         TextToSpeech.QUEUE_FLUSH, null, "lesson_${index}"
                                     )
