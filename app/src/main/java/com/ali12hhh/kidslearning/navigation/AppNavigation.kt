@@ -87,13 +87,43 @@ fun AppNavigation() {
     NavHost(navController = navController, startDestination = AppRoutes.HOME) {
         composable(AppRoutes.HOME) {
             HomePage(
-                onArabic = { navController.navigate(AppRoutes.ARABIC_LETTERS) },
-                onEnglish = { navController.navigate(AppRoutes.ENGLISH_LETTERS) },
+                onArabic = { navController.navigate(AppRoutes.ARABIC_LEVELS) },
+                onEnglish = { navController.navigate(AppRoutes.ENGLISH_LEVELS) },
                 onPlay = { navController.navigate(AppRoutes.PLAY) }
             )
         }
-        composable(AppRoutes.ARABIC_LETTERS) { ContentPage("الحروف العربية", LearningCatalog.arabicLetters.joinToString("  ")) }
-        composable(AppRoutes.ENGLISH_LETTERS) { ContentPage("English Letters", LearningCatalog.englishLetters.joinToString("  ")) }
+        composable(AppRoutes.ARABIC_LETTERS) {
+            LanguageLevelsPage(
+                language = "ar",
+                onBack = { navController.popBackStack() },
+                onSelectLevel = { /* Level content will be connected later. */ },
+                onSpeak = { _, _ -> /* Speech wiring will be added later. */ }
+            )
+        }
+        composable(AppRoutes.ENGLISH_LETTERS) {
+            LanguageLevelsPage(
+                language = "en",
+                onBack = { navController.popBackStack() },
+                onSelectLevel = { /* Level content will be connected later. */ },
+                onSpeak = { _, _ -> /* Speech wiring will be added later. */ }
+            )
+        }
+        composable(AppRoutes.ARABIC_LEVELS) {
+            LanguageLevelsPage(
+                language = "ar",
+                onBack = { navController.popBackStack() },
+                onSelectLevel = { /* Intentionally not connected yet. */ },
+                onSpeak = { _, _ -> /* Intentionally not connected yet. */ }
+            )
+        }
+        composable(AppRoutes.ENGLISH_LEVELS) {
+            LanguageLevelsPage(
+                language = "en",
+                onBack = { navController.popBackStack() },
+                onSelectLevel = { /* Intentionally not connected yet. */ },
+                onSpeak = { _, _ -> /* Intentionally not connected yet. */ }
+            )
+        }
         composable(AppRoutes.NUMBERS) { ContentPage("الأرقام والعدّ", LearningCatalog.digits.joinToString("  ")) }
         composable(AppRoutes.PLAY) { ContentPage("وقت اللعب", "منطقة الألعاب قيد التجهيز") }
     }
