@@ -1,6 +1,5 @@
 package com.ali12hhh.kidslearning.navigation
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -13,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -116,57 +114,12 @@ fun ShopPage(initialCollection:Boolean=false,onBack:()->Unit){
 
 @Composable
 private fun StoreArtwork(art: Int, description: String, modifier: Modifier = Modifier) {
-    val palettes = listOf(
-        Color(0xFFFFC94A), Color(0xFF8EC5FF), Color(0xFFFF8FA3),
-        Color(0xFF9FE2BF), Color(0xFFB89CFF), Color(0xFFFFA66B),
-        Color(0xFF65D8E8), Color(0xFFFFD86B), Color(0xFF7FC8FF), Color(0xFFFF9FCF)
-    )
-    val accent = palettes[(art - 1).mod(palettes.size)]
-    Canvas(modifier) {
-        val w = size.width
-        val h = size.height
-        val cx = w * 0.5f
-        val cy = h * 0.48f
-        drawCircle(Color(0x3320304A), radius = w * 0.43f, center = androidx.compose.ui.geometry.Offset(cx + w*.02f, cy + h*.07f))
-        drawCircle(Color.White, radius = w * 0.42f, center = androidx.compose.ui.geometry.Offset(cx, cy))
-        drawCircle(accent, radius = w * 0.34f, center = androidx.compose.ui.geometry.Offset(cx, cy))
-        when ((art - 1) % 5) {
-            0 -> {
-                val path = Path()
-                for (i in 0 until 10) {
-                    val angle = -Math.PI / 2 + i * Math.PI / 5
-                    val radius = if (i % 2 == 0) w * .25f else w * .11f
-                    val x = cx + kotlin.math.cos(angle).toFloat() * radius
-                    val y = cy + kotlin.math.sin(angle).toFloat() * radius
-                    if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-                }
-                path.close()
-                drawPath(path, Color.White)
-            }
-            1 -> {
-                drawCircle(Color.White, radius = w*.18f, center = androidx.compose.ui.geometry.Offset(cx, cy))
-                drawCircle(accent, radius = w*.08f, center = androidx.compose.ui.geometry.Offset(cx, cy))
-                drawLine(Color.White, androidx.compose.ui.geometry.Offset(cx-w*.22f, cy+w*.25f), androidx.compose.ui.geometry.Offset(cx+w*.22f, cy+w*.25f), strokeWidth = w*.07f)
-            }
-            2 -> {
-                drawCircle(Color.White, radius = w*.22f, center = androidx.compose.ui.geometry.Offset(cx, cy))
-                drawCircle(accent, radius = w*.10f, center = androidx.compose.ui.geometry.Offset(cx, cy))
-                drawLine(Color.White, androidx.compose.ui.geometry.Offset(cx, cy-w*.32f), androidx.compose.ui.geometry.Offset(cx, cy-w*.16f), strokeWidth = w*.06f)
-            }
-            3 -> {
-                drawRect(Color.White, topLeft = androidx.compose.ui.geometry.Offset(cx-w*.20f, cy-w*.15f), size = androidx.compose.ui.geometry.Size(w*.40f, w*.32f))
-                drawCircle(accent, radius = w*.09f, center = androidx.compose.ui.geometry.Offset(cx, cy))
-                drawLine(Color.White, androidx.compose.ui.geometry.Offset(cx-w*.20f, cy-w*.15f), androidx.compose.ui.geometry.Offset(cx, cy-w*.30f), strokeWidth = w*.05f)
-                drawLine(Color.White, androidx.compose.ui.geometry.Offset(cx+w*.20f, cy-w*.15f), androidx.compose.ui.geometry.Offset(cx, cy-w*.30f), strokeWidth = w*.05f)
-            }
-            else -> {
-                for (i in 0 until 4) {
-                    val dx = if (i % 2 == 0) -w*.16f else w*.16f
-                    val dy = if (i < 2) -w*.16f else w*.16f
-                    drawCircle(Color.White, radius = w*.075f, center = androidx.compose.ui.geometry.Offset(cx+dx, cy+dy))
-                }
-                drawCircle(accent, radius = w*.11f, center = androidx.compose.ui.geometry.Offset(cx, cy))
-            }
-        }
+    val icons = listOf("👑","🏆","⭐","💎","🚀","🥇","🪄","🛡️","🎖️","🔥","🌙","☀️","💖","🌈","📚","🎈","🎁","✨","🦸","🧠","🧭","🌟","🏅","🪐","🎨","⚡","💝","🚀","📖","🏆")
+    Box(
+        modifier = modifier
+            .background(Color(0xFFF5F8FF), RoundedCornerShape(24.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(icons[(art - 1).coerceIn(0, icons.lastIndex)], fontSize = 54.sp)
     }
 }
