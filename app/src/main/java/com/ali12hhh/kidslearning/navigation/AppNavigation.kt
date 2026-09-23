@@ -179,12 +179,16 @@ fun AppNavigation() {
                 onSelectSection = { section ->
                     if (level == 1 && (section == "letters" || section == "numbers")) {
                         navController.navigate(if (section == "letters") AppRoutes.ENGLISH_LEVEL_ONE_LETTERS else AppRoutes.ENGLISH_LEVEL_ONE_NUMBERS)
+                    } else if (level == 2 && (section == "letters" || section == "numbers")) {
+                        navController.navigate(if (section == "letters") AppRoutes.ENGLISH_LEVEL_TWO_LETTERS else AppRoutes.ENGLISH_LEVEL_TWO_NUMBERS)
                     }
                 }
             )
         }
         composable(AppRoutes.ENGLISH_LEVEL_ONE_LETTERS) { EnglishLevelOnePage(onBack = { navController.popBackStack() }, initialSection = 0) }
         composable(AppRoutes.ENGLISH_LEVEL_ONE_NUMBERS) { EnglishLevelOnePage(onBack = { navController.popBackStack() }, initialSection = 1) }
+        composable(AppRoutes.ENGLISH_LEVEL_TWO_LETTERS) { EnglishLevelTwoPage(onBack = { navController.popBackStack() }, initialSection = 0) }
+        composable(AppRoutes.ENGLISH_LEVEL_TWO_NUMBERS) { EnglishLevelTwoPage(onBack = { navController.popBackStack() }, initialSection = 1) }
         composable(AppRoutes.NUMBERS) { ContentPage("الأرقام والعدّ", LearningCatalog.digits.joinToString("  ")) }
         composable(AppRoutes.PLAY) { ContentPage("وقت اللعب", "منطقة الألعاب قيد التجهيز") }
     }
