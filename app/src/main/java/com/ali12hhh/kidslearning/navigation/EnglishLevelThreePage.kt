@@ -108,7 +108,7 @@ fun EnglishLevelThreePage(onBack: () -> Unit, initialSection: Int = 0) {
 
 @Composable
 private fun SpeechButton(text: String, tts: TextToSpeech?) {
-    IconButton(onClick = { tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "level3") }) {
+    IconButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "level3") }) {
         Text("🔊", fontSize = 20.sp)
     }
 }
@@ -136,7 +136,7 @@ private fun ColorsSection() {
     ) {
         items(colorItems) { item ->
             Card(
-                onClick = { tts?.speak(item.name, TextToSpeech.QUEUE_FLUSH, null, "color") },
+                onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(item.name, TextToSpeech.QUEUE_FLUSH, null, "color") },
                 modifier = Modifier.height(150.dp),
                 shape = RoundedCornerShape(24.dp),
                 elevation = CardDefaults.cardElevation(7.dp)
@@ -177,7 +177,7 @@ private fun ShapesSection() {
     ) {
         items(shapeItems) { item ->
             Card(
-                onClick = { tts?.speak(item.name, TextToSpeech.QUEUE_FLUSH, null, "shape") },
+                onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(item.name, TextToSpeech.QUEUE_FLUSH, null, "shape") },
                 modifier = Modifier.height(210.dp),
                 shape = RoundedCornerShape(28.dp),
                 elevation = CardDefaults.cardElevation(8.dp)
@@ -242,7 +242,7 @@ private fun WordsSection() {
         ) {
             items(wordItems) { item ->
                 Card(
-                    onClick = { tts?.speak(item.word, TextToSpeech.QUEUE_FLUSH, null, "word") },
+                    onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(item.word, TextToSpeech.QUEUE_FLUSH, null, "word") },
                     modifier = Modifier.height(145.dp),
                     shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
