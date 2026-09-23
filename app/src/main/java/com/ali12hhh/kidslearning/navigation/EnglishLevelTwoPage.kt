@@ -183,7 +183,7 @@ private fun LetterWritingSection() {
         Spacer(Modifier.height(8.dp))
         Text("${lesson.upper} — ${lesson.word}", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
         Text(lesson.meaning, color = Color(0xFF53647A))
-        Button(onClick = { tts?.speak("${lesson.upper}. ${lesson.word}", TextToSpeech.QUEUE_FLUSH, null, "letter") }) {
+        Button(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak("${lesson.upper}. ${lesson.word}", TextToSpeech.QUEUE_FLUSH, null, "letter") }) {
             Text("🔊 اسمع الحرف والكلمة")
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -223,7 +223,7 @@ private fun NumberWritingSection() {
         Spacer(Modifier.height(8.dp))
         Text(arabicDigits(number), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF2563EB))
         Text("$number — $name", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
-        Button(onClick = { tts?.speak(name, TextToSpeech.QUEUE_FLUSH, null, "number") }) {
+        Button(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(name, TextToSpeech.QUEUE_FLUSH, null, "number") }) {
             Text("🔊 اسمع الرقم")
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
