@@ -359,7 +359,7 @@ private fun ChildProfileCard(cardColor: Color, textColor: Color) {
             modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("👦", fontSize = 38.sp)
+            val imageUri = AppSettings.childImageUri(LocalContext.current)\n            if (imageUri != null) AsyncImage(model = imageUri, contentDescription = "صورة الطفل", modifier = Modifier.size(58.dp)) else Text("👦", fontSize = 38.sp)
             Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(AppSettings.childName(LocalContext.current), fontWeight = FontWeight.Bold, color = textColor)
