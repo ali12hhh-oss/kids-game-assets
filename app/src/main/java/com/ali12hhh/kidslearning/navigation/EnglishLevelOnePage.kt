@@ -62,7 +62,7 @@ private fun englishNumberText(number: Int): String = when (number) {
         "eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty")[number]
     else -> {
         val tens = listOf("","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety")
-        if (number % 10 == 0) tens[number / 10] else "\${tens[number / 10]}-\${englishNumberText(number % 10)}"
+        if (number % 10 == 0) tens[number / 10] else "${tens[number / 10]}-${englishNumberText(number % 10)}"
     }
 }
 
@@ -123,7 +123,9 @@ private fun EnglishLettersSection() {
     DisposableEffect(context) {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                engineSafeSpeakSetup(tts)
+                engine.language = Locale.ENGLISH
+                engine.setSpeechRate(0.82f)
+                engine.setPitch(1.0f)
             }
         }
         tts = engine
@@ -144,7 +146,7 @@ private fun EnglishLettersSection() {
             shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(Color.White.copy(alpha = .97f))) {
             Column(Modifier.fillMaxWidth().padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(if (caseTab == 0) lesson.lower else lesson.upper, fontSize = 104.sp, fontWeight = FontWeight.Black, color = activeColor)
-                Text("الحرف الحالي: \${lesson.lower.uppercase()} / \${lesson.lower}", fontSize = 13.sp, color = Color(0xFF66758B))
+                Text("الحرف الحالي: ${lesson.lower.uppercase()} / ${lesson.lower}", fontSize = 13.sp, color = Color(0xFF66758B))
                 Spacer(Modifier.height(8.dp))
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(Color(0xFFF1F6FF))) {
@@ -159,38 +161,32 @@ private fun EnglishLettersSection() {
                     }
                 }
                 Spacer(Modifier.height(10.dp))
-                Text("اسم الحرف: \${lesson.name}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Text("الصوت التدريبي: \${lesson.soundHint}", fontSize = 14.sp, color = activeColor)
+                Text("اسم الحرف: ${lesson.name}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text("الصوت التدريبي: ${lesson.soundHint}", fontSize = 14.sp, color = activeColor)
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(modifier = Modifier.weight(1f), onClick = { tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
                         colors = ButtonDefaults.buttonColors(Color(0xFF5B4BCE))) {
                         Text("🔊"); Spacer(Modifier.width(5.dp)); Text("اسم الحرف")
                     }
-                    Button(Modifier.weight(1f), onClick = { tts?.speak(lesson.soundHint, TextToSpeech.QUEUE_FLUSH, null, "letter_sound") },
+                    Button(modifier = Modifier.weight(1f), onClick = { tts?.speak(lesson.soundHint, TextToSpeech.QUEUE_FLUSH, null, "letter_sound") },
                         colors = ButtonDefaults.buttonColors(activeColor)) {
                         Text("🔉"); Spacer(Modifier.width(5.dp)); Text("صوت الحرف")
                     }
                 }
                 Spacer(Modifier.height(8.dp))
                 TextButton(onClick = { tts?.speak(lesson.example, TextToSpeech.QUEUE_FLUSH, null, "example") }) {
-                    Text("🔊 اسمع الكلمة: \${lesson.example}")
+                    Text("🔊 اسمع الكلمة: ${lesson.example}")
                 }
                 Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Button(modifier = Modifier.weight(1f), enabled = index > 0, onClick = { index-- }, shape = RoundedCornerShape(18.dp)) { Text("السابق") }
-                    Button(Modifier.weight(1f), enabled = index < englishLetters.lastIndex, onClick = { index++ }, shape = RoundedCornerShape(18.dp)) { Text("التالي") }
+                    Button(modifier = Modifier.weight(1f), enabled = index < englishLetters.lastIndex, onClick = { index++ }, shape = RoundedCornerShape(18.dp)) { Text("التالي") }
                 }
                 Spacer(Modifier.height(5.dp))
-                Text("\${index + 1} / \${englishLetters.size}", fontWeight = FontWeight.Bold, color = activeColor)
+                Text("${index + 1} / ${englishLetters.size}", fontWeight = FontWeight.Bold, color = activeColor)
             }
         }
     }
-}
-
-private fun engineSafeSpeakSetup(tts: TextToSpeech?) {
-    tts?.language = Locale.ENGLISH
-    tts?.setSpeechRate(0.82f)
-    tts?.setPitch(1.0f)
 }
 
 @Composable
@@ -226,7 +222,7 @@ private fun EnglishNumbersSection() {
                 Text(number.toString(), fontSize = 25.sp, fontWeight = FontWeight.Bold)
                 Text(english, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = color)
                 Spacer(Modifier.height(8.dp))
-                Text("هذا هو العدد رقم \${arabicDigits(number)}. نتعلم شكله واسمه ونطقه باللغة الإنجليزية.",
+                Text("هذا هو العدد رقم ${arabicDigits(number)}. نتعلم شكله واسمه ونطقه باللغة الإنجليزية.",
                     Modifier.fillMaxWidth(), textAlign = TextAlign.Center, fontSize = 15.sp, color = Color(0xFF53647A))
                 Spacer(Modifier.height(10.dp))
                 Button(onClick = { tts?.speak(english, TextToSpeech.QUEUE_FLUSH, null, "number") },
@@ -235,11 +231,11 @@ private fun EnglishNumbersSection() {
                 }
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Button(Modifier.weight(1f), enabled = number > 1, onClick = { number-- }, shape = RoundedCornerShape(18.dp)) { Text("السابق") }
-                    Button(Modifier.weight(1f), enabled = number < 100, onClick = { number++ }, shape = RoundedCornerShape(18.dp)) { Text("التالي") }
+                    Button(modifier = Modifier.weight(1f), enabled = number > 1, onClick = { number-- }, shape = RoundedCornerShape(18.dp)) { Text("السابق") }
+                    Button(modifier = Modifier.weight(1f), enabled = number < 100, onClick = { number++ }, shape = RoundedCornerShape(18.dp)) { Text("التالي") }
                 }
                 Spacer(Modifier.height(5.dp))
-                Text("العدد \${arabicDigits(number)} من ١٠٠", fontWeight = FontWeight.Bold, color = color)
+                Text("العدد ${arabicDigits(number)} من ١٠٠", fontWeight = FontWeight.Bold, color = color)
             }
         }
     }
