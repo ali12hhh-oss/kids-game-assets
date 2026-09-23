@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
 import androidx.compose.ui.platform.LocalLayoutDirection
 import io.github.sceneview.Scene
 import io.github.sceneview.rememberCameraNode
@@ -210,6 +211,25 @@ fun AppNavigation() {
 }
 
 @Composable
+@Composable
+private fun StoreDialog(context: android.content.Context, onDismiss: () -> Unit) {
+    val items = listOf("hat" to ("🎩 قبعة الدب" to 15), "balloon" to ("🎈 بالون ملوّن" to 20), "toy" to ("🧸 دمية صغيرة" to 25), "car" to ("🚗 سيارة لعبة" to 30))
+    var refresh by remember { mutableIntStateOf(0) }
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("🛍️ متجر المقتنيات") }, text = {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("نجوم الطفل: ⭐ " + AppSettings.childStars(context), fontWeight = FontWeight.ExtraBold)
+            items.forEach { (id, item) ->
+                val owned = id in AppSettings.ownedItems(context)
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(item.first, Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                    if (owned) Text("تم الشراء", color = Color(0xFF16803C), fontWeight = FontWeight.Bold)
+                    else Button(enabled = AppSettings.childStars(context) >= item.second, onClick = { if (AppSettings.buyItem(context, id, item.second)) refresh++ }) { Text("⭐ " + item.second) }
+                }
+            }
+        }
+    }, confirmButton = { TextButton(onClick = onDismiss) { Text("إغلاق") } })
+}
+
 private fun HomePage(
     onArabic: () -> Unit,
     onEnglish: () -> Unit,
@@ -309,7 +329,7 @@ private fun HomePage(
                 }
 
                 if (showShop) {
-                    InfoDialog("المتجر", "المتجر قيد التجهيز، وسيتمكن الطفل من استخدام نجومه لشراء المقتنيات.") { showShop = false }
+                    StoreDialog(context = LocalContext.current, onDismiss = { showShop = false })
                 }
             }
         }
