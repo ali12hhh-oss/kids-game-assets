@@ -20,6 +20,9 @@ object AppRoutes {
     const val ENGLISH_LEVEL_ONE_NUMBERS = "english_level_one_numbers"
     const val ENGLISH_LEVEL_TWO_LETTERS = "english_level_two_letters"
     const val ENGLISH_LEVEL_TWO_NUMBERS = "english_level_two_numbers"
+    const val ENGLISH_LEVEL_THREE_COLORS = "english_level_three_colors"
+    const val ENGLISH_LEVEL_THREE_SHAPES = "english_level_three_shapes"
+    const val ENGLISH_LEVEL_THREE_WORDS = "english_level_three_words"
     const val NUMBERS = "numbers"
     const val PLAY = "play"
 }
