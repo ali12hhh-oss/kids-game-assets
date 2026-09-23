@@ -176,10 +176,14 @@ fun AppNavigation() {
                 language = "en",
                 level = level,
                 onBack = { navController.popBackStack() },
-                onSelectSection = { /* Section content will be connected later. */ }
+                onSelectSection = { section ->
+                    if (level == 1 && (section == "letters" || section == "numbers")) {
+                        navController.navigate(AppRoutes.ENGLISH_LEVEL_ONE)
+                    }
+                }
             )
         }
-        composable(AppRoutes.NUMBERS) { ContentPage("الأرقام والعدّ", LearningCatalog.digits.joinToString("  ")) }
+        composable(AppRoutes.ENGLISH_LEVEL_ONE) { EnglishLevelOnePage(onBack = { navController.popBackStack() }) }\n        composable(AppRoutes.NUMBERS) { ContentPage("الأرقام والعدّ", LearningCatalog.digits.joinToString("  ")) }
         composable(AppRoutes.PLAY) { ContentPage("وقت اللعب", "منطقة الألعاب قيد التجهيز") }
     }
 }
