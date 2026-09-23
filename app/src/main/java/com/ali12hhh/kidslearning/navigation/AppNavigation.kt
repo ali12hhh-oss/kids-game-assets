@@ -85,11 +85,15 @@ private fun Modifier.shiftDownByFraction(fraction: Float): Modifier = layout { m
 fun AppNavigation() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = AppRoutes.HOME) {
+        composable(AppRoutes.SETTINGS) {
+            SettingsPage(onBack = { navController.popBackStack() })
+        }
         composable(AppRoutes.HOME) {
             HomePage(
                 onArabic = { navController.navigate(AppRoutes.ARABIC_LEVELS) },
                 onEnglish = { navController.navigate(AppRoutes.ENGLISH_LEVELS) },
-                onPlay = { navController.navigate(AppRoutes.PLAY) }
+                onPlay = { navController.navigate(AppRoutes.PLAY) },
+                onSettings = { navController.navigate(AppRoutes.SETTINGS) }
             )
         }
         composable(AppRoutes.ARABIC_LETTERS) {
@@ -209,10 +213,10 @@ fun AppNavigation() {
 private fun HomePage(
     onArabic: () -> Unit,
     onEnglish: () -> Unit,
-    onPlay: () -> Unit
+    onPlay: () -> Unit,
+    onSettings: () -> Unit
 ) {
     var darkMode by remember { mutableStateOf(false) }
-    var showSettings by remember { mutableStateOf(false) }
     var showShop by remember { mutableStateOf(false) }
 
     val background = if (darkMode) {
@@ -238,7 +242,7 @@ private fun HomePage(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TopAction("⚙️", "الإعدادات", textColor) { showSettings = true }
+                        TopAction("⚙️", "الإعدادات", textColor, onSettings)
                         TopAction(
                             icon = if (darkMode) "☀️" else "🌙",
                             label = if (darkMode) "نهاري" else "ليلي",
@@ -303,9 +307,6 @@ private fun HomePage(
                     Spacer(Modifier.height(4.dp))
                 }
 
-                if (showSettings) {
-                    InfoDialog("الإعدادات", "ستتوسع الإعدادات هنا لاحقًا.") { showSettings = false }
-                }
                 if (showShop) {
                     InfoDialog("المتجر", "المتجر قيد التجهيز، وسيتمكن الطفل من استخدام نجومه لشراء المقتنيات.") { showShop = false }
                 }
