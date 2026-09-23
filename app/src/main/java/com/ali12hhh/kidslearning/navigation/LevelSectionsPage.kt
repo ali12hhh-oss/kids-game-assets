@@ -52,6 +52,11 @@ fun LevelSectionsPage(
                 Triple("letters", "✍️", "كتابة الحروف"),
                 Triple("numbers", "🔢", "كتابة الأرقام")
             )
+            3 -> listOf(
+                Triple("colors", "🎨", "الألوان"),
+                Triple("shapes", "🔷", "الأشكال"),
+                Triple("words", "📚", "الكلمات")
+            )
             else -> listOf(
                 Triple("words", "🧩", "كلمات"),
                 Triple("sentences", "💬", "جمل")
@@ -92,6 +97,7 @@ fun LevelSectionsPage(
                 Text(
                     if (arabic) "اختر القسم الذي تريد التعلّم فيه"
                     else if (level == 2) "Practice writing letters and numbers"
+                    else if (level == 3) "Learn colors, shapes and useful words"
                     else "Choose a learning section",
                     Modifier.padding(top = 6.dp),
                     fontSize = 15.sp,
