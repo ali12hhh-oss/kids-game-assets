@@ -217,7 +217,7 @@ private fun PlaceValueQuiz() {
             Button(onClick = {
                 if (selected == null) {
                     selected = option
-                    if (option == quiz.correct) {
+                    if (option == quiz.correct) {\n                        AppSettings.awardCorrectAnswer(context)
                         score++
                         reaction = 1
                         if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak("أحسنت! إجابة صحيحة", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
