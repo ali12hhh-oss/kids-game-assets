@@ -8,10 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.RecordVoiceOver
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -98,12 +94,12 @@ fun EnglishLevelOnePage(onBack: () -> Unit, initialSection: Int = 0) {
             TabRow(selectedTabIndex = section, containerColor = Color.White) {
                 Tab(section == 0, { section = 0 }) {
                     Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.AutoStories, null); Text("الحروف", fontWeight = FontWeight.Bold)
+                        Text("🔤", fontSize = 22.sp); Text("الحروف", fontWeight = FontWeight.Bold)
                     }
                 }
                 Tab(section == 1, { section = 1 }) {
                     Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.Numbers, null); Text("الأرقام", fontWeight = FontWeight.Bold)
+                        Text("🔢", fontSize = 22.sp); Text("الأرقام", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -167,13 +163,13 @@ private fun EnglishLettersSection() {
                 Text("الصوت التدريبي: \${lesson.soundHint}", fontSize = 14.sp, color = activeColor)
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(Modifier.weight(1f), onClick = { tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
+                    Button(modifier = Modifier.weight(1f), onClick = { tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
                         colors = ButtonDefaults.buttonColors(Color(0xFF5B4BCE))) {
-                        Icon(Icons.Default.RecordVoiceOver, null); Spacer(Modifier.width(5.dp)); Text("اسم الحرف")
+                        Text("🔊"); Spacer(Modifier.width(5.dp)); Text("اسم الحرف")
                     }
                     Button(Modifier.weight(1f), onClick = { tts?.speak(lesson.soundHint, TextToSpeech.QUEUE_FLUSH, null, "letter_sound") },
                         colors = ButtonDefaults.buttonColors(activeColor)) {
-                        Icon(Icons.Default.VolumeUp, null); Spacer(Modifier.width(5.dp)); Text("صوت الحرف")
+                        Text("🔉"); Spacer(Modifier.width(5.dp)); Text("صوت الحرف")
                     }
                 }
                 Spacer(Modifier.height(8.dp))
@@ -181,7 +177,7 @@ private fun EnglishLettersSection() {
                     Text("🔊 اسمع الكلمة: \${lesson.example}")
                 }
                 Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Button(Modifier.weight(1f), enabled = index > 0, onClick = { index-- }, shape = RoundedCornerShape(18.dp)) { Text("السابق") }
+                    Button(modifier = Modifier.weight(1f), enabled = index > 0, onClick = { index-- }, shape = RoundedCornerShape(18.dp)) { Text("السابق") }
                     Button(Modifier.weight(1f), enabled = index < englishLetters.lastIndex, onClick = { index++ }, shape = RoundedCornerShape(18.dp)) { Text("التالي") }
                 }
                 Spacer(Modifier.height(5.dp))
@@ -205,7 +201,11 @@ private fun EnglishNumbersSection() {
 
     DisposableEffect(context) {
         val engine = TextToSpeech(context) { status ->
-            if (status == TextToSpeech.SUCCESS) engineSafeSpeakSetup(tts)
+            if (status == TextToSpeech.SUCCESS) {
+                engine.language = Locale.ENGLISH
+                engine.setSpeechRate(0.82f)
+                engine.setPitch(1.0f)
+            }
         }
         tts = engine
         onDispose { engine.stop(); engine.shutdown() }
@@ -231,7 +231,7 @@ private fun EnglishNumbersSection() {
                 Spacer(Modifier.height(10.dp))
                 Button(onClick = { tts?.speak(english, TextToSpeech.QUEUE_FLUSH, null, "number") },
                     shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(color)) {
-                    Icon(Icons.Default.VolumeUp, null); Spacer(Modifier.width(6.dp)); Text("نطق العدد بالإنجليزية")
+                    Text("🔊"); Spacer(Modifier.width(6.dp)); Text("نطق العدد بالإنجليزية")
                 }
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
