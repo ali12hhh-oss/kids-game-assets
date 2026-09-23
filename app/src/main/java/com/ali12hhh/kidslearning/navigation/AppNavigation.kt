@@ -211,7 +211,6 @@ fun AppNavigation() {
 }
 
 @Composable
-@Composable
 private fun StoreDialog(context: android.content.Context, onDismiss: () -> Unit) {
     val items = listOf("hat" to ("🎩 قبعة الدب" to 15), "balloon" to ("🎈 بالون ملوّن" to 20), "toy" to ("🧸 دمية صغيرة" to 25), "car" to ("🚗 سيارة لعبة" to 30))
     var refresh by remember { mutableIntStateOf(0) }
@@ -359,7 +358,8 @@ private fun ChildProfileCard(cardColor: Color, textColor: Color) {
             modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val imageUri = AppSettings.childImageUri(LocalContext.current)\n            if (imageUri != null) AsyncImage(model = imageUri, contentDescription = "صورة الطفل", modifier = Modifier.size(58.dp)) else Text("👦", fontSize = 38.sp)
+            val imageUri = AppSettings.childImageUri(LocalContext.current)
+            if (imageUri != null) AsyncImage(model = imageUri, contentDescription = "صورة الطفل", modifier = Modifier.size(58.dp)) else Text("👦", fontSize = 38.sp)
             Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(AppSettings.childName(LocalContext.current), fontWeight = FontWeight.Bold, color = textColor)
@@ -523,7 +523,11 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
             ) {
                 speaker.language = Locale("ar", "SA")
             }
-            if (!AppSettings.isSpeechEnabled(context)) {\n                finishGreeting()\n                return@OnInitListener\n            }\n            speaker.setSpeechRate(AppSettings.speechRate(context))
+            if (!AppSettings.isSpeechEnabled(context)) {
+                finishGreeting()
+                return@OnInitListener
+            }
+            speaker.setSpeechRate(AppSettings.speechRate(context))
             speaker.setPitch(0.96f)
 
             selectArabicMaleVoice(speaker)?.let { speaker.voice = it }
