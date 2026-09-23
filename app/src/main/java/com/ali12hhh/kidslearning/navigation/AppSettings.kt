@@ -52,7 +52,10 @@ object AppSettings {
         return true
     }
     fun resetProgress(context: Context) =
-        prefs(context).edit().putInt(CHILD_STARS, 0).apply()
+        prefs(context).edit()
+            .putInt(CHILD_STARS, 0)
+            .remove(LAST_SESSION_ID)
+            .apply()
 
     fun hasParentPin(context: Context): Boolean = prefs(context).contains(PARENT_PIN)
     fun setParentPin(context: Context, pin: String) =
@@ -72,6 +75,7 @@ fun speakIfEnabled(
     utteranceId: String
 ) {
     if (AppSettings.isSpeechEnabled(context)) {
+        tts?.setSpeechRate(AppSettings.speechRate(context))
         tts?.speak(
             text,
             android.speech.tts.TextToSpeech.QUEUE_FLUSH,
