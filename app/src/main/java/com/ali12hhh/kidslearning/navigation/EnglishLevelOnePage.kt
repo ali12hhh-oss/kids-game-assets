@@ -74,8 +74,8 @@ private fun arabicDigits(number: Int): String =
     number.toString().map { if (it in '0'..'9') ('٠'.code + (it - '0')).toChar() else it }.joinToString("")
 
 @Composable
-fun EnglishLevelOnePage(onBack: () -> Unit) {
-    var section by remember { mutableIntStateOf(0) }
+fun EnglishLevelOnePage(onBack: () -> Unit, initialSection: Int = 0) {
+    var section by remember { mutableIntStateOf(initialSection.coerceIn(0, 1)) }
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
