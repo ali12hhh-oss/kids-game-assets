@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +34,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -229,6 +232,7 @@ private fun StoreDialog(context: android.content.Context, onDismiss: () -> Unit)
     }, confirmButton = { TextButton(onClick = onDismiss) { Text("إغلاق") } })
 }
 
+@Composable
 private fun HomePage(
     onArabic: () -> Unit,
     onEnglish: () -> Unit,
