@@ -9,6 +9,8 @@ object AppRoutes {
     const val ENGLISH_LEVELS = "english_levels"
     const val ARABIC_LEVEL_CONTENT = "arabic_level_content/{level}"
     const val ENGLISH_LEVEL_CONTENT = "english_level_content/{level}"
+    const val ARABIC_LEVEL_PAGE = "arabic_level_page/{level}"
+    const val ENGLISH_LEVEL_PAGE = "english_level_page/{level}"
     const val NUMBERS = "numbers"
     const val PLAY = "play"
 }
