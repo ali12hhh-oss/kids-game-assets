@@ -216,7 +216,8 @@ private fun HomePage(
     onPlay: () -> Unit,
     onSettings: () -> Unit
 ) {
-    var darkMode by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var darkMode by remember { mutableStateOf(AppSettings.isDarkMode(context)) }
     var showShop by remember { mutableStateOf(false) }
 
     val background = if (darkMode) {
@@ -247,7 +248,7 @@ private fun HomePage(
                             icon = if (darkMode) "☀️" else "🌙",
                             label = if (darkMode) "نهاري" else "ليلي",
                             textColor = textColor
-                        ) { darkMode = !darkMode }
+                        ) { darkMode = !darkMode; AppSettings.setDarkMode(context, darkMode) }
                     }
 
                     Spacer(Modifier.height(4.dp))
@@ -341,11 +342,11 @@ private fun ChildProfileCard(cardColor: Color, textColor: Color) {
             Text("👦", fontSize = 38.sp)
             Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text("صديقي الصغير", fontWeight = FontWeight.Bold, color = textColor)
+                Text(AppSettings.childName(LocalContext.current), fontWeight = FontWeight.Bold, color = textColor)
                 Text("ملف الطفل", fontSize = 12.sp, color = textColor)
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("⭐ 0", fontWeight = FontWeight.ExtraBold, color = textColor)
+                Text("⭐ " + AppSettings.childStars(LocalContext.current), fontWeight = FontWeight.ExtraBold, color = textColor)
                 Text("نجومي", fontSize = 11.sp, color = textColor)
             }
         }
@@ -502,7 +503,7 @@ private fun RealCharacterHero(modifier: Modifier = Modifier) {
             ) {
                 speaker.language = Locale("ar", "SA")
             }
-            speaker.setSpeechRate(0.88f)
+            if (!AppSettings.isSpeechEnabled(context)) {\n                finishGreeting()\n                return@OnInitListener\n            }\n            speaker.setSpeechRate(AppSettings.speechRate(context))
             speaker.setPitch(0.96f)
 
             selectArabicMaleVoice(speaker)?.let { speaker.voice = it }
