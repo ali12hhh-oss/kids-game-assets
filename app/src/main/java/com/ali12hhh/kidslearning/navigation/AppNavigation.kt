@@ -97,6 +97,12 @@ fun AppNavigation() {
         composable(AppRoutes.SETTINGS) {
             SettingsPage(onBack = { navController.popBackStack() })
         }
+        composable(AppRoutes.SHOP) {
+            ShopPage(onBack = { navController.popBackStack() })
+        }
+        composable(AppRoutes.COLLECTION) {
+            ShopPage(initialCollection = true, onBack = { navController.popBackStack() })
+        }
         composable(AppRoutes.HOME) {
             val greetOnThisHomeEntry = !hasGreetedOnAppLaunch
             LaunchedEffect(Unit) { hasGreetedOnAppLaunch = true }
@@ -105,6 +111,8 @@ fun AppNavigation() {
                 onEnglish = { navController.navigate(AppRoutes.ENGLISH_LEVELS) },
                 onPlay = { navController.navigate(AppRoutes.PLAY) },
                 onSettings = { navController.navigate(AppRoutes.SETTINGS) },
+                onShop = { navController.navigate(AppRoutes.SHOP) },
+                onCollection = { navController.navigate(AppRoutes.COLLECTION) },
                 greetOnEntry = greetOnThisHomeEntry
             )
         }
@@ -222,37 +230,19 @@ fun AppNavigation() {
 }
 
 @Composable
-private fun StoreDialog(context: android.content.Context, onDismiss: () -> Unit) {
-    val items = listOf("hat" to ("🎩 قبعة الدب" to 15), "balloon" to ("🎈 بالون ملوّن" to 20), "toy" to ("🧸 دمية صغيرة" to 25), "car" to ("🚗 سيارة لعبة" to 30))
-    var refresh by remember { mutableIntStateOf(0) }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text("🛍️ متجر المقتنيات") }, text = {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("نجوم الطفل: ⭐ " + (AppSettings.childStars(context) + refresh * 0), fontWeight = FontWeight.ExtraBold)
-            items.forEach { (id, item) ->
-                val owned = id in AppSettings.ownedItems(context)
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(item.first, Modifier.weight(1f), fontWeight = FontWeight.Bold)
-                    if (owned) Text("تم الشراء", color = Color(0xFF16803C), fontWeight = FontWeight.Bold)
-                    else Button(enabled = AppSettings.childStars(context) >= item.second, onClick = { if (AppSettings.buyItem(context, id, item.second)) refresh++ }) { Text("⭐ " + item.second) }
-                }
-            }
-        }
-    }, confirmButton = { TextButton(onClick = onDismiss) { Text("إغلاق") } })
-}
-
-@Composable
 private fun HomePage(
     onArabic: () -> Unit,
     onEnglish: () -> Unit,
     onPlay: () -> Unit,
     onSettings: () -> Unit,
+    onShop: () -> Unit,
+    onCollection: () -> Unit,
     greetOnEntry: Boolean
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var refreshKey by remember { mutableIntStateOf(0) }
     var darkMode by remember { mutableStateOf(AppSettings.isDarkMode(context)) }
-    var showShop by remember { mutableStateOf(false) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -300,7 +290,7 @@ private fun HomePage(
                     }
 
                     Spacer(Modifier.height(4.dp))
-                    ChildProfileCard(cardColor, textColor)
+                    ChildProfileCard(cardColor, textColor, onCollection)
                     Spacer(Modifier.weight(1f))
 
                     Row(
@@ -349,16 +339,13 @@ private fun HomePage(
                             subtitle = "استخدم نجومك",
                             cardColor = cardColor,
                             textColor = textColor,
-                            onClick = { showShop = true }
+                            onClick = onShop
                         )
                     }
 
                     Spacer(Modifier.height(4.dp))
                 }
 
-                if (showShop) {
-                    StoreDialog(context = LocalContext.current, onDismiss = { showShop = false })
-                }
             }
         }
     }
@@ -376,7 +363,7 @@ private fun TopAction(icon: String, label: String, textColor: Color, onClick: ()
 }
 
 @Composable
-private fun ChildProfileCard(cardColor: Color, textColor: Color) {
+private fun ChildProfileCard(cardColor: Color, textColor: Color, onCollection: () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Card(
         modifier = Modifier.fillMaxWidth().shadow(6.dp, shape),
@@ -397,6 +384,9 @@ private fun ChildProfileCard(cardColor: Color, textColor: Color) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("⭐ " + AppSettings.childStars(LocalContext.current), fontWeight = FontWeight.ExtraBold, color = textColor)
                 Text("نجومي", fontSize = 11.sp, color = textColor)
+                TextButton(onClick = onCollection) {
+                    Text("مقتنياتي", fontSize = 11.sp, fontWeight = FontWeight.Black)
+                }
             }
         }
     }
