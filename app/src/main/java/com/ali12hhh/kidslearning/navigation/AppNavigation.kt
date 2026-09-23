@@ -52,6 +52,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import io.github.sceneview.Scene
 import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
@@ -240,8 +243,21 @@ private fun HomePage(
     onSettings: () -> Unit
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var refreshKey by remember { mutableIntStateOf(0) }
     var darkMode by remember { mutableStateOf(AppSettings.isDarkMode(context)) }
     var showShop by remember { mutableStateOf(false) }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                darkMode = AppSettings.isDarkMode(context)
+                refreshKey++
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     val background = if (darkMode) {
         Brush.verticalGradient(listOf(Color(0xFF172033), Color(0xFF253552)))
@@ -275,7 +291,7 @@ private fun HomePage(
                     }
 
                     Spacer(Modifier.height(4.dp))
-                    ChildProfileCard(cardColor, textColor)
+                    key(refreshKey) { ChildProfileCard(cardColor, textColor) }
                     Spacer(Modifier.weight(1f))
 
                     Row(
