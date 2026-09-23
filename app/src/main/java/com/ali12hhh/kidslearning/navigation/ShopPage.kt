@@ -1,5 +1,6 @@
 package com.ali12hhh.kidslearning.navigation
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -246,15 +249,102 @@ private fun StoreItemCard(
 
 @Composable
 private fun StoreArtwork(art: Int, description: String, modifier: Modifier = Modifier) {
-    val icons = listOf(
-        "👑","🏆","⭐","💎","🚀","🥇","🪄","🛡️","🎖️","🔥",
-        "🌙","☀️","💖","🌈","📚","🎈","🎁","✨","🦸","🧠",
-        "🧭","🌟","🏅","🪐","🎨","⚡","💝","🚀","📖","🏆"
+    val palettes = listOf(
+        Color(0xFFF2B93B), Color(0xFF4D8FE8), Color(0xFFFFC83D), Color(0xFF4AB7D8),
+        Color(0xFFE86B75), Color(0xFFE6A83E), Color(0xFF9A72D8), Color(0xFF4D9BA7),
+        Color(0xFFE09A3E), Color(0xFFE85C4A), Color(0xFF6576B8), Color(0xFFF0B83E),
+        Color(0xFFE86A91), Color(0xFF68A8E8), Color(0xFF4D86C8), Color(0xFFEA7382),
+        Color(0xFFC76CC0), Color(0xFF62B995), Color(0xFF4D8FE8), Color(0xFFB36DAE),
+        Color(0xFF4EAAA0), Color(0xFF7F69C7), Color(0xFFE4A13C), Color(0xFF5799D1),
+        Color(0xFFD96D9A), Color(0xFFF0B83E), Color(0xFFE8788E), Color(0xFF7094D6),
+        Color(0xFF5A9FB5), Color(0xFFD99B42)
     )
-    Box(
-        modifier = modifier.background(Color(0xFFF5F8FF), RoundedCornerShape(24.dp)),
-        contentAlignment = Alignment.Center
+    val accent = palettes[(art - 1).coerceIn(0, palettes.lastIndex)]
+    val dark = Color(
+        red = (accent.red * 0.68f).coerceIn(0f, 1f),
+        green = (accent.green * 0.68f).coerceIn(0f, 1f),
+        blue = (accent.blue * 0.68f).coerceIn(0f, 1f),
+        alpha = 1f
+    )
+
+    Canvas(
+        modifier = modifier
+            .background(Color(0xFFF7F9FF), RoundedCornerShape(24.dp))
+            .padding(7.dp)
     ) {
-        Text(icons[(art - 1).coerceIn(0, icons.lastIndex)], fontSize = 50.sp)
+        val cX = size.width / 2f
+        val cY = size.height / 2f
+        val r = size.minDimension * 0.34f
+
+        drawCircle(Color(0xFFE9EEF8), radius = r * 1.34f, center = androidx.compose.ui.geometry.Offset(cX + 2f, cY + 3f))
+        drawCircle(Color.White, radius = r * 1.29f, center = androidx.compose.ui.geometry.Offset(cX, cY))
+        drawCircle(accent.copy(alpha = 0.13f), radius = r * 1.05f, center = androidx.compose.ui.geometry.Offset(cX, cY))
+
+        for (i in 0 until 8) {
+            val angle = Math.toRadians((i * 45 - 90).toDouble())
+            val inner = r * 1.08f
+            val outer = r * 1.23f
+            drawLine(
+                accent.copy(alpha = 0.34f),
+                androidx.compose.ui.geometry.Offset(cX + kotlin.math.cos(angle).toFloat() * inner, cY + kotlin.math.sin(angle).toFloat() * inner),
+                androidx.compose.ui.geometry.Offset(cX + kotlin.math.cos(angle).toFloat() * outer, cY + kotlin.math.sin(angle).toFloat() * outer),
+                strokeWidth = 3f
+            )
+        }
+
+        when ((art - 1) % 10) {
+            0 -> { // crown
+                val p = Path().apply {
+                    moveTo(cX-r*.72f,cY-r*.25f); lineTo(cX-r*.48f,cY-r*.72f)
+                    lineTo(cX,cY-r*.42f); lineTo(cX+r*.42f,cY-r*.74f)
+                    lineTo(cX+r*.72f,cY-r*.25f); lineTo(cX+r*.56f,cY+r*.28f)
+                    lineTo(cX-r*.56f,cY+r*.28f); close()
+                }
+                drawPath(p, accent)
+                drawRoundRect(dark, androidx.compose.ui.geometry.Offset(cX-r*.58f,cY+r*.28f), androidx.compose.ui.geometry.Size(r*1.16f,r*.18f), cornerRadius=androidx.compose.ui.geometry.CornerRadius(6f,6f))
+            }
+            1 -> { // book
+                drawRoundRect(accent, androidx.compose.ui.geometry.Offset(cX-r*.75f,cY-r*.58f), androidx.compose.ui.geometry.Size(r*.68f,r*1.2f), cornerRadius=androidx.compose.ui.geometry.CornerRadius(10f,10f))
+                drawRoundRect(dark, androidx.compose.ui.geometry.Offset(cX+r*.07f,cY-r*.58f), androidx.compose.ui.geometry.Size(r*.68f,r*1.2f), cornerRadius=androidx.compose.ui.geometry.CornerRadius(10f,10f))
+                drawLine(Color.White.copy(alpha=.85f), androidx.compose.ui.geometry.Offset(cX,cY-r*.52f), androidx.compose.ui.geometry.Offset(cX,cY+r*.55f), 3f)
+            }
+            2 -> { // star
+                val p=Path()
+                for(i in 0 until 10){ val a=Math.toRadians((-90+i*36).toDouble()); val rr=if(i%2==0) r*.9f else r*.4f; val x=cX+kotlin.math.cos(a).toFloat()*rr; val y=cY+kotlin.math.sin(a).toFloat()*rr; if(i==0)p.moveTo(x,y) else p.lineTo(x,y) }; p.close()
+                drawPath(p,accent)
+            }
+            3 -> { // diamond
+                val p=Path().apply{moveTo(cX,cY-r);lineTo(cX+r*.7f,cY);lineTo(cX,cY+r);lineTo(cX-r*.7f,cY);close()}
+                drawPath(p,accent); drawLine(Color.White.copy(alpha=.8f),androidx.compose.ui.geometry.Offset(cX-r*.7f,cY),androidx.compose.ui.geometry.Offset(cX+r*.7f,cY),3f); drawLine(Color.White.copy(alpha=.65f),androidx.compose.ui.geometry.Offset(cX,cY-r),androidx.compose.ui.geometry.Offset(cX,cY+r),2f)
+            }
+            4 -> { // rocket
+                val p=Path().apply{moveTo(cX,cY-r);lineTo(cX+r*.48f,cY-r*.35f);lineTo(cX+r*.4f,cY+r*.42f);lineTo(cX,cY+r*.78f);lineTo(cX-r*.4f,cY+r*.42f);lineTo(cX-r*.48f,cY-r*.35f);close()}
+                drawPath(p,accent); drawCircle(Color.White,r*.18f,androidx.compose.ui.geometry.Offset(cX,cY-r*.05f)); drawLine(dark,androidx.compose.ui.geometry.Offset(cX-r*.45f,cY+r*.25f),androidx.compose.ui.geometry.Offset(cX-r*.75f,cY+r*.52f),7f); drawLine(dark,androidx.compose.ui.geometry.Offset(cX+r*.45f,cY+r*.25f),androidx.compose.ui.geometry.Offset(cX+r*.75f,cY+r*.52f),7f)
+            }
+            5 -> { // trophy
+                drawRoundRect(accent,androidx.compose.ui.geometry.Offset(cX-r*.48f,cY-r*.55f),androidx.compose.ui.geometry.Size(r*.96f,r*1.05f),cornerRadius=androidx.compose.ui.geometry.CornerRadius(12f,12f))
+                drawLine(dark,androidx.compose.ui.geometry.Offset(cX,cY+r*.5f),androidx.compose.ui.geometry.Offset(cX,cY+r*.82f),7f); drawLine(dark,androidx.compose.ui.geometry.Offset(cX-r*.45f,cY+r*.86f),androidx.compose.ui.geometry.Offset(cX+r*.45f,cY+r*.86f),8f)
+                drawArc(accent,androidx.compose.ui.geometry.Offset(cX-r*.9f,cY-r*.45f).x, androidx.compose.ui.geometry.Offset(cX-r*.15f,cY+r*.35f).y,90f,180f,false,style=Stroke(7f))
+                drawArc(accent,androidx.compose.ui.geometry.Offset(cX+r*.15f,cY-r*.45f).x, androidx.compose.ui.geometry.Offset(cX+r*.9f,cY+r*.35f).y,270f,180f,false,style=Stroke(7f))
+            }
+            6 -> { // magic wand
+                drawLine(accent,androidx.compose.ui.geometry.Offset(cX-r*.55f,cY+r*.62f),androidx.compose.ui.geometry.Offset(cX+r*.5f,cY-r*.5f),9f)
+                drawCircle(accent,r*.16f,androidx.compose.ui.geometry.Offset(cX+r*.63f,cY-r*.68f))
+                drawCircle(dark,r*.08f,androidx.compose.ui.geometry.Offset(cX-r*.62f,cY-r*.42f))
+            }
+            7 -> { // shield
+                val p=Path().apply{moveTo(cX,cY-r);lineTo(cX+r*.72f,cY-r*.62f);lineTo(cX+r*.6f,cY+r*.4f);lineTo(cX,cY+r);lineTo(cX-r*.6f,cY+r*.4f);lineTo(cX-r*.72f,cY-r*.62f);close()}
+                drawPath(p,accent); drawLine(Color.White.copy(alpha=.8f),androidx.compose.ui.geometry.Offset(cX,cY-r*.72f),androidx.compose.ui.geometry.Offset(cX,cY+r*.62f),3f)
+            }
+            8 -> { // medal
+                drawLine(dark,androidx.compose.ui.geometry.Offset(cX-r*.42f,cY-r*.75f),androidx.compose.ui.geometry.Offset(cX-r*.12f,cY-.05f),9f); drawLine(accent,androidx.compose.ui.geometry.Offset(cX+r*.42f,cY-r*.75f),androidx.compose.ui.geometry.Offset(cX+r*.12f,cY-.05f),9f)
+                drawCircle(accent,r*.62f,androidx.compose.ui.geometry.Offset(cX,cY+r*.12f)); drawCircle(Color.White.copy(alpha=.65f),r*.26f,androidx.compose.ui.geometry.Offset(cX,cY+r*.12f))
+            }
+            else -> { // fire
+                val p=Path().apply{moveTo(cX,cY-r);lineTo(cX+r*.55f,cY-r*.25f);lineTo(cX+r*.3f,cY-r*.02f);lineTo(cX+r*.72f,cY+r*.15f);lineTo(cX,cY+r);lineTo(cX-r*.62f,cY+r*.25f);lineTo(cX-r*.38f,cY+r*.02f);lineTo(cX-r*.5f,cY-r*.28f);close()}
+                drawPath(p,accent)
+                drawCircle(Color(0xFFFFE38A),r*.25f,androidx.compose.ui.geometry.Offset(cX,cY+r*.34f))
+            }
+        }
     }
 }
