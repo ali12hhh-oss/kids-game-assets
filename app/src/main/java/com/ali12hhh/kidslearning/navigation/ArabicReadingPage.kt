@@ -5,6 +5,9 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -77,7 +80,6 @@ fun ArabicReadingPage(onBack: () -> Unit) {
                 Text("هَيَّا نَتَعَلَّمُ الحُرُوفَ!", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF52647D))
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    // The mascot occupies its own side panel so it never overlaps the board.
                     Card(Modifier.weight(0.78f).height(180.dp), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6A7)), elevation = CardDefaults.cardElevation(8.dp)) {
                         Column(Modifier.fillMaxSize().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                             Text("🧸", fontSize = 70.sp)
@@ -87,7 +89,7 @@ fun ArabicReadingPage(onBack: () -> Unit) {
                     }
                     Card(Modifier.weight(1.65f).height(220.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF174B3D)), elevation = CardDefaults.cardElevation(12.dp)) {
                         Box(Modifier.fillMaxSize().padding(10.dp).background(Brush.verticalGradient(listOf(Color(0xFF236B54), Color(0xFF123B32))), RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
-                            AnimatedContent(targetState = index, transitionSpec = { androidx.compose.animation.fadeIn(tween(250)) togetherWith androidx.compose.animation.fadeOut(tween(180)) }, label = "letterChange") { current ->
+                            AnimatedContent(targetState = index, transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(180)) }, label = "letterChange") { current ->
                                 Text(arabicLessons[current].letter, Modifier.scale(pop), fontSize = 126.sp, fontWeight = FontWeight.Black, color = colors[current % colors.size], textAlign = TextAlign.Center)
                             }
                             Text("الصَّبُّورَة", Modifier.align(Alignment.TopCenter).padding(top = 5.dp), color = Color(0xFFD9F3D6), fontSize = 12.sp, fontWeight = FontWeight.Bold)
