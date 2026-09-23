@@ -139,7 +139,8 @@ private fun LearnReadingSection(
     var ready by remember { mutableStateOf(false) }
 
     DisposableEffect(Unit) {
-        val engine = TextToSpeech(context) { status ->
+        lateinit var engine: TextToSpeech
+        engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 val preferred = engine.setLanguage(Locale.forLanguageTag("ar-XA"))
                 if (preferred == TextToSpeech.LANG_NOT_SUPPORTED || preferred == TextToSpeech.LANG_MISSING_DATA) {
@@ -151,7 +152,11 @@ private fun LearnReadingSection(
             }
         }
         tts = engine
-        onDispose { engine.stop(); engine.shutdown(); tts = null }
+        onDispose {
+            engine.stop()
+            engine.shutdown()
+            tts = null
+        }
     }
 
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -174,9 +179,9 @@ private fun LearnReadingSection(
                 Text("مثال تعليمي ${index + 1}", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF718099))
 
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                    LessonLetterCard(lesson.first)
+                    LessonLetterCard(lesson.first, Modifier.weight(1f))
                     Text("+", modifier = Modifier.padding(horizontal = 8.dp), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF6C7890))
-                    LessonLetterCard(lesson.second)
+                    LessonLetterCard(lesson.second, Modifier.weight(1f))
                     Text("=", modifier = Modifier.padding(horizontal = 8.dp), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF6C7890))
                     Card(
                         modifier = Modifier.height(112.dp).weight(1f).shadow(8.dp, RoundedCornerShape(22.dp)),
@@ -222,9 +227,9 @@ private fun LearnReadingSection(
 }
 
 @Composable
-private fun LessonLetterCard(letter: String) {
+private fun LessonLetterCard(letter: String, modifier: Modifier) {
     Card(
-        modifier = Modifier.height(112.dp).weight(1f).shadow(7.dp, RoundedCornerShape(22.dp)),
+        modifier = modifier.height(112.dp).shadow(7.dp, RoundedCornerShape(22.dp)),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F5FF))
     ) {
