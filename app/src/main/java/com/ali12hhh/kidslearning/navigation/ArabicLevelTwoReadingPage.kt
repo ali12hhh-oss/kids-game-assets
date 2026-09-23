@@ -164,7 +164,7 @@ private fun LetterFormsSection(
     DisposableEffect(Unit) {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                engineLanguage@ run { tts?.language = Locale("ar") }
+                tts?.language = Locale("ar")
                 ready = true
             }
         }
