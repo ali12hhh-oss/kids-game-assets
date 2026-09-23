@@ -130,8 +130,25 @@ fun AppNavigation() {
                 language = "ar",
                 level = level,
                 onBack = { navController.popBackStack() },
-                onSelectSection = { /* Section content will be connected later. */ }
+                onSelectSection = { section ->
+                    if (level == 1 && section == "reading") {
+                        navController.navigate(AppRoutes.ARABIC_LEVEL_CONTENT.replace("{level}", "1"))
+                    } else if (level == 2 && section == "reading") {
+                        navController.navigate(AppRoutes.ARABIC_LEVEL_TWO_READING)
+                    }
+                }
             )
+        }
+        composable(AppRoutes.ARABIC_LEVEL_CONTENT) { entry ->
+            val level = entry.arguments?.getString("level")?.toIntOrNull() ?: 1
+            if (level == 1) {
+                ArabicReadingPage(onBack = { navController.popBackStack() })
+            } else {
+                ContentPage("العربية", "المحتوى قيد التجهيز")
+            }
+        }
+        composable(AppRoutes.ARABIC_LEVEL_TWO_READING) {
+            ArabicLevelTwoReadingPage(onBack = { navController.popBackStack() })
         }
         composable(AppRoutes.ENGLISH_LEVEL_PAGE) { entry ->
             val level = entry.arguments?.getString("level")?.toIntOrNull() ?: 1
