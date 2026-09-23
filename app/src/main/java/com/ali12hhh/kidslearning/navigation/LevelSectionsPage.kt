@@ -39,22 +39,22 @@ fun LevelSectionsPage(
     val title = if (arabic) "المستوى $level" else "Level $level"
     val sections = if (arabic) {
         listOf(
-            "reading" to "📖" to "القراءة",
-            "math" to "🔢" to "الرياضيات"
+            Triple("reading", "📖", "القراءة"),
+            Triple("math", "🔢", "الرياضيات")
         )
     } else {
         when (level) {
             1 -> listOf(
-                "letters" to "🔤" to "الحروف",
-                "numbers" to "🔢" to "الأرقام"
+                Triple("letters", "🔤", "الحروف"),
+                Triple("numbers", "🔢", "الأرقام")
             )
             2 -> listOf(
-                "words" to "🧩" to "كلمات",
-                "counting" to "🔢" to "الأعداد"
+                Triple("words", "🧩", "كلمات"),
+                Triple("counting", "🔢", "الأعداد")
             )
             else -> listOf(
-                "words" to "🧩" to "كلمات",
-                "sentences" to "💬" to "جمل"
+                Triple("words", "🧩", "كلمات"),
+                Triple("sentences", "💬", "جمل")
             )
         }
     }
