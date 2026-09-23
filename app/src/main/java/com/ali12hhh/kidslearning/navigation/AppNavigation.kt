@@ -135,6 +135,8 @@ fun AppNavigation() {
                         navController.navigate(AppRoutes.ARABIC_LEVEL_CONTENT.replace("{level}", "1"))
                     } else if (level == 2 && section == "reading") {
                         navController.navigate(AppRoutes.ARABIC_LEVEL_TWO_READING)
+                    } else if (level == 3 && section == "reading") {
+                        navController.navigate(AppRoutes.ARABIC_LEVEL_THREE_READING)
                     }
                 }
             )
@@ -149,6 +151,9 @@ fun AppNavigation() {
         }
         composable(AppRoutes.ARABIC_LEVEL_TWO_READING) {
             ArabicLevelTwoReadingPage(onBack = { navController.popBackStack() })
+        }
+        composable(AppRoutes.ARABIC_LEVEL_THREE_READING) {
+            ArabicLevelThreeReadingPage(onBack = { navController.popBackStack() })
         }
         composable(AppRoutes.ENGLISH_LEVEL_PAGE) { entry ->
             val level = entry.arguments?.getString("level")?.toIntOrNull() ?: 1
