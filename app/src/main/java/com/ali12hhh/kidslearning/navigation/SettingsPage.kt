@@ -11,7 +11,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext\nimport androidx.activity.compose.rememberLauncherForActivityResult\nimport androidx.activity.result.contract.ActivityResultContracts\nimport coil.compose.AsyncImage
+import androidx.compose.ui.platform.LocalContext
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import coil.compose.AsyncImage
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,7 +35,10 @@ fun SettingsPage(onBack: () -> Unit) {
         SettingsScreen.DATA -> DataProgressPage(context) { screen = SettingsScreen.MAIN }
         SettingsScreen.TERMS -> SimpleInfoPage("📜 شروط الاستخدام", "استخدام التطبيق مخصص للتعلّم والترفيه للأطفال تحت إشراف ولي الأمر.") { screen = SettingsScreen.MAIN }
         SettingsScreen.PRIVACY_POLICY -> SimpleInfoPage("🔐 سياسة الخصوصية", "الإعدادات وملف الطفل الحاليان يُحفظان محليًا على الجهاز. لا نضع هنا ادعاءات عن جمع بيانات أو خدمات لم يتم تنفيذها فعليًا.") { screen = SettingsScreen.MAIN }
-        SettingsScreen.ABOUT -> SimpleInfoPage("ℹ️ عن التطبيق", "تعلّم مع دبدوب\nتطبيق تعليمي وترفيهي للأطفال.\n\nالإعدادات الظاهرة هنا مرتبطة بوظائف حقيقية داخل التطبيق.") { screen = SettingsScreen.MAIN }
+        SettingsScreen.ABOUT -> SimpleInfoPage("ℹ️ عن التطبيق", "تعلّم مع دبدوب
+تطبيق تعليمي وترفيهي للأطفال.
+
+الإعدادات الظاهرة هنا مرتبطة بوظائف حقيقية داخل التطبيق.") { screen = SettingsScreen.MAIN }
     }
 }
 
@@ -84,11 +90,30 @@ private fun MainSettings(context: Context, onBack: () -> Unit, onOpen: (Settings
 
 @Composable private fun ProfileSettings(context: Context, onBack: () -> Unit) {
     var name by remember { mutableStateOf(AppSettings.childName(context)) }
-    var saved by remember { mutableStateOf(false) }\n    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->\n        if (uri != null) {\n            try { context.contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}\n            AppSettings.setChildImageUri(context, uri.toString())\n        }\n    }
+    var saved by remember { mutableStateOf(false) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            try { context.contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
+            AppSettings.setChildImageUri(context, uri.toString())
+        }
+    }
     DetailScaffold("👤 ملف الطفل", onBack) {
-        Text("صورة الطفل", fontWeight = FontWeight.Bold, fontSize = 18.sp)\n        val imageUri = AppSettings.childImageUri(context)\n        if (imageUri != null) AsyncImage(model = imageUri, contentDescription = "صورة الطفل", modifier = Modifier.size(120.dp))\n        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {\n            Button(onClick = { launcher.launch(arrayOf("image/*")) }) { Text("اختيار من المعرض") }\n            OutlinedButton(onClick = { AppSettings.setChildImageUri(context, null) }) { Text("إزالة") }\n        }\n        Text("اسم الطفل", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text("صورة الطفل", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        val imageUri = AppSettings.childImageUri(context)
+        if (imageUri != null) AsyncImage(model = imageUri, contentDescription = "صورة الطفل", modifier = Modifier.size(120.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = { launcher.launch(arrayOf("image/*")) }) { Text("اختيار من المعرض") }
+            OutlinedButton(onClick = { AppSettings.setChildImageUri(context, null) }) { Text("إزالة") }
+        }
+        Text("اسم الطفل", fontWeight = FontWeight.Bold, fontSize = 18.sp)
         OutlinedTextField(name, { name = it }, singleLine = true, modifier = Modifier.fillMaxWidth())
-        Text("النجوم الحالية: ⭐ " + AppSettings.childStars(context), fontWeight = FontWeight.Bold)\n        Spacer(Modifier.height(10.dp))\n        Text("🛍️ مقتنياتي", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)\n        val owned = AppSettings.ownedItems(context)\n        Text(if (owned.isEmpty()) "لا توجد مقتنيات بعد." else owned.joinToString(" • ") {\n            when (it) { "hat" -> "🎩 قبعة الدب"; "balloon" -> "🎈 بالون ملوّن"; "toy" -> "🧸 دمية صغيرة"; "car" -> "🚗 سيارة لعبة"; else -> it }\n        }, color = Color(0xFF68788F))
+        Text("النجوم الحالية: ⭐ " + AppSettings.childStars(context), fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(10.dp))
+        Text("🛍️ مقتنياتي", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+        val owned = AppSettings.ownedItems(context)
+        Text(if (owned.isEmpty()) "لا توجد مقتنيات بعد." else owned.joinToString(" • ") {
+            when (it) { "hat" -> "🎩 قبعة الدب"; "balloon" -> "🎈 بالون ملوّن"; "toy" -> "🧸 دمية صغيرة"; "car" -> "🚗 سيارة لعبة"; else -> it }
+        }, color = Color(0xFF68788F))
         Button({ AppSettings.setChildName(context, name); saved = true }, Modifier.fillMaxWidth()) { Text("حفظ الملف") }
         if (saved) Text("تم حفظ ملف الطفل.", color = Color(0xFF16803C), fontWeight = FontWeight.Bold)
     }
