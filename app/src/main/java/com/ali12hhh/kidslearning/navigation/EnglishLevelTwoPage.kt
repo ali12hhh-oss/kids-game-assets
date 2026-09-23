@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -128,14 +129,14 @@ private fun WritingBoard(
                 drawRect(Color(0xFFF8F0D8))
                 drawLine(Color(0xFFD7C79D), androidx.compose.ui.geometry.Offset(0f, size.height * .78f),
                     androidx.compose.ui.geometry.Offset(size.width, size.height * .78f), 2f)
-                drawContext.canvas.nativeCanvas.apply {
+                drawIntoCanvas { canvas ->
                     val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
                         color = android.graphics.Color.argb(55, 50, 80, 130)
                         textSize = guideSize.toPx()
                         textAlign = android.graphics.Paint.Align.CENTER
                         typeface = android.graphics.Typeface.DEFAULT_BOLD
                     }
-                    drawText(guide, size.width / 2f, size.height * .65f, paint)
+                    canvas.nativeCanvas.drawText(guide, size.width / 2f, size.height * .65f, paint)
                 }
                 strokes.forEach { drawPath(it, Color(0xFF2456A6), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 10f)) }
             }
@@ -185,8 +186,8 @@ private fun LetterWritingSection() {
             Text("🔊 اسمع الحرف والكلمة")
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(Modifier.weight(1f), enabled = index > 0, onClick = { index-- }) { Text("السابق") }
-            Button(Modifier.weight(1f), enabled = index < traceLetters.lastIndex, onClick = { index++ }) { Text("التالي") }
+            Button(modifier = Modifier.weight(1f), enabled = index > 0, onClick = { index-- }) { Text("السابق") }
+            Button(modifier = Modifier.weight(1f), enabled = index < traceLetters.lastIndex, onClick = { index++ }) { Text("التالي") }
         }
         Text("${index + 1} / ${traceLetters.size}", fontWeight = FontWeight.Bold)
     }
@@ -225,8 +226,8 @@ private fun NumberWritingSection() {
             Text("🔊 اسمع الرقم")
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(Modifier.weight(1f), enabled = number > 1, onClick = { number-- }) { Text("السابق") }
-            Button(Modifier.weight(1f), enabled = number < 99, onClick = { number++ }) { Text("التالي") }
+            Button(modifier = Modifier.weight(1f), enabled = number > 1, onClick = { number-- }) { Text("السابق") }
+            Button(modifier = Modifier.weight(1f), enabled = number < 99, onClick = { number++ }) { Text("التالي") }
         }
         Text("${arabicDigits(number)} من ٩٩", fontWeight = FontWeight.Bold)
     }
