@@ -11,13 +11,14 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
@@ -108,7 +109,7 @@ fun EnglishLevelThreePage(onBack: () -> Unit, initialSection: Int = 0) {
 @Composable
 private fun SpeechButton(text: String, tts: TextToSpeech?) {
     IconButton(onClick = { tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "level3") }) {
-        Icon(Icons.Default.VolumeUp, contentDescription = "Listen")
+        Text("🔊", fontSize = 20.sp)
     }
 }
 
@@ -200,7 +201,7 @@ private fun ShapePreview(kind: Int) {
         val fill = Color(0xFF4F8DFF)
         when (kind) {
             0 -> drawRect(fill)
-            1 -> drawRect(fill, size.width * .12f, size.height * .28f)
+            1 -> drawRect(fill, topLeft = Offset(size.width * .12f, size.height * .28f), size = Size(size.width * .76f, size.height * .44f))
             2 -> drawCircle(fill)
             3 -> {
                 val path = Path().apply {
