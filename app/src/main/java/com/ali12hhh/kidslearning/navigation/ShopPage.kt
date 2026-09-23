@@ -125,51 +125,47 @@ private fun StoreArtwork(art: Int, description: String, modifier: Modifier = Mod
     Canvas(modifier) {
         val w = size.width
         val h = size.height
-        drawCircle(Color(0x1F20304A), radius = w * .43f, center = androidx.compose.ui.geometry.Offset(w*.52f,h*.56f))
-        drawCircle(Color.White, radius = w * .42f, center = androidx.compose.ui.geometry.Offset(w*.5f,h*.48f))
-        drawCircle(accent, radius = w * .34f, center = androidx.compose.ui.geometry.Offset(w*.5f,h*.48f))
-        val center = androidx.compose.ui.geometry.Offset(w*.5f,h*.48f)
-        when ((art - 1) % 6) {
+        val cx = w * 0.5f
+        val cy = h * 0.48f
+        drawCircle(Color(0x3320304A), radius = w * 0.43f, center = androidx.compose.ui.geometry.Offset(cx + w*.02f, cy + h*.07f))
+        drawCircle(Color.White, radius = w * 0.42f, center = androidx.compose.ui.geometry.Offset(cx, cy))
+        drawCircle(accent, radius = w * 0.34f, center = androidx.compose.ui.geometry.Offset(cx, cy))
+        when ((art - 1) % 5) {
             0 -> {
-                val p = Path()
+                val path = Path()
                 for (i in 0 until 10) {
-                    val angle = -Math.PI/2 + i*Math.PI/5
-                    val r = if (i % 2 == 0) w*.25f else w*.11f
-                    val x = center.x + kotlin.math.cos(angle).toFloat()*r
-                    val y = center.y + kotlin.math.sin(angle).toFloat()*r
-                    if (i == 0) p.moveTo(x,y) else p.lineTo(x,y)
+                    val angle = -Math.PI / 2 + i * Math.PI / 5
+                    val radius = if (i % 2 == 0) w * .25f else w * .11f
+                    val x = cx + kotlin.math.cos(angle).toFloat() * radius
+                    val y = cy + kotlin.math.sin(angle).toFloat() * radius
+                    if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
                 }
-                p.close()
-                drawPath(p, Color.White)
+                path.close()
+                drawPath(path, Color.White)
             }
             1 -> {
-                drawRoundRect(Color.White, androidx.compose.ui.geometry.Offset(w*.30f,h*.25f),
-                    androidx.compose.ui.geometry.Size(w*.40f,h*.42f), cornerRadius=androidx.compose.ui.geometry.CornerRadius(w*.06f))
-                drawCircle(accent, radius=w*.08f, center=center)
+                drawCircle(Color.White, radius = w*.18f, center = androidx.compose.ui.geometry.Offset(cx, cy))
+                drawCircle(accent, radius = w*.08f, center = androidx.compose.ui.geometry.Offset(cx, cy))
+                drawLine(Color.White, androidx.compose.ui.geometry.Offset(cx-w*.22f, cy+w*.25f), androidx.compose.ui.geometry.Offset(cx+w*.22f, cy+w*.25f), strokeWidth = w*.07f)
             }
             2 -> {
-                drawCircle(Color.White, radius=w*.18f, center=center)
-                drawCircle(accent, radius=w*.10f, center=center)
-                drawLine(Color.White, androidx.compose.ui.geometry.Offset(w*.24f,h*.72f), androidx.compose.ui.geometry.Offset(w*.76f,h*.72f), strokeWidth=w*.07f)
+                drawCircle(Color.White, radius = w*.22f, center = androidx.compose.ui.geometry.Offset(cx, cy))
+                drawCircle(accent, radius = w*.10f, center = androidx.compose.ui.geometry.Offset(cx, cy))
+                drawLine(Color.White, androidx.compose.ui.geometry.Offset(cx, cy-w*.32f), androidx.compose.ui.geometry.Offset(cx, cy-w*.16f), strokeWidth = w*.06f)
             }
             3 -> {
-                drawRoundRect(Color.White, androidx.compose.ui.geometry.Offset(w*.27f,h*.31f),
-                    androidx.compose.ui.geometry.Size(w*.46f,h*.34f), cornerRadius=androidx.compose.ui.geometry.CornerRadius(w*.12f))
-                drawCircle(accent, radius=w*.09f, center=androidx.compose.ui.geometry.Offset(w*.5f,h*.48f))
-                drawLine(Color.White, androidx.compose.ui.geometry.Offset(w*.50f,h*.18f), androidx.compose.ui.geometry.Offset(w*.50f,h*.31f), strokeWidth=w*.06f)
-            }
-            4 -> {
-                drawCircle(Color.White, radius=w*.21f, center=center)
-                drawLine(Color.White, androidx.compose.ui.geometry.Offset(w*.30f,h*.70f), androidx.compose.ui.geometry.Offset(w*.70f,h*.70f), strokeWidth=w*.08f)
-                drawLine(Color.White, androidx.compose.ui.geometry.Offset(w*.38f,h*.78f), androidx.compose.ui.geometry.Offset(w*.62f,h*.78f), strokeWidth=w*.06f)
+                drawRect(Color.White, topLeft = androidx.compose.ui.geometry.Offset(cx-w*.20f, cy-w*.15f), size = androidx.compose.ui.geometry.Size(w*.40f, w*.32f))
+                drawCircle(accent, radius = w*.09f, center = androidx.compose.ui.geometry.Offset(cx, cy))
+                drawLine(Color.White, androidx.compose.ui.geometry.Offset(cx-w*.20f, cy-w*.15f), androidx.compose.ui.geometry.Offset(cx, cy-w*.30f), strokeWidth = w*.05f)
+                drawLine(Color.White, androidx.compose.ui.geometry.Offset(cx+w*.20f, cy-w*.15f), androidx.compose.ui.geometry.Offset(cx, cy-w*.30f), strokeWidth = w*.05f)
             }
             else -> {
                 for (i in 0 until 4) {
-                    val dx = if (i % 2 == 0) -.17f else .17f
-                    val dy = if (i < 2) -.17f else .17f
-                    drawCircle(Color.White, radius=w*.075f, center=androidx.compose.ui.geometry.Offset(w*(.5f+dx),h*(.48f+dy)))
+                    val dx = if (i % 2 == 0) -w*.16f else w*.16f
+                    val dy = if (i < 2) -w*.16f else w*.16f
+                    drawCircle(Color.White, radius = w*.075f, center = androidx.compose.ui.geometry.Offset(cx+dx, cy+dy))
                 }
-                drawCircle(accent, radius=w*.11f, center=center)
+                drawCircle(accent, radius = w*.11f, center = androidx.compose.ui.geometry.Offset(cx, cy))
             }
         }
     }
