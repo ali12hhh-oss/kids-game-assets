@@ -107,7 +107,7 @@ fun EnglishLevelThreePage(onBack: () -> Unit, initialSection: Int = 0) {
 }
 
 @Composable
-private fun SpeechButton(text: String, tts: TextToSpeech?) {
+private fun SpeechButton(text: String, tts: TextToSpeech?) {\n    val context = LocalContext.current
     IconButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "level3") }) {
         Text("🔊", fontSize = 20.sp)
     }
