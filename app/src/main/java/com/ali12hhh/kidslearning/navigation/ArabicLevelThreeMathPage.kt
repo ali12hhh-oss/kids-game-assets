@@ -101,7 +101,7 @@ Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){B
 
 @Composable private fun CharacterReactionMath(reaction:Int){
 val engine=rememberEngine();val loader=rememberModelLoader(engine);val model=remember{runCatching{loader.createModelInstance("Mannequin_Medium_Anim.glb")}.getOrNull()};val camera=rememberCameraNode(engine){position=Position(z=3.5f)};val node=remember(model){model?.let{ModelNode(modelInstance=it,autoAnimate=false,scaleToUnits=1.0f).also{it.position=Position(x=0f,y=-0.45f,z=0f)}}}
-LaunchedEffect(reaction,node){val n=node?:return@LaunchedEffect;if(reaction==1){runCatching{n.stopAnimation(8)};runCatching{n.playAnimation(7,1f,false)};delay(1800);runCatching{n.stopAnimation(7)}}else if(reaction==-1){runCatching{n.stopAnimation(7)};runCatching{n.playAnimation(8,1f,false)}}else{runCatching{n.playAnimation(0,1f,true)}}
+LaunchedEffect(reaction,node){val n=node?:return@LaunchedEffect;if(reaction==1){runCatching{n.stopAnimation(8)};runCatching{n.playAnimation(7,1f,false)};delay(1800);runCatching{n.stopAnimation(7)}}else if(reaction==-1){runCatching{n.stopAnimation(7)};runCatching{n.playAnimation(8,1f,false)}}else{runCatching{n.playAnimation(0,1f,true)}}}
 Card(Modifier.fillMaxWidth().height(104.dp),shape=RoundedCornerShape(20.dp),colors=CardDefaults.cardColors(Color(0xFFF8FAFF))){Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center){Scene(modifier=Modifier.fillMaxSize(),engine=engine,modelLoader=loader,cameraNode=camera,cameraManipulator=null,isOpaque=false,childNodes=listOfNotNull(node))}}}
 
 private fun numberColor(n:Int)=listOf(Color(0xFF315CFF),Color(0xFFE64A6B),Color(0xFF16A085),Color(0xFFE67E22),Color(0xFF7A4DCE),Color(0xFF008C95))[(n-1)%6]
