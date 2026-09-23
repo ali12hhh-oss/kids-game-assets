@@ -4,6 +4,8 @@ package com.ali12hhh.kidslearning.navigation
 object AppRoutes {
     const val HOME = "home"
     const val SETTINGS = "settings"
+    const val SHOP = "shop"
+    const val COLLECTION = "collection"
     const val ARABIC_LETTERS = "arabic_letters"
     const val ENGLISH_LETTERS = "english_letters"
     const val ARABIC_LEVELS = "arabic_levels"
