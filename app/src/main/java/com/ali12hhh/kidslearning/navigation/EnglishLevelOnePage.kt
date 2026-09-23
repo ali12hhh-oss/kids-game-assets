@@ -165,17 +165,17 @@ private fun EnglishLettersSection() {
                 Text("الصوت التدريبي: ${lesson.soundHint}", fontSize = 14.sp, color = activeColor)
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(modifier = Modifier.weight(1f), onClick = { tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
+                    Button(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
                         colors = ButtonDefaults.buttonColors(Color(0xFF5B4BCE))) {
                         Text("🔊"); Spacer(Modifier.width(5.dp)); Text("اسم الحرف")
                     }
-                    Button(modifier = Modifier.weight(1f), onClick = { tts?.speak(lesson.soundHint, TextToSpeech.QUEUE_FLUSH, null, "letter_sound") },
+                    Button(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.soundHint, TextToSpeech.QUEUE_FLUSH, null, "letter_sound") },
                         colors = ButtonDefaults.buttonColors(activeColor)) {
                         Text("🔉"); Spacer(Modifier.width(5.dp)); Text("صوت الحرف")
                     }
                 }
                 Spacer(Modifier.height(8.dp))
-                TextButton(onClick = { tts?.speak(lesson.example, TextToSpeech.QUEUE_FLUSH, null, "example") }) {
+                TextButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.example, TextToSpeech.QUEUE_FLUSH, null, "example") }) {
                     Text("🔊 اسمع الكلمة: ${lesson.example}")
                 }
                 Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -225,7 +225,7 @@ private fun EnglishNumbersSection() {
                 Text("هذا هو العدد رقم ${arabicDigits(number)}. نتعلم شكله واسمه ونطقه باللغة الإنجليزية.",
                     Modifier.fillMaxWidth(), textAlign = TextAlign.Center, fontSize = 15.sp, color = Color(0xFF53647A))
                 Spacer(Modifier.height(10.dp))
-                Button(onClick = { tts?.speak(english, TextToSpeech.QUEUE_FLUSH, null, "number") },
+                Button(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(english, TextToSpeech.QUEUE_FLUSH, null, "number") },
                     shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(color)) {
                     Text("🔊"); Spacer(Modifier.width(6.dp)); Text("نطق العدد بالإنجليزية")
                 }
