@@ -26,6 +26,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
+import io.github.sceneview.Scene
+import io.github.sceneview.rememberCameraNode
+import io.github.sceneview.rememberEngine
+import io.github.sceneview.rememberModelLoader
+import io.github.sceneview.node.ModelNode
+import io.github.sceneview.math.Position
+import kotlinx.coroutines.delay
 
 private fun arDigits(v: Int) = v.toString().map { ('٠'.code + (it.code - '0'.code)).toChar() }.joinToString("")
 private data class StrokeLine(val points: List<Offset>)
@@ -179,6 +186,7 @@ private fun PlaceValueQuiz() {
     var index by remember { mutableStateOf(0) }
     var selected by remember { mutableStateOf<Int?>(null) }
     var score by remember { mutableStateOf(0) }
+    var reaction by remember { mutableStateOf(0) }
     val context = LocalContext.current
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
     var ready by remember { mutableStateOf(false) }
@@ -209,12 +217,20 @@ private fun PlaceValueQuiz() {
             Button(onClick = {
                 if (selected == null) {
                     selected = option
-                    if (ready) tts?.speak(if (option == quiz.correct) "أحسنت! إجابة صحيحة" else "حاول مرة أخرى", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
+                    if (option == quiz.correct) {
+                        score++
+                        reaction = 1
+                        if (ready) tts?.speak("أحسنت! إجابة صحيحة", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
+                    } else {
+                        reaction = -1
+                        if (ready) tts?.speak("حاول مرة أخرى", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
+                    }
                 }
             }, Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(containerColor = color, contentColor = if (selected != null) Color.White else Color(0xFF24324A))) {
                 Text(arDigits(option), fontSize = 20.sp, fontWeight = FontWeight.Black)
             }
         }
+        CharacterReaction(reaction)
         Text("النتيجة: ${arDigits(score)}", fontWeight = FontWeight.ExtraBold, color = Color(0xFF315CFF))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Button(onClick = { if (index > 0) { index--; selected = null } }, Modifier.weight(1f), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق") }
@@ -223,3 +239,50 @@ private fun PlaceValueQuiz() {
     }
 }
 private fun numberColor(number: Int) = listOf(Color(0xFF315CFF), Color(0xFFE64A6B), Color(0xFF16A085), Color(0xFFE67E22), Color(0xFF7A4DCE), Color(0xFF008C95))[(number - 1) % 6]
+
+
+@Composable
+private fun CharacterReaction(reaction: Int) {
+    val engine = rememberEngine()
+    val loader = rememberModelLoader(engine)
+    val model = remember { runCatching { loader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull() }
+    val camera = rememberCameraNode(engine) { position = Position(z = 3.5f) }
+    val node = remember(model) {
+        model?.let {
+            ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = 1.0f).also {
+                it.position = Position(x = 0f, y = -0.45f, z = 0f)
+            }
+        }
+    }
+    LaunchedEffect(reaction, node) {
+        val n = node ?: return@LaunchedEffect
+        if (reaction == 1) {
+            runCatching { n.stopAnimation(8) }
+            runCatching { n.playAnimation(7, 1f, false) }
+            delay(1800)
+            runCatching { n.stopAnimation(7) }
+        } else if (reaction == -1) {
+            runCatching { n.stopAnimation(7) }
+            runCatching { n.playAnimation(8, 1f, false) }
+        } else {
+            runCatching { n.playAnimation(0, 1f, true) }
+        }
+    }
+    Card(
+        Modifier.fillMaxWidth().height(105.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(Color(0xFFF8FAFF))
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Scene(
+                modifier = Modifier.fillMaxSize(),
+                engine = engine,
+                modelLoader = loader,
+                cameraNode = camera,
+                cameraManipulator = null,
+                isOpaque = false,
+                childNodes = listOfNotNull(node)
+            )
+        }
+    }
+}
