@@ -291,7 +291,7 @@ private fun HomePage(
                     }
 
                     Spacer(Modifier.height(4.dp))
-                    key(refreshKey) { ChildProfileCard(cardColor, textColor) }
+                    ChildProfileCard(cardColor, textColor)
                     Spacer(Modifier.weight(1f))
 
                     Row(
