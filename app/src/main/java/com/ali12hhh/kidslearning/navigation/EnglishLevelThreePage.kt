@@ -93,12 +93,9 @@ fun EnglishLevelThreePage(onBack: () -> Unit, initialSection: Int = 0) {
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).background(Color(0xFFEAF3FF))) {
             TabRow(selectedTabIndex = section, containerColor = Color.White) {
-                Tab(section == 0, { section = 0 }) { Text("🎨
-Colors", Modifier.padding(12.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold) }
-                Tab(section == 1, { section = 1 }) { Text("🔷
-Shapes", Modifier.padding(12.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold) }
-                Tab(section == 2, { section = 2 }) { Text("📚
-Words", Modifier.padding(12.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold) }
+                Tab(section == 0, { section = 0 }) { Text("🎨 Colors", Modifier.padding(12.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold) }
+                Tab(section == 1, { section = 1 }) { Text("🔷 Shapes", Modifier.padding(12.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold) }
+                Tab(section == 2, { section = 2 }) { Text("📚 Words", Modifier.padding(12.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold) }
             }
             when (section) {
                 0 -> ColorsSection()
