@@ -133,6 +133,8 @@ fun AppNavigation() {
                 onSelectSection = { section ->
                     if (level == 1 && section == "reading") {
                         navController.navigate(AppRoutes.ARABIC_LEVEL_CONTENT.replace("{level}", "1"))
+                    } else if (level == 1 && section == "math") {
+                        navController.navigate(AppRoutes.ARABIC_LEVEL_ONE_MATH)
                     } else if (level == 2 && section == "reading") {
                         navController.navigate(AppRoutes.ARABIC_LEVEL_TWO_READING)
                     } else if (level == 3 && section == "reading") {
@@ -148,6 +150,9 @@ fun AppNavigation() {
             } else {
                 ContentPage("العربية", "المحتوى قيد التجهيز")
             }
+        }
+        composable(AppRoutes.ARABIC_LEVEL_ONE_MATH) {
+            ArabicLevelOneMathPage(onBack = { navController.popBackStack() })
         }
         composable(AppRoutes.ARABIC_LEVEL_TWO_READING) {
             ArabicLevelTwoReadingPage(onBack = { navController.popBackStack() })
