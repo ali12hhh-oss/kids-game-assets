@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.background
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -89,12 +88,13 @@ fun BreakGamePage(onBack: () -> Unit) {
         running = true
     }
 
-    LaunchedEffect(running, finished, tick) {
+    LaunchedEffect(running, finished) {
         if (!running || finished) return@LaunchedEffect
         var elapsedMs = 0L
         var spawnMs = 0L
         while (running && !finished && remaining > 0) {
             delay(50)
+            tick++
             elapsedMs += 50
             spawnMs += 50
             val speed = if (fastMode) 0.00155f else 0.00105f
@@ -141,7 +141,7 @@ fun BreakGamePage(onBack: () -> Unit) {
         }
     }
 
-    LaunchedEffect(jumping, tick) {
+    LaunchedEffect(jumping) {
         if (jumping) {
             delay(620)
             jumping = false
@@ -154,6 +154,7 @@ fun BreakGamePage(onBack: () -> Unit) {
     val cameraNode = rememberCameraNode(engine) {
         position = Position(x = 0f, y = 0.35f, z = 5.8f)
     }
+    val animationFrame = tick
     val playerX = (playerLane - 1) * 0.78f
     val playerY = if (jumping) 0.65f else 0f
     val characterNode = remember(model) {
@@ -205,6 +206,7 @@ fun BreakGamePage(onBack: () -> Unit) {
                     .fillMaxSize()
                     .padding(top = 105.dp, bottom = 190.dp)
             ) {
+                if (animationFrame < 0) return@Canvas
                 val laneWidth = size.width / 3f
                 val top = size.height * 0.02f
                 val bottom = size.height * 0.98f
