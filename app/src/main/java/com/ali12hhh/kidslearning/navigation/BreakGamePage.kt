@@ -71,6 +71,8 @@ fun BreakGamePage(onBack: () -> Unit) {
     var fastMode by remember { mutableStateOf(false) }
     var tick by remember { mutableIntStateOf(0) }
     var spawnCounter by remember { mutableIntStateOf(0) }
+    var combo by remember { mutableIntStateOf(0) }
+    var countdown by remember { mutableIntStateOf(3) }
     val items = remember { mutableStateListOf<BreakItem>() }
 
     fun resetGame() {
@@ -83,13 +85,23 @@ fun BreakGamePage(onBack: () -> Unit) {
         jumping = false
         fastMode = false
         spawnCounter = 0
+        combo = 0
+        countdown = 3
         tick++
         finished = false
         running = true
     }
 
+    LaunchedEffect(Unit) {
+        for (value in 3 downTo 1) {
+            countdown = value
+            delay(700)
+        }
+        countdown = 0
+    }
+
     LaunchedEffect(running, finished) {
-        if (!running || finished) return@LaunchedEffect
+        if (!running || finished || countdown > 0) return@LaunchedEffect
         var elapsedMs = 0L
         var spawnMs = 0L
         while (running && !finished && remaining > 0) {
@@ -106,9 +118,11 @@ fun BreakGamePage(onBack: () -> Unit) {
                     if (item.lane == playerLane) {
                         if (item.type == STAR) {
                             collected += 1
-                            score += 10
+                            combo += 1
+                            score += 10 + (combo.coerceAtMost(5) - 1) * 2
                         } else if (!jumping) {
                             misses += 1
+                            combo = 0
                             score = (score - 4).coerceAtLeast(0)
                         } else {
                             score += 6
@@ -210,6 +224,12 @@ fun BreakGamePage(onBack: () -> Unit) {
                 val laneWidth = size.width / 3f
                 val top = size.height * 0.02f
                 val bottom = size.height * 0.98f
+                val horizonY = size.height * 0.34f
+                val roadTop = size.width * 0.22f
+                val roadBottom = size.width * 0.96f
+                drawRect(Color(0xFF1B3A46).copy(alpha = 0.42f), Offset(0f, horizonY), androidx.compose.ui.geometry.Size(size.width, size.height - horizonY))
+                drawLine(Color.White.copy(alpha = 0.16f), Offset(size.width * 0.08f, horizonY), Offset(size.width * 0.02f, size.height), strokeWidth = 6f)
+                drawLine(Color.White.copy(alpha = 0.16f), Offset(size.width * 0.92f, horizonY), Offset(size.width * 0.98f, size.height), strokeWidth = 6f)
                 for (i in 1..2) {
                     val x = laneWidth * i
                     drawLine(Color.White.copy(alpha = 0.12f), Offset(x, top), Offset(x, bottom), strokeWidth = 2f)
@@ -264,6 +284,11 @@ fun BreakGamePage(onBack: () -> Unit) {
                 Spacer(Modifier.height(8.dp))
                 Text("مغامرة ريبو", modifier = Modifier.fillMaxWidth(), color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
                 Text("انطلق، اجمع النجوم وتجاوز الحواجز", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.88f), fontSize = 13.sp, textAlign = TextAlign.Center)
+                if (combo > 1) Text("🔥 سلسلة $combo", modifier = Modifier.fillMaxWidth(), color = Color(0xFFFFD54F), fontSize = 13.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(5.dp))
+                Box(Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.18f))) {
+                    Box(Modifier.fillMaxWidth((remaining.toFloat() / GAME_SECONDS).coerceIn(0f, 1f)).fillMaxSize().clip(RoundedCornerShape(8.dp)).background(Color(0xFFFFD54F)))
+                }
             }
 
             Card(
@@ -283,7 +308,7 @@ fun BreakGamePage(onBack: () -> Unit) {
                     LaneJoystick(
                         lane = playerLane,
                         onLaneChange = { delta ->
-                            if (running && !finished) playerLane = (playerLane + delta).coerceIn(0, 2)
+                            if (running && !finished && countdown == 0) playerLane = (playerLane + delta).coerceIn(0, 2)
                         }
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -291,14 +316,27 @@ fun BreakGamePage(onBack: () -> Unit) {
                             label = if (fastMode) "⚡" else "🏃",
                             caption = if (fastMode) "اندفاع" else "جري",
                             active = fastMode,
-                            onClick = { if (running && !finished) fastMode = !fastMode }
+                            onClick = { if (running && !finished && countdown == 0) fastMode = !fastMode }
                         )
                         ControlButton(
                             label = "↑",
                             caption = "قفز",
                             active = jumping,
-                            onClick = { if (running && !finished && !jumping) jumping = true }
+                            onClick = { if (running && !finished && countdown == 0 && !jumping) jumping = true }
                         )
+                    }
+                }
+            }
+
+            if (countdown > 0 && !finished) {
+                Box(
+                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.28f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(shape = CircleShape, colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.94f))) {
+                        Box(Modifier.size(118.dp), contentAlignment = Alignment.Center) {
+                            Text(countdown.toString(), fontSize = 54.sp, fontWeight = FontWeight.Black, color = Color(0xFF315CFF))
+                        }
                     }
                 }
             }
