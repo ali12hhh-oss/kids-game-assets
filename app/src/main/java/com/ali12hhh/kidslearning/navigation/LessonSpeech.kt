@@ -47,3 +47,27 @@ object LessonSpeech {
         engine.setPitch(0.96f)
     }
 }
+
+
+/** Central letter pronunciation: normal interaction speaks the sound; names are explicit-only UI actions. */
+object LetterSpeech {
+    private val arabicSounds = mapOf(
+        "ا" to "أَ", "أ" to "أَ", "إ" to "إِ", "آ" to "آ", "ب" to "بَ", "ت" to "تَ", "ث" to "ثَ",
+        "ج" to "جَ", "ح" to "حَ", "خ" to "خَ", "د" to "دَ", "ذ" to "ذَ", "ر" to "رَ", "ز" to "زَ",
+        "س" to "سَ", "ش" to "شَ", "ص" to "صَ", "ض" to "ضَ", "ط" to "طَ", "ظ" to "ظَ", "ع" to "عَ",
+        "غ" to "غَ", "ف" to "فَ", "ق" to "قَ", "ك" to "كَ", "ل" to "لَ", "م" to "مَ", "ن" to "نَ",
+        "ه" to "هَ", "و" to "وَ", "ي" to "يَ"
+    )
+    private val englishSounds = mapOf(
+        "a" to "æ", "b" to "buh", "c" to "kuh", "d" to "duh", "e" to "eh", "f" to "fuh", "g" to "guh",
+        "h" to "huh", "i" to "ih", "j" to "juh", "k" to "kuh", "l" to "luh", "m" to "muh", "n" to "nuh",
+        "o" to "ah", "p" to "puh", "q" to "kwuh", "r" to "ruh", "s" to "sss", "t" to "tuh", "u" to "uh",
+        "v" to "vuh", "w" to "wuh", "x" to "ks", "y" to "yuh", "z" to "zuh"
+    )
+    fun arabic(letter: String): String = arabicSounds[letter.trim().firstOrNull()?.toString()] ?: letter
+    fun english(letter: String): String = englishSounds[letter.trim().lowercase().firstOrNull()?.toString()] ?: letter
+    fun speakArabic(tts: TextToSpeech?, letter: String, id: String = "letter_sound") =
+        tts?.speak(arabic(letter), TextToSpeech.QUEUE_FLUSH, null, id)
+    fun speakEnglish(tts: TextToSpeech?, letter: String, id: String = "letter_sound") =
+        tts?.speak(english(letter), TextToSpeech.QUEUE_FLUSH, null, id)
+}
