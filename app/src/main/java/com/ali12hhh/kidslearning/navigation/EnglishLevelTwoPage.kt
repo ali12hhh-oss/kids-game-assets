@@ -9,11 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Backspace
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Keyboard
-import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,8 +22,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.awaitPointerEvent
-import androidx.compose.ui.input.pointer.consume
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -86,7 +80,7 @@ fun EnglishLevelTwoPage(onBack: () -> Unit, initialSection: Int = 0) {
         Column(Modifier.fillMaxSize().padding(padding).background(Color(0xFFEAF3FF))) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 ChoiceCard(Modifier.weight(1f), section == 0, Icons.Default.Edit, "كتابة الحروف", Color(0xFF4F7CFF)) { section = 0 }
-                ChoiceCard(Modifier.weight(1f), section == 1, Icons.Default.Numbers, "كتابة الأرقام", Color(0xFFFF8A4C)) { section = 1 }
+                ChoiceCard(Modifier.weight(1f), section == 1, null, "كتابة الأرقام", Color(0xFFFF8A4C)) { section = 1 }
             }
             if (section == 0) LetterWritingSection() else NumberWritingSection()
         }
@@ -94,10 +88,10 @@ fun EnglishLevelTwoPage(onBack: () -> Unit, initialSection: Int = 0) {
 }
 
 @Composable
-private fun ChoiceCard(modifier: Modifier, selected: Boolean, icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, color: Color, onClick: () -> Unit) {
+private fun ChoiceCard(modifier: Modifier, selected: Boolean, icon: androidx.compose.ui.graphics.vector.ImageVector?, title: String, color: Color, onClick: () -> Unit) {
     Surface(modifier = modifier.height(58.dp), onClick = onClick, shape = RoundedCornerShape(18.dp), color = if (selected) color else Color.White, shadowElevation = if (selected) 5.dp else 2.dp) {
         Row(Modifier.fillMaxSize().padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-            Icon(icon, contentDescription = null, tint = if (selected) Color.White else color)
+            if (icon != null) Icon(icon, contentDescription = null, tint = if (selected) Color.White else color) else Text("123", fontSize = 14.sp, fontWeight = FontWeight.Black, color = if (selected) Color.White else color)
             Spacer(Modifier.width(6.dp))
             Text(title, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = if (selected) Color.White else Color(0xFF27364D))
         }
@@ -105,11 +99,11 @@ private fun ChoiceCard(modifier: Modifier, selected: Boolean, icon: androidx.com
 }
 
 @Composable
-private fun WritingBoard(guide: String, guideSize: androidx.compose.ui.unit.TextUnit, onClear: () -> Unit) {
+private fun WritingBoard(guide: String, guideSize: androidx.compose.ui.unit.TextUnit, modifier: Modifier = Modifier, onClear: () -> Unit) {
     val strokes = remember { mutableStateListOf<List<Offset>>() }
     var currentStroke by remember { mutableStateOf<List<Offset>>(emptyList()) }
 
-    Card(Modifier.fillMaxWidth().weight(1f).padding(horizontal = 2.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFDF7)), elevation = CardDefaults.cardElevation(7.dp)) {
+    Card(modifier.fillMaxWidth().padding(horizontal = 2.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFDF7)), elevation = CardDefaults.cardElevation(7.dp)) {
         Canvas(Modifier.fillMaxSize().padding(10.dp).pointerInput(Unit) {
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
@@ -120,7 +114,6 @@ private fun WritingBoard(guide: String, guideSize: androidx.compose.ui.unit.Text
                     val event = awaitPointerEvent(PointerEventPass.Main)
                     val change = event.changes.firstOrNull() ?: break
                     if (change.pressed) {
-                        change.consume()
                         val point = change.position
                         if (point != points.last()) {
                             points = points + point
@@ -161,7 +154,7 @@ private fun WritingBoard(guide: String, guideSize: androidx.compose.ui.unit.Text
 
     Spacer(Modifier.height(6.dp))
     ProLessonButton(modifier = Modifier.height(40.dp), onClick = { strokes.clear(); currentStroke = emptyList(); onClear() }, shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF476F))) {
-        Icon(Icons.Default.Backspace, contentDescription = null)
+        Text("✕", fontSize = 18.sp, fontWeight = FontWeight.Black)
         Spacer(Modifier.width(5.dp))
         Text("مسح", fontWeight = FontWeight.ExtraBold)
     }
@@ -191,17 +184,17 @@ private fun LetterWritingSection() {
     Column(Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("اكتب الحرف بنفسك", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
         Row(Modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(!upper, { upper = false }, label = { Text("صغير a–z", fontSize = 12.sp) }, leadingIcon = { Icon(Icons.Default.Keyboard, null) })
+            FilterChip(!upper, { upper = false }, label = { Text("صغير a–z", fontSize = 12.sp) }, leadingIcon = { Text("a", fontWeight = FontWeight.Black) })
             FilterChip(upper, { upper = true }, label = { Text("كبير A–Z", fontSize = 12.sp) }, leadingIcon = { Icon(Icons.Default.Edit, null) })
         }
-        WritingBoard(if (upper) lesson.upper else lesson.lower, 150.sp, {})
+        WritingBoard(if (upper) lesson.upper else lesson.lower, 150.sp, modifier = Modifier.fillMaxWidth().weight(1f), onClear = {})
         Row(Modifier.fillMaxWidth().padding(top = 6.dp).navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ProLessonButton(Modifier.weight(1f).height(46.dp), enabled = index > 0, onClick = { index-- }) { Text("‹  السابق", fontWeight = FontWeight.ExtraBold) }
+            ProLessonButton(modifier = Modifier.weight(1f).height(46.dp), enabled = index > 0, onClick = { index-- }) { Text("‹  السابق", fontWeight = FontWeight.ExtraBold) }
             ProLessonButton(Modifier.weight(1f).height(46.dp), enabled = index < traceLetters.lastIndex, onClick = { index++ }) { Text("التالي  ›", fontWeight = FontWeight.ExtraBold) }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("${lesson.upper} — ${lesson.word}", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
-            IconButton(onClick = { if (AppSettings.isSpeechEnabled(context)) LetterSpeech.speakEnglish(tts, lesson.lower, "letter_sound") }) { Icon(Icons.Default.VolumeUp, contentDescription = "استمع") }
+            IconButton(onClick = { if (AppSettings.isSpeechEnabled(context)) LetterSpeech.speakEnglish(tts, lesson.lower, "letter_sound") }) { Text("🔊", fontSize = 18.sp) }
             Text("${index + 1}/${traceLetters.size}", fontSize = 12.sp, color = Color(0xFF61728B))
         }
     }
@@ -230,12 +223,12 @@ private fun NumberWritingSection() {
     Column(Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("اكتب الرقم بنفسك", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
         Text("تدرّب على 1 إلى 99", fontSize = 12.sp, color = Color(0xFF61728B))
-        WritingBoard(number.toString(), 135.sp, {})
+        WritingBoard(number.toString(), 135.sp, modifier = Modifier.fillMaxWidth().weight(1f), onClear = {})
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
             Text(arabicDigits(number), fontSize = 21.sp, fontWeight = FontWeight.Black, color = Color(0xFF2563EB))
             Spacer(Modifier.width(8.dp))
             Text("$number — $name", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
-            IconButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(name, TextToSpeech.QUEUE_FLUSH, null, "number") }) { Icon(Icons.Default.VolumeUp, contentDescription = "استمع") }
+            IconButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(name, TextToSpeech.QUEUE_FLUSH, null, "number") }) { Text("🔊", fontSize = 18.sp) }
         }
         Row(Modifier.fillMaxWidth().padding(top = 6.dp).navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ProLessonButton(Modifier.weight(1f).height(46.dp), enabled = number > 1, onClick = { number-- }) { Text("‹  السابق", fontWeight = FontWeight.ExtraBold) }
