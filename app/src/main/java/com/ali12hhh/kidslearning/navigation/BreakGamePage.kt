@@ -150,7 +150,7 @@ fun BreakGamePage(onBack: () -> Unit) {
 
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    val model = remember { runCatching { modelLoader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull() }
+    val model = remember { runCatching { modelLoader.createModelInstance("Mannequin_Medium.glb") }.getOrNull() }
     val cameraNode = rememberCameraNode(engine) {
         position = Position(x = 0f, y = 0.35f, z = 5.8f)
     }
@@ -266,40 +266,68 @@ fun BreakGamePage(onBack: () -> Unit) {
                 Text("انطلق، اجمع النجوم وتجاوز الحواجز", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.88f), fontSize = 13.sp, textAlign = TextAlign.Center)
             }
 
-            Row(
+            Card(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                shape = RoundedCornerShape(30.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.30f))
             ) {
-                LaneJoystick(
-                    lane = playerLane,
-                    onLaneChange = { delta ->
-                        if (running && !finished) playerLane = (playerLane + delta).coerceIn(0, 2)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    LaneJoystick(
+                        lane = playerLane,
+                        onLaneChange = { delta ->
+                            if (running && !finished) playerLane = (playerLane + delta).coerceIn(0, 2)
+                        }
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        ControlButton(
+                            label = if (fastMode) "⚡" else "🏃",
+                            caption = if (fastMode) "اندفاع" else "جري",
+                            active = fastMode,
+                            onClick = { if (running && !finished) fastMode = !fastMode }
+                        )
+                        ControlButton(
+                            label = "↑",
+                            caption = "قفز",
+                            active = jumping,
+                            onClick = { if (running && !finished && !jumping) jumping = true }
+                        )
                     }
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ControlButton(
-                        label = if (fastMode) "⚡" else "🏃",
-                        caption = if (fastMode) "سريع" else "جري",
-                        active = fastMode,
-                        onClick = { if (running && !finished) fastMode = !fastMode }
-                    )
-                    ControlButton(
-                        label = "↥",
-                        caption = "قفز",
-                        active = jumping,
-                        onClick = { if (running && !finished && !jumping) jumping = true }
-                    )
+                }
+            }
+
+            if (!running && !finished) {
+                Box(
+                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.32f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.96f))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 28.dp, vertical = 22.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text("اللعبة متوقفة", fontSize = 22.sp, fontWeight = FontWeight.Black)
+                            Text("جاهز للعودة إلى المغامرة؟", fontSize = 14.sp, color = Color.DarkGray)
+                            Button(onClick = { running = true }) { Text("متابعة") }
+                        }
+                    }
                 }
             }
 
             if (finished) {
                 Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.50f)),
+                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.58f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Card(
@@ -312,10 +340,10 @@ fun BreakGamePage(onBack: () -> Unit) {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text("أحسنت! 🎉", fontSize = 30.sp, fontWeight = FontWeight.Black)
+                            Text("نهاية الجولة 🎉", fontSize = 30.sp, fontWeight = FontWeight.Black)
                             Text("جمعت $collected نجمة", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                            Text("النقاط: $score", fontSize = 16.sp)
-                            Text("أخطاء: $misses", fontSize = 14.sp, color = Color.Gray)
+                            Text("النقاط  $score", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            Text("تجاوزت $misses حاجزًا", fontSize = 14.sp, color = Color.Gray)
                             Text("حصلت على ⭐ " + (collected / 2).coerceIn(1, 12) + " من نجوم التطبيق", textAlign = TextAlign.Center)
                             Spacer(Modifier.height(4.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -335,10 +363,10 @@ private fun LaneJoystick(lane: Int, onLaneChange: (Int) -> Unit) {
     var dragStartX by remember { mutableStateOf<Float?>(null) }
     Box(
         modifier = Modifier
-            .size(116.dp)
+            .size(112.dp)
             .clip(CircleShape)
-            .background(Color.Black.copy(alpha = 0.30f))
-            .pointerInput(lane) {
+            .background(Color.White.copy(alpha = 0.10f))
+            .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset -> dragStartX = offset.x },
                     onDrag = { change, _ ->
@@ -356,25 +384,54 @@ private fun LaneJoystick(lane: Int, onLaneChange: (Int) -> Unit) {
             },
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("↔", color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.Black)
-            Text("حرّك", color = Color.White, fontSize = 12.sp)
+        Box(
+            modifier = Modifier.size(82.dp).clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.28f))
+        )
+        Box(
+            modifier = Modifier
+                .size(54.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.90f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("↔", color = Color(0xFF183047), fontSize = 25.sp, fontWeight = FontWeight.Black)
         }
+        Text(
+            text = when (lane) { 0 -> "يسار"; 2 -> "يمين"; else -> "وسط" },
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp),
+            color = Color.White.copy(alpha = 0.82f),
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
 @Composable
 private fun ControlButton(label: String, caption: String, active: Boolean, onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        IconButton(
-            onClick = onClick,
+        Box(
             modifier = Modifier
-                .size(64.dp)
+                .size(70.dp)
                 .clip(CircleShape)
-                .background(if (active) Color(0xFFFFD54F) else Color.Black.copy(alpha = 0.34f))
+                .background(if (active) Color(0xFFFFD54F) else Color.Black.copy(alpha = 0.42f))
+                .padding(3.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Text(label, fontSize = 27.sp, color = if (active) Color(0xFF24324A) else Color.White)
+            IconButton(
+                onClick = onClick,
+                modifier = Modifier.fillMaxSize().clip(CircleShape)
+                    .background(if (active) Color(0xFFFFE27A) else Color.White.copy(alpha = 0.08f))
+            ) {
+                Text(
+                    label,
+                    fontSize = 29.sp,
+                    color = if (active) Color(0xFF24324A) else Color.White,
+                    fontWeight = FontWeight.Black
+                )
+            }
         }
-        Text(caption, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(3.dp))
+        Text(caption, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Black)
     }
 }
