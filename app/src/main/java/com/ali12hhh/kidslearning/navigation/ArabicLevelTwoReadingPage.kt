@@ -8,7 +8,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -279,15 +281,6 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
         }
     }
 
-    val dots = when (lesson.letter) {
-        "ب", "ت", "ث", "ن" -> 1
-        "ي" -> 2
-        "ق" -> 2
-        "ف", "خ", "ذ", "ز", "ض", "ظ", "غ" -> 1
-        "ش" -> 3
-        else -> 0
-    }
-
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             forms.forEachIndexed { i, form ->
@@ -321,17 +314,33 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
             Box(Modifier.fillMaxSize().padding(10.dp), contentAlignment = Alignment.Center) {
                 Canvas(
                     Modifier.fillMaxSize().background(Color(0xFFFFFDF4)).pointerInput(lesson.letter, selectedForm) {
-                        detectDragGestures(
-                            onDragStart = { offset -> currentStroke = listOf(offset) },
-                            onDrag = { change, _ ->
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
+                            down.consume()
+                            var points = listOf(down.position)
+                            var moved = false
+
+                            while (true) {
+                                val event = awaitPointerEvent(PointerEventPass.Main)
+                                val change = event.changes.firstOrNull() ?: break
+                                if (!change.pressed) {
+                                    if (!moved) {
+                                        strokes.add(listOf(change.position))
+                                    } else if (points.size > 1) {
+                                        strokes.add(points)
+                                    }
+                                    break
+                                }
                                 change.consume()
-                                currentStroke = currentStroke + change.position
-                            },
-                            onDragEnd = {
-                                if (currentStroke.size > 1) strokes.add(currentStroke)
-                                currentStroke = emptyList()
+                                val position = change.position
+                                if (position != points.last()) {
+                                    moved = true
+                                    points = points + position
+                                    currentStroke = points
+                                }
                             }
-                        )
+                            currentStroke = emptyList()
+                        }
                     }
                 ) {
                     val guideSize = min(size.width, size.height) * 0.62f
@@ -346,7 +355,7 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
                             points.firstOrNull()?.let { moveTo(it.x, it.y) }
                             points.drop(1).forEach { lineTo(it.x, it.y) }
                         }
-                        drawPath(path, Color(0xFF315CFF), style = Stroke(width = 30f, cap = StrokeCap.Round))
+                        if (points.size == 1) drawCircle(Color(0xFF315CFF), 15f, points.first()) else drawPath(path, Color(0xFF315CFF), style = Stroke(width = 30f, cap = StrokeCap.Round))
                     }
                     if (currentStroke.size > 1) {
                         val path = Path().apply {
@@ -356,15 +365,6 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
                         drawPath(path, Color(0xFF315CFF), style = Stroke(width = 9f, cap = StrokeCap.Round))
                     }
 
-                    if (dots > 0) {
-                        val baseY = size.height * 0.69f
-                        val spacing = 22f
-                        val startX = center.x - (dots - 1) * spacing / 2f
-                        repeat(dots) { d ->
-                            drawCircle(Color(0xFFEF476F), 7f, Offset(startX + d * spacing, baseY))
-                            drawCircle(Color.White, 3f, Offset(startX + d * spacing, baseY))
-                        }
-                    }
                 }
             }
         }
