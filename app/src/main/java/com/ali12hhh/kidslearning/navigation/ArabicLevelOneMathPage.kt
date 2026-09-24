@@ -34,13 +34,14 @@ private fun hundreds(v: Int) = v / 100
 fun ArabicLevelOneMathPage(onBack: () -> Unit) {
     var number by remember { mutableStateOf(1) }
     val context = LocalContext.current
+    var tts by remember { mutableStateOf<TextToSpeech?>(null) }
+    var ready by remember { mutableStateOf(false) }
+
     LaunchedEffect(number, ready) {
         if (ready && AppSettings.isSpeechEnabled(context)) {
             tts?.speak(numberSpeech(number), TextToSpeech.QUEUE_FLUSH, null, "number_change_" + number)
         }
     }
-    var tts by remember { mutableStateOf<TextToSpeech?>(null) }
-    var ready by remember { mutableStateOf(false) }
 
     fun speakNumberNow(value: Int) { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak(numberSpeech(value), TextToSpeech.QUEUE_FLUSH, null, "number_click_" + value) }
 
