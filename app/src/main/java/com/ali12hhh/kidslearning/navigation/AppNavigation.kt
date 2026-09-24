@@ -34,6 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -302,7 +303,7 @@ private fun HomePage(
                     }
 
                     Spacer(Modifier.height(4.dp))
-                    ChildProfileCard(cardColor, textColor, onCollection) { showChildProfile = true }
+                    key(refreshKey) { ChildProfileCard(cardColor, textColor, onCollection) { showChildProfile = true } }
                     Spacer(Modifier.weight(1f))
 
                     Row(
