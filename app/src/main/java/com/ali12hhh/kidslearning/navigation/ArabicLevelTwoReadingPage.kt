@@ -256,6 +256,27 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
     var currentStroke by remember(lesson.letter) { mutableStateOf<List<Offset>>(emptyList()) }
     val forms = listOf(lesson.initial, lesson.medial, lesson.final)
     val labels = listOf("أولي", "وسطي", "أخري")
+    val context = LocalContext.current
+    var tts by remember { mutableStateOf<TextToSpeech?>(null) }
+    var ready by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        val engine = TextToSpeech(context) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                LessonSpeech.configure(engine, LessonSpeech.ARABIC_LOCALE)
+                ready = true
+            }
+        }
+        tts = engine
+        onDispose { engine.stop(); engine.shutdown(); tts = null }
+    }
+
+    LaunchedEffect(lesson.letter, ready) {
+        if (ready && AppSettings.isSpeechEnabled(context)) {
+            tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "writing_letter_" + lesson.letter)
+        }
+    }
+
     val dots = when (lesson.letter) {
         "ب", "ت", "ث", "ن" -> 1
         "ي" -> 2
@@ -270,7 +291,10 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
             forms.forEachIndexed { i, form ->
                 val selected = selectedForm == i
                 Card(
-                    Modifier.weight(1f).height(62.dp).clickable { selectedForm = i },
+                    Modifier.weight(1f).height(62.dp).clickable { selectedForm = i
+                        if (ready && AppSettings.isSpeechEnabled(context)) {
+                            tts?.speak(lesson.name + "، " + labels[i], TextToSpeech.QUEUE_FLUSH, null, "writing_form_" + lesson.letter + "_" + i)
+                        } },
                     shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(containerColor = if (selected) Color(0xFF315CFF) else Color.White)
                 ) {
