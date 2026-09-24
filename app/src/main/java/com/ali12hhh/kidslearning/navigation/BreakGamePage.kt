@@ -203,7 +203,6 @@ fun BreakGamePage(onBack: () -> Unit) {
             .apply {
                 rotation = Rotation(y = 180f)
             }
-            )
         }
     }
     val playerX = (playerLane - 1) * 0.78f
