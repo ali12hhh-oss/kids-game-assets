@@ -104,6 +104,10 @@ Card(Modifier.fillMaxWidth().shadow(7.dp,RoundedCornerShape(22.dp)),shape=Rounde
 Text(arDigits(q.left)+" "+(if(title=="الجمع")"+" else "-")+" "+arDigits(q.right)+" = ؟",fontSize=42.sp,fontWeight=FontWeight.Black,color=numberColor(index+1));Text(q.question,Modifier.fillMaxWidth(),fontSize=18.sp,fontWeight=FontWeight.Black,textAlign=TextAlign.Center);OutlinedButton(onClick={speak(q.question,"question_"+title+"_"+index)}){Text("🔊 صوت السؤال",fontWeight=FontWeight.ExtraBold)}}}
 q.options.forEach{option->val correct=option==q.answer;val c=when{selected==option&&correct->Color(0xFF2EAD67);selected==option&&!correct->Color(0xFFE05A5A);else->Color.White};ProLessonButton(onClick={if(selected==null){selected=option;if(correct){score++;reaction=1;AppSettings.awardCorrectAnswer(context);speak("أحسنت! إجابة صحيحة","correct_"+title+"_"+index)}else{reaction=-1;speak("حاول مرة ثانية","wrong_"+title+"_"+index)}}},Modifier.fillMaxWidth().height(48.dp),colors=ButtonDefaults.buttonColors(containerColor=c,contentColor=if(selected!=null)Color.White else Color(0xFF24324A))){Box(Modifier.fillMaxWidth(),contentAlignment=Alignment.Center){Text(arDigits(option),fontSize=20.sp,fontWeight=FontWeight.Black,textAlign=TextAlign.Center)}}}}
 CharacterReactionMath(reaction)
+Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){
+ProLessonButton(onClick={if(index>0){index--;selected=null;reaction=0}},modifier=Modifier.weight(1f).height(50.dp),colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF5B6B88)),shape=RoundedCornerShape(16.dp)){Text("السابق",fontWeight=FontWeight.ExtraBold)}
+ProLessonButton(onClick={if(index<quizzes.lastIndex){index++;selected=null;reaction=0}},modifier=Modifier.weight(1f).height(50.dp),colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF315CFF)),shape=RoundedCornerShape(16.dp)){Text("التالي",fontWeight=FontWeight.ExtraBold)}
+}
 }
 
 @Composable private fun CharacterReactionMath(reaction:Int){
