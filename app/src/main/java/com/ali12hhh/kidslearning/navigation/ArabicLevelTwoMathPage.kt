@@ -155,20 +155,18 @@ private fun NumberWritingSection() {
                 Text(arDigits(number), Modifier.align(Alignment.Center), fontSize = 118.sp, fontWeight = FontWeight.Black, color = Color(0xFFE9EDF6))
                 Canvas(Modifier.fillMaxSize().pointerInput(number) {
                     awaitEachGesture {
-                        awaitPointerEventScope {
-                            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
-                            down.consume()
-                            var points = listOf(down.position)
-                            strokes = strokes + StrokeLine(points)
+                        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
+                        down.consume()
+                        var points = listOf(down.position)
+                        strokes = strokes + StrokeLine(points)
 
-                            while (true) {
-                                val event = awaitPointerEvent(PointerEventPass.Main)
-                                val change = event.changes.firstOrNull() ?: break
-                                if (!change.pressed) break
-                                change.consume()
-                                points = points + change.position
-                                strokes = strokes.dropLast(1) + StrokeLine(points)
-                            }
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Main)
+                            val change = event.changes.firstOrNull() ?: break
+                            if (!change.pressed) break
+                            change.consume()
+                            points = points + change.position
+                            strokes = strokes.dropLast(1) + StrokeLine(points)
                         }
                     }
                 }) {
