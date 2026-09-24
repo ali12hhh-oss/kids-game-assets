@@ -6,7 +6,9 @@ import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -282,14 +284,29 @@ private fun WritingSection(
             Box(Modifier.fillMaxSize().padding(10.dp)) {
                 Canvas(
                     Modifier.fillMaxSize().background(Color(0xFFFFFDF4)).pointerInput(lesson.result) {
-                        detectDragGestures(
-                            onDragStart = { offset -> currentStroke = listOf(offset) },
-                            onDrag = { change, _ -> change.consume(); currentStroke = currentStroke + change.position },
-                            onDragEnd = {
-                                if (currentStroke.size == 1 || currentStroke.size > 1) strokes.add(currentStroke)
-                                currentStroke = emptyList()
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
+                            down.consume()
+                            var points = listOf(down.position)
+                            var moved = false
+
+                            while (true) {
+                                val event = awaitPointerEvent(PointerEventPass.Main)
+                                val change = event.changes.firstOrNull() ?: break
+                                if (!change.pressed) {
+                                    if (moved && points.size > 1) strokes.add(points)
+                                    else strokes.add(listOf(change.position))
+                                    break
+                                }
+                                change.consume()
+                                if (change.position != points.last()) {
+                                    moved = true
+                                    points = points + change.position
+                                    currentStroke = points
+                                }
                             }
-                        )
+                            currentStroke = emptyList()
+                        }
                     }
                 ) {
                     drawWritingGuides()
