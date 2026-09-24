@@ -1,5 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
+import com.ali12hhh.kidslearning.navigation.ProLessonButton
+
 import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.Canvas
@@ -183,12 +185,12 @@ private fun LetterWritingSection() {
         Spacer(Modifier.height(8.dp))
         Text("${lesson.upper} — ${lesson.word}", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
         Text(lesson.meaning, color = Color(0xFF53647A))
-        Button(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak("${lesson.upper}. ${lesson.word}", TextToSpeech.QUEUE_FLUSH, null, "letter") }) {
+        ProLessonButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak("${lesson.upper}. ${lesson.word}", TextToSpeech.QUEUE_FLUSH, null, "letter") }) {
             Text("🔊 اسمع الحرف والكلمة")
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(modifier = Modifier.weight(1f), enabled = index > 0, onClick = { index-- }) { Text("السابق") }
-            Button(modifier = Modifier.weight(1f), enabled = index < traceLetters.lastIndex, onClick = { index++ }) { Text("التالي") }
+        Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ProLessonButton(modifier = Modifier.weight(1f), enabled = index > 0, onClick = { index-- }) { Text("السابق") }
+            ProLessonButton(modifier = Modifier.weight(1f), enabled = index < traceLetters.lastIndex, onClick = { index++ }) { Text("التالي") }
         }
         Text("${index + 1} / ${traceLetters.size}", fontWeight = FontWeight.Bold)
     }
@@ -222,12 +224,12 @@ private fun NumberWritingSection() {
         Spacer(Modifier.height(8.dp))
         Text(arabicDigits(number), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF2563EB))
         Text("$number — $name", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
-        Button(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(name, TextToSpeech.QUEUE_FLUSH, null, "number") }) {
+        ProLessonButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(name, TextToSpeech.QUEUE_FLUSH, null, "number") }) {
             Text("🔊 اسمع الرقم")
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(modifier = Modifier.weight(1f), enabled = number > 1, onClick = { number-- }) { Text("السابق") }
-            Button(modifier = Modifier.weight(1f), enabled = number < 99, onClick = { number++ }) { Text("التالي") }
+        Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ProLessonButton(modifier = Modifier.weight(1f), enabled = number > 1, onClick = { number-- }) { Text("السابق") }
+            ProLessonButton(modifier = Modifier.weight(1f), enabled = number < 99, onClick = { number++ }) { Text("التالي") }
         }
         Text("${arabicDigits(number)} من ٩٩", fontWeight = FontWeight.Bold)
     }
