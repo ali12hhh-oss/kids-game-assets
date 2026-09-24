@@ -95,26 +95,169 @@ Text(ex.explanation,Modifier.fillMaxWidth(),fontSize=18.sp,lineHeight=28.sp,text
 ProLessonButton(onClick={if(ready)if (AppSettings.isSpeechEnabled(context)) tts?.speak(ex.explanation,TextToSpeech.QUEUE_FLUSH,null,"example_"+title+"_"+index)},Modifier.height(52.dp)){Text("🔊 اسمع الشرح",fontWeight=FontWeight.ExtraBold)}}}
 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){ProLessonButton(onClick={if(index>0)index--},Modifier.weight(1f).height(54.dp),colors=ButtonDefaults.buttonColors(Color(0xFF5B6B88))){Text("السابق",fontWeight=FontWeight.ExtraBold)};ProLessonButton(onClick={if(index<examples.lastIndex)index++},Modifier.weight(1f).height(54.dp)){Text("التالي",fontWeight=FontWeight.ExtraBold)}}}}
 
-@Composable private fun QuizOperation(title:String,quizzes:List<ArithmeticQuiz>){
-var index by remember(title){mutableStateOf(0)};var selected by remember(title){mutableStateOf<Int?>(null)};var score by remember(title){mutableStateOf(0)};var reaction by remember(title){mutableStateOf(0)};val scope=rememberCoroutineScope();val context=LocalContext.current;var ready by remember{mutableStateOf(false)};var tts by remember{mutableStateOf<TextToSpeech?>(null)};val q=quizzes[index]
-DisposableEffect(title){lateinit var e:TextToSpeech;e=TextToSpeech(context){s->if(s==TextToSpeech.SUCCESS){e.setLanguage(Locale.forLanguageTag("ar-XA"));e.setSpeechRate(0.82f);ready=true}};tts=e;onDispose{e.stop();e.shutdown()}}
-fun speak(text:String,id:String){if(ready)if (AppSettings.isSpeechEnabled(context)) tts?.speak(text,TextToSpeech.QUEUE_FLUSH,null,id)}
-Column(Modifier.fillMaxSize(),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(6.dp)){
-Text("سؤال "+arDigits(index+1)+" / "+arDigits(quizzes.size)+" • النتيجة "+arDigits(score),fontWeight=FontWeight.Bold,color=Color(0xFF65738A));
-Card(Modifier.fillMaxWidth().shadow(7.dp,RoundedCornerShape(22.dp)),shape=RoundedCornerShape(22.dp),colors=CardDefaults.cardColors(Color.White)){Column(Modifier.fillMaxWidth().padding(14.dp),horizontalAlignment=Alignment.CenterHorizontally){
-Text(arDigits(q.left)+" "+(if(title=="الجمع")"+" else "-")+" "+arDigits(q.right)+" = ؟",fontSize=42.sp,fontWeight=FontWeight.Black,color=numberColor(index+1));Text(q.question,Modifier.fillMaxWidth(),fontSize=18.sp,fontWeight=FontWeight.Black,textAlign=TextAlign.Center);OutlinedButton(onClick={speak(q.question,"question_"+title+"_"+index)}){Text("🔊 صوت السؤال",fontWeight=FontWeight.ExtraBold)}}}
-q.options.forEach{option->val correct=option==q.answer;val c=when{selected==option&&correct->Color(0xFF2EAD67);selected==option&&!correct->Color(0xFFE05A5A);else->Color.White};ProLessonButton(onClick={if(selected==null){selected=option;if(correct){score++;reaction=1;AppSettings.awardCorrectAnswer(context);speak("أحسنت! إجابة صحيحة","correct_"+title+"_"+index)}else{reaction=-1;speak("حاول مرة ثانية","wrong_"+title+"_"+index)};scope.launch{delay(900);if(index<quizzes.lastIndex){index++;selected=null;reaction=0}}}},Modifier.fillMaxWidth().height(48.dp),colors=ButtonDefaults.buttonColors(containerColor=c,contentColor=if(selected!=null)Color.White else Color(0xFF24324A))){Box(Modifier.fillMaxWidth(),contentAlignment=Alignment.Center){Text(arDigits(option),fontSize=20.sp,fontWeight=FontWeight.Black,textAlign=TextAlign.Center)}}}}
-CharacterReactionMath(reaction)
-Row(Modifier.fillMaxWidth().navigationBarsPadding(),horizontalArrangement=Arrangement.spacedBy(10.dp)){
-ProLessonButton(onClick={if(index>0){index--;selected=null;reaction=0}},modifier=Modifier.weight(1f).height(50.dp),colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF5B6B88)),shape=RoundedCornerShape(16.dp)){Text("السابق",fontWeight=FontWeight.ExtraBold)}
-ProLessonButton(onClick={if(index<quizzes.lastIndex){index++;selected=null;reaction=0}},modifier=Modifier.weight(1f).height(50.dp),colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF315CFF)),shape=RoundedCornerShape(16.dp)){Text("التالي",fontWeight=FontWeight.ExtraBold)}
+@Composable
+private fun QuizOperation(title:String,quizzes:List<ArithmeticQuiz>){
+    var index by remember(title){mutableStateOf(0)}
+    var selected by remember(title){mutableStateOf<Int?>(null)}
+    var score by remember(title){mutableStateOf(0)}
+    var reaction by remember(title){mutableStateOf(0)}
+    val scope=rememberCoroutineScope()
+    val context=LocalContext.current
+    var ready by remember{mutableStateOf(false)}
+    var tts by remember{mutableStateOf<TextToSpeech?>(null)}
+    val q=quizzes[index]
+
+    DisposableEffect(title){
+        lateinit var e:TextToSpeech
+        e=TextToSpeech(context){s->if(s==TextToSpeech.SUCCESS){e.setLanguage(Locale.forLanguageTag("ar-XA"));e.setSpeechRate(0.82f);ready=true}}
+        tts=e
+        onDispose{e.stop();e.shutdown()}
+    }
+
+    fun speak(text:String,id:String){
+        if(ready && AppSettings.isSpeechEnabled(context)){
+            tts?.stop()
+            tts?.speak(text,TextToSpeech.QUEUE_FLUSH,null,id)
+        }
+    }
+
+    Box(Modifier.fillMaxSize()){
+        Column(
+            Modifier.fillMaxSize().padding(horizontal=72.dp),
+            horizontalAlignment=Alignment.CenterHorizontally,
+            verticalArrangement=Arrangement.spacedBy(6.dp)
+        ){
+            Text("سؤال "+arDigits(index+1)+" / "+arDigits(quizzes.size)+" • النتيجة "+arDigits(score),fontWeight=FontWeight.Bold,color=Color(0xFF65738A))
+            Card(
+                Modifier.fillMaxWidth().shadow(7.dp,RoundedCornerShape(22.dp)),
+                shape=RoundedCornerShape(22.dp),
+                colors=CardDefaults.cardColors(Color.White)
+            ){
+                Column(Modifier.fillMaxWidth().padding(12.dp),horizontalAlignment=Alignment.CenterHorizontally){
+                    Text(arDigits(q.left)+" "+(if(title=="الجمع")"+" else "-")+" "+arDigits(q.right)+" = ؟",fontSize=42.sp,fontWeight=FontWeight.Black,color=numberColor(index+1))
+                    Text(q.question,Modifier.fillMaxWidth(),fontSize=18.sp,fontWeight=FontWeight.Black,textAlign=TextAlign.Center)
+                    OutlinedButton(onClick={speak(q.question,"question_"+title+"_"+index)}){Text("🔊 صوت السؤال",fontWeight=FontWeight.ExtraBold)}
+                }
+            }
+
+            q.options.forEach{option->
+                val correct=option==q.answer
+                val c=when{
+                    selected==option&&correct->Color(0xFF2EAD67)
+                    selected==option&&!correct->Color(0xFFE05A5A)
+                    else->Color.White
+                }
+                ProLessonButton(
+                    onClick={
+                        if(selected==null){
+                            selected=option
+                            if(correct){
+                                score++
+                                reaction=1
+                                AppSettings.awardCorrectAnswer(context)
+                                speak("أحسنت! إجابة صحيحة","correct_"+title+"_"+index)
+                            }else{
+                                reaction=-1
+                                speak("حاول مرة أخرى","wrong_"+title+"_"+index)
+                            }
+                            scope.launch{
+                                delay(1500)
+                                if(index<quizzes.lastIndex){
+                                    index++
+                                    selected=null
+                                    reaction=0
+                                }
+                            }
+                        }
+                    },
+                    Modifier.fillMaxWidth().height(48.dp),
+                    colors=ButtonDefaults.buttonColors(
+                        containerColor=c,
+                        contentColor=if(selected!=null)Color.White else Color(0xFF24324A)
+                    )
+                ){
+                    Box(Modifier.fillMaxWidth(),contentAlignment=Alignment.Center){
+                        Text(arDigits(option),fontSize=20.sp,fontWeight=FontWeight.Black,textAlign=TextAlign.Center)
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(2.dp))
+            CharacterReactionMath(reaction)
+        }
+
+        if(index>0){
+            ProLessonButton(
+                onClick={tts?.stop();index--;selected=null;reaction=0},
+                modifier=Modifier.align(Alignment.CenterStart).width(62.dp).height(58.dp),
+                colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF5B6B88)),
+                shape=RoundedCornerShape(18.dp)
+            ){Text("‹
+السابق",fontWeight=FontWeight.ExtraBold,textAlign=TextAlign.Center)}
+        }
+
+        if(index<quizzes.lastIndex){
+            ProLessonButton(
+                onClick={tts?.stop();index++;selected=null;reaction=0},
+                modifier=Modifier.align(Alignment.CenterEnd).width(62.dp).height(58.dp),
+                colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF315CFF)),
+                shape=RoundedCornerShape(18.dp)
+            ){Text("التالي
+›",fontWeight=FontWeight.ExtraBold,textAlign=TextAlign.Center)}
+        }
+    }
 }
 
-}
+@Composable
+private fun CharacterReactionMath(reaction:Int){
+    val engine=rememberEngine()
+    val loader=rememberModelLoader(engine)
+    val model=remember{runCatching{loader.createModelInstance("Mannequin_Medium_Anim.glb")}.getOrNull()}
+    val camera=rememberCameraNode(engine){position=Position(z=3.15f)}
+    val node=remember(model){
+        model?.let{
+            ModelNode(
+                modelInstance=it,
+                autoAnimate=false,
+                scaleToUnits=2.65f
+            ).also{
+                it.position=Position(x=0f,y=-0.62f,z=0f)
+            }
+        }
+    }
 
-@Composable private fun CharacterReactionMath(reaction:Int){
-val engine=rememberEngine();val loader=rememberModelLoader(engine);val model=remember{runCatching{loader.createModelInstance("Mannequin_Medium_Anim.glb")}.getOrNull()};val camera=rememberCameraNode(engine){position=Position(z=3.5f)};val node=remember(model){model?.let{ModelNode(modelInstance=it,autoAnimate=false,scaleToUnits = 2.2f).also{it.position=Position(x=0f,y=-0.45f,z=0f)}}}
-LaunchedEffect(reaction,node){val n=node?:return@LaunchedEffect;if(reaction==1){runCatching{n.stopAnimation(8)};runCatching{n.playAnimation(7,1f,false)};delay(1800);runCatching{n.stopAnimation(7)}}else if(reaction==-1){runCatching{n.stopAnimation(7)};runCatching{n.playAnimation(8,1f,false)}}else{runCatching{n.playAnimation(0,1f,true)}}}
-Card(Modifier.fillMaxWidth().height(104.dp),shape=RoundedCornerShape(20.dp),colors=CardDefaults.cardColors(Color(0xFFF8FAFF))){Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center){Scene(modifier=Modifier.fillMaxSize(),engine=engine,modelLoader=loader,cameraNode=camera,cameraManipulator=null,isOpaque=false,childNodes=listOfNotNull(node))}}}
+    LaunchedEffect(reaction,node){
+        val n=node?:return@LaunchedEffect
+        if(reaction==1){
+            runCatching{n.stopAnimation(8)}
+            runCatching{n.playAnimation(7,1f,false)}
+            delay(1800)
+            runCatching{n.stopAnimation(7)}
+        }else if(reaction==-1){
+            runCatching{n.stopAnimation(7)}
+            runCatching{n.playAnimation(8,1f,false)}
+        }else{
+            runCatching{n.playAnimation(0,1f,true)}
+        }
+    }
+
+    Card(
+        Modifier.fillMaxWidth().height(145.dp),
+        shape=RoundedCornerShape(20.dp),
+        colors=CardDefaults.cardColors(Color(0xFFF8FAFF))
+    ){
+        Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center){
+            Scene(
+                modifier=Modifier.fillMaxSize(),
+                engine=engine,
+                modelLoader=loader,
+                cameraNode=camera,
+                cameraManipulator=null,
+                isOpaque=false,
+                childNodes=listOfNotNull(node)
+            )
+        }
+    }
+}
 
 private fun numberColor(n:Int)=listOf(Color(0xFF315CFF),Color(0xFFE64A6B),Color(0xFF16A085),Color(0xFFE67E22),Color(0xFF7A4DCE),Color(0xFF008C95))[(n-1)%6]
