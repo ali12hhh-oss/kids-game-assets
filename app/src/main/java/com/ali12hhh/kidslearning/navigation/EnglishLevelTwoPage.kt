@@ -136,7 +136,7 @@ private fun WritingBoard(guide: String, guideSize: androidx.compose.ui.unit.Text
                         moveTo(points.first().x, points.first().y)
                         points.drop(1).forEach { lineTo(it.x, it.y) }
                     }
-                    drawPath(path, Color(0xFF2456A6), style = Stroke(width = 10f, cap = StrokeCap.Round))
+                    drawPath(path, Color(0xFF2456A6), style = Stroke(width = 30f, cap = StrokeCap.Round))
                 }
             }
             strokes.forEach(::drawStroke)
@@ -179,7 +179,7 @@ private fun LetterWritingSection() {
             FilterChip(!upper, { upper = false }, label = { Text("صغير a–z", fontSize = 12.sp) }, leadingIcon = { Text("a", fontWeight = FontWeight.Black) })
             FilterChip(upper, { upper = true }, label = { Text("كبير A–Z", fontSize = 12.sp) }, leadingIcon = { Icon(Icons.Default.Edit, null) })
         }
-        WritingBoard(if (upper) lesson.upper else lesson.lower, 150.sp, modifier = Modifier.fillMaxWidth().weight(1f), onClear = {})
+        key(upper, lesson.upper, lesson.lower) { WritingBoard(if (upper) lesson.upper else lesson.lower, 150.sp, modifier = Modifier.fillMaxWidth().weight(1f), onClear = {}) }
         Row(Modifier.fillMaxWidth().padding(top = 6.dp).navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ProLessonButton(modifier = Modifier.weight(1f).height(46.dp), enabled = index > 0, onClick = { index-- }) { Text("‹  السابق", fontWeight = FontWeight.ExtraBold) }
             ProLessonButton(modifier = Modifier.weight(1f).height(46.dp), enabled = index < traceLetters.lastIndex, onClick = { index++ }) { Text("التالي  ›", fontWeight = FontWeight.ExtraBold) }
@@ -215,7 +215,7 @@ private fun NumberWritingSection() {
     Column(Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 5.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("اكتب الرقم بنفسك", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
         Text("تدرّب على 1 إلى 99", fontSize = 12.sp, color = Color(0xFF61728B))
-        WritingBoard(number.toString(), 135.sp, modifier = Modifier.fillMaxWidth().weight(1f), onClear = {})
+        key(number) { WritingBoard(number.toString(), 135.sp, modifier = Modifier.fillMaxWidth().weight(1f), onClear = {}) }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
             Text(arabicDigits(number), fontSize = 21.sp, fontWeight = FontWeight.Black, color = Color(0xFF2563EB))
             Spacer(Modifier.width(8.dp))
