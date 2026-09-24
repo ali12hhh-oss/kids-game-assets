@@ -153,7 +153,7 @@ private fun LearnReadingSection(
                 if (preferred == TextToSpeech.LANG_NOT_SUPPORTED || preferred == TextToSpeech.LANG_MISSING_DATA) {
                     engine.language = Locale("ar")
                 }
-                engine.setSpeechRate(0.82f)
+                engine.setSpeechRate(0.78f)
                 engine.setPitch(0.98f)
                 ready = true
             }
@@ -166,11 +166,33 @@ private fun LearnReadingSection(
         }
     }
 
+    val explanation = remember(lesson) {
+        "في هذا المثال نتعلم قراءة المقطع ${lesson.result}. " +
+            "لدينا أولًا الحرف ${lesson.first}، ثم يأتي بعده الحرف ${lesson.second}. " +
+            "نلاحظ شكل الحرف الأول ومكانه، ثم نلاحظ شكل الحرف الثاني وترتيبه. " +
+            "عندما نرى الحرفين متتابعين في الكلمة، نقرأهما بالترتيب من اليمين إلى اليسار، " +
+            "فنصل إلى المقطع ${lesson.result}. " +
+            "إذن ${lesson.first} ثم ${lesson.second}، والنتيجة التي نقرأها هي ${lesson.result}. " +
+            "تذكّر: لا نغيّر ترتيب الحرفين، وننظر إلى شكل كل حرف ثم نقرأ المقطع كاملًا."
+    }
+
+    LaunchedEffect(index, ready) {
+        if (ready && AppSettings.isSpeechEnabled(context)) {
+            tts?.stop()
+            tts?.speak(explanation, TextToSpeech.QUEUE_FLUSH, null, "lesson_explanation_${index}")
+        }
+    }
+
+    fun speakExplanation() {
+        if (ready && AppSettings.isSpeechEnabled(context)) {
+            tts?.stop()
+            tts?.speak(explanation, TextToSpeech.QUEUE_FLUSH, null, "lesson_explanation_manual_${index}")
+        }
+    }
+
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        LaunchedEffect(index, ready) { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak("نستمع إلى صوت الحرف الأول: ${LetterSpeech.arabic(lesson.first)}. ثم صوت الحرف الثاني: ${LetterSpeech.arabic(lesson.second)}. والآن نصل الصوتين معًا فنقول: ${lesson.result}.", TextToSpeech.QUEUE_FLUSH, null, "lesson_change_${index}") }
-        fun speak(text: String, id: String) { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, id) }
         Text(
-            "نركّب الحرفين معًا ثم ننطق المقطع بوضوح",
+            "تعلم كيف نقرأ الحرفين معًا ونكوّن المقطع",
             fontSize = 15.sp, color = Color(0xFF66748B), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(7.dp))
@@ -185,15 +207,30 @@ private fun LearnReadingSection(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text("مثال تعليمي ${index + 1}", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF718099))
+                Text("شرح تعليمي • مثال ${index + 1}", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF718099))
 
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                    LessonLetterCard(lesson.first, Modifier.weight(1f)) { LetterSpeech.speakArabic(tts, lesson.first, "letter_first_${index}") }
+                    LessonLetterCard(lesson.first, Modifier.weight(1f)) {
+                        tts?.stop()
+                        if (ready && AppSettings.isSpeechEnabled(context)) {
+                            tts?.speak("الحرف ${lesson.first}", TextToSpeech.QUEUE_FLUSH, null, "letter_first_${index}")
+                        }
+                    }
                     Text("+", modifier = Modifier.padding(horizontal = 8.dp), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF6C7890))
-                    LessonLetterCard(lesson.second, Modifier.weight(1f)) { LetterSpeech.speakArabic(tts, lesson.second, "letter_second_${index}") }
+                    LessonLetterCard(lesson.second, Modifier.weight(1f)) {
+                        tts?.stop()
+                        if (ready && AppSettings.isSpeechEnabled(context)) {
+                            tts?.speak("الحرف ${lesson.second}", TextToSpeech.QUEUE_FLUSH, null, "letter_second_${index}")
+                        }
+                    }
                     Text("=", modifier = Modifier.padding(horizontal = 8.dp), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF6C7890))
                     Card(
-                        modifier = Modifier.height(112.dp).weight(1f).shadow(8.dp, RoundedCornerShape(22.dp)).clickable { speak(lesson.result, "result_${index}") },
+                        modifier = Modifier.height(112.dp).weight(1f).shadow(8.dp, RoundedCornerShape(22.dp)).clickable {
+                            tts?.stop()
+                            if (ready && AppSettings.isSpeechEnabled(context)) {
+                                tts?.speak("نقرأ المقطع ${lesson.result}", TextToSpeech.QUEUE_FLUSH, null, "result_${index}")
+                            }
+                        },
                         shape = RoundedCornerShape(22.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF0FF))
                     ) {
@@ -203,7 +240,15 @@ private fun LearnReadingSection(
                     }
                 }
 
-                Text("نقول صوت الحرف الأول، ثم نصلُه بصوت الحرف الثاني، فيتكوّن المقطع: ${lesson.result}", fontSize = 19.sp, fontWeight = FontWeight.Bold, color = Color(0xFF263B72), textAlign = TextAlign.Center)
+                Text(
+                    explanation,
+                    fontSize = 18.sp,
+                    lineHeight = 28.sp,
+                    modifier = Modifier.fillMaxWidth(),
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF263B72),
+                    textAlign = TextAlign.Center
+                )
 
                 Card(
                     Modifier.fillMaxWidth(),
@@ -211,18 +256,11 @@ private fun LearnReadingSection(
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF4F7FF))
                 ) {
                     Column(Modifier.fillMaxWidth().padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("اسمع ثم كرّر", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF66748B))
+                        Text("شرح المثال", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF66748B))
                         ProLessonButton(
-                            onClick = {
-                                if (ready) {
-                                    if (AppSettings.isSpeechEnabled(context)) tts?.speak(
-                                        "صوت ${LetterSpeech.arabic(lesson.first)} مع صوت ${LetterSpeech.arabic(lesson.second)} يساوي ${lesson.result}",
-                                        TextToSpeech.QUEUE_FLUSH, null, "lesson_${index}"
-                                    )
-                                }
-                            },
+                            onClick = { speakExplanation() },
                             shape = RoundedCornerShape(18.dp)
-                        ) { Text("🔊  نطق وشرح المثال", fontWeight = FontWeight.ExtraBold) }
+                        ) { Text("🔊 اسمع الشرح التعليمي", fontWeight = FontWeight.ExtraBold) }
                     }
                 }
 
