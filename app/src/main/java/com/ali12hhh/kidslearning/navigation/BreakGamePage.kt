@@ -73,6 +73,7 @@ fun BreakGamePage(onBack: () -> Unit) {
     var tick by remember { mutableIntStateOf(0) }
     var spawnCounter by remember { mutableIntStateOf(0) }
     var combo by remember { mutableIntStateOf(0) }
+    var bestCombo by remember { mutableIntStateOf(0) }
     var dodged by remember { mutableIntStateOf(0) }
     var perfects by remember { mutableIntStateOf(0) }
     var goldCollected by remember { mutableIntStateOf(0) }
@@ -91,6 +92,7 @@ fun BreakGamePage(onBack: () -> Unit) {
         fastMode = false
         spawnCounter = 0
         combo = 0
+        bestCombo = 0
         dodged = 0
         perfects = 0
         goldCollected = 0
@@ -129,6 +131,7 @@ fun BreakGamePage(onBack: () -> Unit) {
                         if (item.type == STAR || item.type == GOLD_STAR) {
                             collected += 1
                             combo += 1
+                            bestCombo = maxOf(bestCombo, combo)
                             val base = if (item.type == GOLD_STAR) 25 else 10
                             score += base + (combo.coerceAtMost(8) - 1) * 2
                             if (item.type == GOLD_STAR) {
@@ -142,6 +145,7 @@ fun BreakGamePage(onBack: () -> Unit) {
                         } else {
                             dodged += 1
                             combo += 1
+                            bestCombo = maxOf(bestCombo, combo)
                             score += 8 + combo.coerceAtMost(5)
                         }
                     }
@@ -171,7 +175,7 @@ fun BreakGamePage(onBack: () -> Unit) {
         if (remaining <= 0) {
             running = false
             finished = true
-            val reward = (collected / 2).coerceIn(1, 12)
+            val reward = (collected / 2).coerceIn(0, 12)
             if (reward > 0) AppSettings.addStars(context, reward)
         }
     }
@@ -410,8 +414,8 @@ fun BreakGamePage(onBack: () -> Unit) {
                             Text("النقاط  $score", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                             Text("تجاوزت $dodged حاجزًا بنجاح", fontSize = 14.sp, color = Color.Gray)
                             Text("اصطدمت بـ $misses حاجز", fontSize = 14.sp, color = Color.Gray)
-                            Text("⭐ نجوم ذهبية: $goldCollected   🔥 أفضل سلسلة: $combo", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                            Text("حصلت على ⭐ " + (collected / 2).coerceIn(1, 12) + " من نجوم التطبيق", textAlign = TextAlign.Center)
+                            Text("⭐ نجوم ذهبية: $goldCollected   🔥 أفضل سلسلة: $bestCombo", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            Text("حصلت على ⭐ " + (collected / 2).coerceIn(0, 12) + " من نجوم التطبيق", textAlign = TextAlign.Center)
                             Spacer(Modifier.height(4.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Button(onClick = { resetGame() }) { Text("العب مرة أخرى") }
