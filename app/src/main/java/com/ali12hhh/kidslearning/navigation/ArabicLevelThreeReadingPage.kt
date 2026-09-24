@@ -167,7 +167,7 @@ private fun LearnReadingSection(
     }
 
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        LaunchedEffect(index, ready) { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak("نستمع إلى الحرف الأول: ${lesson.first}. ثم الحرف الثاني: ${lesson.second}. والآن نصل الصوتين معًا فنقول: ${lesson.result}.", TextToSpeech.QUEUE_FLUSH, null, "lesson_change_${index}") }
+        LaunchedEffect(index, ready) { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak("نستمع إلى صوت الحرف الأول: ${LetterSpeech.arabic(lesson.first)}. ثم صوت الحرف الثاني: ${LetterSpeech.arabic(lesson.second)}. والآن نصل الصوتين معًا فنقول: ${lesson.result}.", TextToSpeech.QUEUE_FLUSH, null, "lesson_change_${index}") }
         fun speak(text: String, id: String) { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, id) }
         Text(
             "نركّب الحرفين معًا ثم ننطق المقطع بوضوح",
@@ -188,9 +188,9 @@ private fun LearnReadingSection(
                 Text("مثال تعليمي ${index + 1}", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF718099))
 
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                    LessonLetterCard(lesson.first, Modifier.weight(1f)) { speak("حرف ${lesson.first}", "letter_first_${index}") }
+                    LessonLetterCard(lesson.first, Modifier.weight(1f)) { LetterSpeech.speakArabic(tts, lesson.first, "letter_first_${index}") }
                     Text("+", modifier = Modifier.padding(horizontal = 8.dp), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF6C7890))
-                    LessonLetterCard(lesson.second, Modifier.weight(1f)) { speak("حرف ${lesson.second}", "letter_second_${index}") }
+                    LessonLetterCard(lesson.second, Modifier.weight(1f)) { LetterSpeech.speakArabic(tts, lesson.second, "letter_second_${index}") }
                     Text("=", modifier = Modifier.padding(horizontal = 8.dp), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF6C7890))
                     Card(
                         modifier = Modifier.height(112.dp).weight(1f).shadow(8.dp, RoundedCornerShape(22.dp)).clickable { speak(lesson.result, "result_${index}") },
@@ -216,7 +216,7 @@ private fun LearnReadingSection(
                             onClick = {
                                 if (ready) {
                                     if (AppSettings.isSpeechEnabled(context)) tts?.speak(
-                                        "حرف ${lesson.first} مع حرف ${lesson.second} يساوي ${lesson.result}",
+                                        "صوت ${LetterSpeech.arabic(lesson.first)} مع صوت ${LetterSpeech.arabic(lesson.second)} يساوي ${lesson.result}",
                                         TextToSpeech.QUEUE_FLUSH, null, "lesson_${index}"
                                     )
                                 }
