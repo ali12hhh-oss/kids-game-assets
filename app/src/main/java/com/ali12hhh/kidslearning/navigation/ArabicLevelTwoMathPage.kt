@@ -158,15 +158,21 @@ private fun NumberWritingSection() {
                         val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
                         down.consume()
                         var points = listOf(down.position)
-                        strokes = strokes + StrokeLine(points)
+                        var moved = false
 
                         while (true) {
                             val event = awaitPointerEvent(PointerEventPass.Main)
                             val change = event.changes.firstOrNull() ?: break
-                            if (!change.pressed) break
+                            if (!change.pressed) {
+                                strokes = strokes + StrokeLine(if (moved) points else listOf(change.position))
+                                break
+                            }
                             change.consume()
-                            points = points + change.position
-                            strokes = strokes.dropLast(1) + StrokeLine(points)
+                            if (change.position != points.last()) {
+                                moved = true
+                                points = points + change.position
+                                strokes = if (strokes.isEmpty()) strokes else strokes.dropLast(1) + StrokeLine(points)
+                            }
                         }
                     }
                 }) {
