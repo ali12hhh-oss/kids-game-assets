@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.size
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -246,6 +248,7 @@ private fun HomePage(
     val lifecycleOwner = LocalLifecycleOwner.current
     var refreshKey by remember { mutableIntStateOf(0) }
     var darkMode by remember { mutableStateOf(AppSettings.isDarkMode(context)) }
+    var showChildProfile by remember { mutableStateOf(false) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -265,6 +268,10 @@ private fun HomePage(
     }
     val textColor = if (darkMode) Color.White else Color(0xFF24324A)
     val cardColor = if (darkMode) Color(0xFF2E3E5C) else Color.White.copy(alpha = 0.95f)
+
+    if (showChildProfile) {
+        ChildProfileDialog(onDismiss = { showChildProfile = false }, onSaved = { showChildProfile = false })
+    }
 
     Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -293,7 +300,7 @@ private fun HomePage(
                     }
 
                     Spacer(Modifier.height(4.dp))
-                    ChildProfileCard(cardColor, textColor, onCollection)
+                    ChildProfileCard(cardColor, textColor, onCollection) { showChildProfile = true }
                     Spacer(Modifier.weight(1f))
 
                     Row(
@@ -366,9 +373,16 @@ private fun TopAction(icon: String, label: String, textColor: Color, onClick: ()
 }
 
 @Composable
-private fun ChildProfileCard(cardColor: Color, textColor: Color, onCollection: () -> Unit) {
+private fun ChildProfileCard(
+    cardColor: Color,
+    textColor: Color,
+    onCollection: () -> Unit,
+    onOpenProfile: () -> Unit
+) {
+    val context = LocalContext.current
     val shape = RoundedCornerShape(22.dp)
     Card(
+        onClick = onOpenProfile,
         modifier = Modifier.fillMaxWidth().shadow(6.dp, shape),
         shape = shape,
         colors = CardDefaults.cardColors(containerColor = cardColor, contentColor = textColor)
@@ -377,15 +391,19 @@ private fun ChildProfileCard(cardColor: Color, textColor: Color, onCollection: (
             modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val imageUri = AppSettings.childImageUri(LocalContext.current)
-            if (imageUri != null) AsyncImage(model = imageUri, contentDescription = "صورة الطفل", modifier = Modifier.size(58.dp)) else Text("👦", fontSize = 38.sp)
+            val imageUri = AppSettings.childImageUri(context)
+            if (imageUri != null) {
+                AsyncImage(model = imageUri, contentDescription = "صورة الطفل", modifier = Modifier.size(58.dp))
+            } else {
+                Text("👦", fontSize = 38.sp)
+            }
             Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(AppSettings.childName(LocalContext.current), fontWeight = FontWeight.Bold, color = textColor)
-                Text("ملف الطفل", fontSize = 12.sp, color = textColor)
+                Text(AppSettings.childName(context), fontWeight = FontWeight.Bold, color = textColor)
+                Text("اضغط لفتح بطاقة الطفل", fontSize = 12.sp, color = textColor.copy(alpha = .72f))
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("⭐ " + AppSettings.childStars(LocalContext.current), fontWeight = FontWeight.ExtraBold, color = textColor)
+                Text("⭐ " + AppSettings.childStars(context), fontWeight = FontWeight.ExtraBold, color = textColor)
                 Text("نجومي", fontSize = 11.sp, color = textColor)
                 TextButton(onClick = onCollection) {
                     Text("مقتنياتي", fontSize = 11.sp, fontWeight = FontWeight.Black)
@@ -393,6 +411,76 @@ private fun ChildProfileCard(cardColor: Color, textColor: Color, onCollection: (
             }
         }
     }
+}
+
+@Composable
+private fun ChildProfileDialog(
+    onDismiss: () -> Unit,
+    onSaved: () -> Unit
+) {
+    val context = LocalContext.current
+    var name by remember { mutableStateOf(AppSettings.childName(context)) }
+    var imageUri by remember { mutableStateOf(AppSettings.childImageUri(context)) }
+    var error by remember { mutableStateOf("") }
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: Exception) {}
+            imageUri = uri.toString()
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("👤 بطاقة الطفل", fontWeight = FontWeight.ExtraBold) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    if (imageUri != null) {
+                        AsyncImage(model = imageUri, contentDescription = "صورة الطفل", modifier = Modifier.size(110.dp))
+                    } else {
+                        Text("👦", fontSize = 72.sp)
+                    }
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { launcher.launch(arrayOf("image/*")) }, modifier = Modifier.weight(1f)) {
+                        Text("تغيير الصورة")
+                    }
+                    OutlinedButton(onClick = { imageUri = null }, modifier = Modifier.weight(1f)) {
+                        Text("إزالة")
+                    }
+                }
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it; error = "" },
+                    label = { Text("اسم الطفل") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text("⭐ النجوم: " + AppSettings.childStars(context), fontWeight = FontWeight.Bold)
+                Text("🛍️ المقتنيات: " + AppSettings.ownedItems(context).size, fontSize = 13.sp)
+                if (error.isNotBlank()) Text(error, color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                val cleanName = name.trim()
+                if (cleanName.isBlank()) {
+                    error = "اكتب اسم الطفل أولاً."
+                } else {
+                    AppSettings.setChildName(context, cleanName)
+                    AppSettings.setChildImageUri(context, imageUri)
+                    onSaved()
+                }
+            }) { Text("حفظ") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("إلغاء") } }
+    )
 }
 
 @Composable
