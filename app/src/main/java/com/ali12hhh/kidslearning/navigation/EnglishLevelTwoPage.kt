@@ -224,7 +224,7 @@ private fun LetterWritingSection() {
         Spacer(Modifier.height(8.dp))
         Text("${lesson.upper} — ${lesson.word}", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
         Text(lesson.meaning, color = Color(0xFF53647A))
-        ProLessonButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak("${lesson.upper}. ${lesson.word}", TextToSpeech.QUEUE_FLUSH, null, "letter") }) {
+        ProLessonButton(onClick = { if (AppSettings.isSpeechEnabled(context)) LetterSpeech.speakEnglish(tts, lesson.lower, "letter_sound") }) {
             Text("🔊 اسمع الحرف والكلمة")
         }
         Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
