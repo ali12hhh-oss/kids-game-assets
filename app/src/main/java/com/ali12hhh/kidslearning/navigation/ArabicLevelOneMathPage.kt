@@ -5,6 +5,7 @@ import com.ali12hhh.kidslearning.navigation.ProLessonButton
 import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -16,7 +17,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import java.util.Locale
 
@@ -31,8 +34,15 @@ private fun hundreds(v: Int) = v / 100
 fun ArabicLevelOneMathPage(onBack: () -> Unit) {
     var number by remember { mutableStateOf(1) }
     val context = LocalContext.current
+    LaunchedEffect(number, ready) {
+        if (ready && AppSettings.isSpeechEnabled(context)) {
+            tts?.speak(numberSpeech(number), TextToSpeech.QUEUE_FLUSH, null, "number_change_" + number)
+        }
+    }
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
     var ready by remember { mutableStateOf(false) }
+
+    fun speakNumberNow(value: Int) { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak(numberSpeech(value), TextToSpeech.QUEUE_FLUSH, null, "number_click_" + value) }
 
     DisposableEffect(Unit) {
         lateinit var engine: TextToSpeech
@@ -57,7 +67,7 @@ fun ArabicLevelOneMathPage(onBack: () -> Unit) {
             Column(Modifier.fillMaxSize().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
                 Text("العدد " + arabicDigits(number), fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF66748B))
                 Box(Modifier.fillMaxWidth().background(Color(0xFFF1F5FF), RoundedCornerShape(26.dp)).padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-                    Text(arabicDigits(number), fontSize = 88.sp, fontWeight = FontWeight.Black, color = numberColor(number))
+                    Text(arabicDigits(number), Modifier.clickable { speakNumberNow(number) }, fontSize = 88.sp, fontWeight = FontWeight.Black, color = numberColor(number))
                 }
                 if (number >= 10) PlaceValueCard(number) else SimpleUnitsCard(number)
                 ProLessonButton(onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(numberSpeech(number), TextToSpeech.QUEUE_FLUSH, null, "number_" + number) }, modifier = Modifier.height(54.dp), shape = RoundedCornerShape(18.dp)) {
@@ -89,25 +99,30 @@ fun ArabicLevelOneMathPage(onBack: () -> Unit) {
 }
 
 @Composable private fun PlaceValueCard(number: Int) {
-    val t = tens(number); val o = ones(number); val h = hundreds(number)
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(Color(0xFFF4F7FF))) {
-        Column(Modifier.fillMaxWidth().padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("مراتب العدد", fontWeight = FontWeight.Black)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                PlaceValue("آحاد", arabicDigits(o), Color(0xFF315CFF))
-                PlaceValue("عشرات", arabicDigits(t), Color(0xFF16A085))
-                if (h > 0) PlaceValue("مئات", arabicDigits(h), Color(0xFFE67E22))
+    val t = tens(number)
+    val o = ones(number)
+    val h = hundreds(number)
+
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(Color(0xFFF4F7FF))) {
+            Column(Modifier.fillMaxWidth().padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("مراتب العدد", fontWeight = FontWeight.Black)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PlaceValueColumn("آحاد", arabicDigits(o), Color(0xFF315CFF))
+                    PlaceValueColumn("عشرات", arabicDigits(t), Color(0xFF16A085))
+                    if (number >= 100) PlaceValueColumn("مئات", arabicDigits(h), Color(0xFFE67E22))
+                }
             }
-            Text(if (number < 100) "العدد " + arabicDigits(number) + " يتكوّن من " + arabicDigits(t) + " عشرات و" + arabicDigits(o) + " آحاد" else "العدد ١٠٠ يتكوّن من ١ مئة و٠ عشرات و٠ آحاد", fontSize = 15.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         }
     }
 }
 
-@Composable private fun PlaceValue(title: String, value: String, color: Color) {
-    Card(shape = RoundedCornerShape(15.dp), colors = CardDefaults.cardColors(color.copy(alpha = 0.12f))) {
-        Column(Modifier.padding(horizontal = 15.dp, vertical = 7.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(value, fontSize = 25.sp, fontWeight = FontWeight.Black, color = color)
-            Text(title, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = color)
+@Composable private fun PlaceValueColumn(title: String, value: String, color: Color) {
+    Card(Modifier.weight(1f), shape = RoundedCornerShape(15.dp), colors = CardDefaults.cardColors(color.copy(alpha = 0.12f))) {
+        Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(title, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = color)
+            Spacer(Modifier.height(4.dp))
+            Text(value, fontSize = 30.sp, fontWeight = FontWeight.Black, color = color)
         }
     }
 }
