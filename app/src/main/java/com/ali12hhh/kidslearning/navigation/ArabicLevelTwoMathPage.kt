@@ -248,11 +248,11 @@ private fun CharacterReaction(reaction: Int) {
     val engine = rememberEngine()
     val loader = rememberModelLoader(engine)
     val model = remember { runCatching { loader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull() }
-    val camera = rememberCameraNode(engine) { position = Position(z = 3.5f) }
+    val camera = rememberCameraNode(engine) { position = Position(z = 2.6f) }
     val node = remember(model) {
         model?.let {
-            ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = 1.0f).also {
-                it.position = Position(x = 0f, y = -0.45f, z = 0f)
+            ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = 2.2f).also {
+                it.position = Position(x = 0f, y = -0.28f, z = 0f)
             }
         }
     }
