@@ -326,9 +326,8 @@ private fun EnglishNumbersSection() {
                     .padding(horizontal = 12.dp, vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(arabicDigits(number), fontSize = 72.sp, fontWeight = FontWeight.Black, color = color)
-                Text(number.toString(), fontSize = 23.sp, fontWeight = FontWeight.Bold)
-                Text(english, fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, color = color)
+                Text(number.toString(), fontSize = 88.sp, fontWeight = FontWeight.Black, color = color)
+                Text(english, fontSize = 27.sp, fontWeight = FontWeight.ExtraBold, color = color)
                 Spacer(Modifier.height(6.dp))
                 Text(
                     "هذا هو العدد رقم ${arabicDigits(number)}. نتعلم شكله واسمه ونطقه باللغة الإنجليزية.",
