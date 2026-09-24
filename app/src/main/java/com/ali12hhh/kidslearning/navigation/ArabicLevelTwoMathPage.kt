@@ -1,5 +1,6 @@
 package com.ali12hhh.kidslearning.navigation
 import android.speech.tts.TextToSpeech
+import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -153,8 +154,7 @@ private fun PlaceValueLearn() {
         lateinit var e: TextToSpeech
         e = TextToSpeech(context) { s ->
             if (s == TextToSpeech.SUCCESS) {
-                e.setLanguage(Locale.forLanguageTag("ar-XA"))
-                e.setSpeechRate(0.82f)
+                LessonSpeech.configure(e, LessonSpeech.ARABIC_LOCALE)
                 ready = true
             }
         }
@@ -195,8 +195,7 @@ private fun PlaceValueQuiz() {
         lateinit var e: TextToSpeech
         e = TextToSpeech(context) { s ->
             if (s == TextToSpeech.SUCCESS) {
-                e.setLanguage(Locale.forLanguageTag("ar-XA"))
-                e.setSpeechRate(0.8f)
+                LessonSpeech.configure(e, LessonSpeech.ARABIC_LOCALE)
                 ready = true
             }
         }
