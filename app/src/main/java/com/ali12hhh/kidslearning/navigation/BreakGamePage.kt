@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.sceneview.Scene
 import io.github.sceneview.math.Position
+import io.github.sceneview.math.Rotation
 import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
@@ -76,7 +78,6 @@ fun BreakGamePage(onBack: () -> Unit) {
     var combo by remember { mutableIntStateOf(0) }
     var bestCombo by remember { mutableIntStateOf(0) }
     var dodged by remember { mutableIntStateOf(0) }
-    var perfects by remember { mutableIntStateOf(0) }
     var goldCollected by remember { mutableIntStateOf(0) }
     var trapHits by remember { mutableIntStateOf(0) }
     var countdown by remember { mutableIntStateOf(3) }
@@ -96,7 +97,6 @@ fun BreakGamePage(onBack: () -> Unit) {
         combo = 0
         bestCombo = 0
         dodged = 0
-        perfects = 0
         goldCollected = 0
         trapHits = 0
         countdown = 3
@@ -109,7 +109,7 @@ fun BreakGamePage(onBack: () -> Unit) {
     LaunchedEffect(roundId) {
         for (value in 3 downTo 1) {
             countdown = value
-            delay(700)
+            delay(650)
         }
         countdown = 0
     }
@@ -123,33 +123,29 @@ fun BreakGamePage(onBack: () -> Unit) {
             tick++
             elapsedMs += 50
             spawnMs += 50
-            val difficulty = 1f + ((GAME_SECONDS - remaining).toFloat() / GAME_SECONDS) * 0.65f
-            val speed = (if (fastMode) 0.00155f else 0.00105f) * difficulty
+            val difficulty = 1f + ((GAME_SECONDS - remaining).toFloat() / GAME_SECONDS) * 0.7f
+            val speed = (if (fastMode) 0.0018f else 0.0012f) * difficulty
             items.forEach { it.progress += speed * 50f }
 
-            val removeIds = mutableListOf<Int>()
+            val removeIds = mutableSetOf<Int>()
             items.forEach { item ->
-                if (item.progress >= 0.83f) {
+                if (item.progress >= 0.82f) {
                     if (item.lane == playerLane) {
                         if (item.type == STAR || item.type == GOLD_STAR) {
-                            collected += 1
-                            combo += 1
+                            collected++
+                            combo++
                             bestCombo = maxOf(bestCombo, combo)
-                            val base = if (item.type == GOLD_STAR) 25 else 10
-                            score += base + (combo.coerceAtMost(8) - 1) * 2
-                            if (item.type == GOLD_STAR) {
-                                perfects += 1
-                                goldCollected += 1
-                            }
+                            score += (if (item.type == GOLD_STAR) 25 else 10) + (combo.coerceAtMost(8) - 1) * 2
+                            if (item.type == GOLD_STAR) goldCollected++
                         } else if (!jumping) {
-                            misses += 1
+                            misses++
+                            trapHits++
                             combo = 0
-                            trapHits += 1
                             collected = (collected - 2).coerceAtLeast(0)
                             score = (score - 14).coerceAtLeast(0)
                         } else {
-                            dodged += 1
-                            combo += 1
+                            dodged++
+                            combo++
                             bestCombo = maxOf(bestCombo, combo)
                             score += 8 + combo.coerceAtMost(5)
                         }
@@ -159,24 +155,22 @@ fun BreakGamePage(onBack: () -> Unit) {
             }
             items.removeAll { it.id in removeIds }
 
-            if (spawnMs >= (if (fastMode) 650L else 850L) / difficulty) {
+            if (spawnMs >= (if (fastMode) 610L else 820L) / difficulty) {
                 spawnMs = 0L
-                spawnCounter += 1
+                spawnCounter++
                 val lane = Random.nextInt(0, 3)
                 val type = when {
-                    spawnCounter % 7 == 0 -> GOLD_STAR
+                    spawnCounter % 8 == 0 -> GOLD_STAR
                     spawnCounter % 3 == 0 -> BARRIER
                     else -> STAR
                 }
-                items += BreakItem(spawnCounter, lane, type, -0.08f)
+                items += BreakItem(spawnCounter, lane, type, -0.10f)
             }
-
             if (elapsedMs >= 1000L) {
                 elapsedMs -= 1000L
-                remaining -= 1
+                remaining--
             }
         }
-
         if (remaining <= 0) {
             running = false
             finished = true
@@ -187,7 +181,7 @@ fun BreakGamePage(onBack: () -> Unit) {
 
     LaunchedEffect(jumping) {
         if (jumping) {
-            delay(620)
+            delay(680)
             jumping = false
         }
     }
@@ -196,34 +190,33 @@ fun BreakGamePage(onBack: () -> Unit) {
     val modelLoader = rememberModelLoader(engine)
     val model = remember { runCatching { modelLoader.createModelInstance("Mannequin_Medium.glb") }.getOrNull() }
     val cameraNode = rememberCameraNode(engine) {
-        position = Position(x = 0f, y = 0.45f, z = 7.4f)
+        position = Position(x = 0f, y = 0.35f, z = 6.5f)
     }
-    val animationFrame = tick
-    val playerX = (playerLane - 1) * 0.78f
-    val playerY = if (jumping) 0.65f else 0f
     val characterNode = remember(model) {
         model?.let { instance ->
             ModelNode(
                 modelInstance = instance,
                 autoAnimate = true,
-                scaleToUnits = 0.95f,
-                centerOrigin = Position(x = 0f, y = -0.85f, z = 0f)
+                scaleToUnits = 1.08f,
+                centerOrigin = Position(x = 0f, y = -0.88f, z = 0f),
+                rotation = Rotation(y = 180f)
             )
         }
     }
+    val playerX = (playerLane - 1) * 0.78f
+    val playerY = if (jumping) 0.72f else 0f
+    val animationFrame = tick
 
     LaunchedEffect(characterNode, running, jumping, fastMode) {
         val node = characterNode ?: return@LaunchedEffect
-        if (running && !jumping) {
-            runCatching { node.playAnimation(0, if (fastMode) 1.25f else 1f, true) }
-        }
+        if (running && !jumping) runCatching { node.playAnimation(0, if (fastMode) 1.35f else 1.05f, true) }
     }
 
-    Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
+    Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF071421)) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Color(0xFF081525), Color(0xFF163B52), Color(0xFF3C7A72), Color(0xFFB6D68A))))
+            modifier = Modifier.fillMaxSize().background(
+                Brush.verticalGradient(listOf(Color(0xFF06111F), Color(0xFF102D43), Color(0xFF17606A), Color(0xFFB7D78D)))
+            )
         ) {
             Scene(
                 modifier = Modifier.fillMaxSize(),
@@ -232,194 +225,185 @@ fun BreakGamePage(onBack: () -> Unit) {
                 cameraNode = cameraNode,
                 cameraManipulator = null,
                 isOpaque = false,
-                childNodes = listOfNotNull(characterNode?.also {
-                    it.position = Position(x = playerX, y = playerY, z = 0f)
-                })
+                childNodes = listOfNotNull(characterNode?.also { it.position = Position(x = playerX, y = playerY, z = 0f) })
             )
 
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 105.dp, bottom = 190.dp)
-            ) {
-                if (animationFrame < 0) return@Canvas
-                val laneWidth = size.width / 3f
-                val top = size.height * 0.02f
-                val bottom = size.height * 0.98f
-                val horizonY = size.height * 0.34f
-                val roadTop = size.width * 0.22f
-                val roadBottom = size.width * 0.96f
-                drawRect(Color(0xFF1B3A46).copy(alpha = 0.42f), Offset(0f, horizonY), androidx.compose.ui.geometry.Size(size.width, size.height - horizonY))
-                drawLine(Color.White.copy(alpha = 0.16f), Offset(size.width * 0.08f, horizonY), Offset(size.width * 0.02f, size.height), strokeWidth = 6f)
-                drawLine(Color.White.copy(alpha = 0.16f), Offset(size.width * 0.92f, horizonY), Offset(size.width * 0.98f, size.height), strokeWidth = 6f)
-                for (i in 1..2) {
-                    val x = laneWidth * i
-                    drawLine(Color.White.copy(alpha = 0.12f), Offset(x, top), Offset(x, bottom), strokeWidth = 2f)
+            Canvas(modifier = Modifier.fillMaxSize().padding(top = 102.dp, bottom = 178.dp)) {
+                val w = size.width
+                val h = size.height
+                val horizon = h * 0.36f
+                val bottom = h * 1.02f
+                val center = w / 2f
+                // Glowing horizon and distant scenery silhouettes.
+                drawCircle(Color(0xFFFFD66B).copy(alpha = 0.24f), radius = w * 0.17f, center = Offset(center, horizon * 0.72f))
+                val skyline = listOf(0.04f to 0.17f, 0.13f to 0.24f, 0.23f to 0.14f, 0.76f to 0.20f, 0.86f to 0.13f, 0.95f to 0.25f)
+                skyline.forEachIndexed { i, pair ->
+                    val bw = w * (if (i % 2 == 0) 0.09f else 0.07f)
+                    val bh = h * pair.second
+                    drawRect(Color(0xFF071A2A).copy(alpha = 0.72f), Offset(w * pair.first, horizon - bh), Size(bw, bh))
+                    for (row in 0..3) for (col in 0..1) {
+                        drawRect(Color(0xFFFFD66B).copy(alpha = 0.30f), Offset(w * pair.first + bw * (0.2f + col * 0.42f), horizon - bh + bh * (0.18f + row * 0.18f)), Size(bw * 0.12f, bh * 0.07f))
+                    }
                 }
-                drawLine(
-                    Color(0xFFFFD54F).copy(alpha = 0.22f),
-                    Offset(0f, size.height * 0.83f),
-                    Offset(size.width, size.height * 0.83f),
-                    strokeWidth = 5f
-                )
+                // Perspective track, shoulders and three playable lanes.
+                val road = Path().apply {
+                    moveTo(w * 0.43f, horizon)
+                    lineTo(w * 0.57f, horizon)
+                    lineTo(w * 1.04f, bottom)
+                    lineTo(w * -0.04f, bottom)
+                    close()
+                }
+                drawPath(road, Color(0xFF102632).copy(alpha = 0.96f))
+                val leftEdge = Path().apply { moveTo(w * 0.43f, horizon); lineTo(w * -0.04f, bottom) }
+                val rightEdge = Path().apply { moveTo(w * 0.57f, horizon); lineTo(w * 1.04f, bottom) }
+                drawPath(leftEdge, Color(0xFF50D8D2).copy(alpha = 0.78f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 5f))
+                drawPath(rightEdge, Color(0xFF50D8D2).copy(alpha = 0.78f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 5f))
+                for (laneLine in 1..2) {
+                    val topX = w * (0.43f + 0.14f * laneLine)
+                    val bottomX = w * (laneLine / 3f)
+                    drawLine(Color.White.copy(alpha = 0.23f), Offset(topX, horizon), Offset(bottomX, bottom), strokeWidth = 3f)
+                }
+                // Moving dash marks give the road a sense of forward motion.
+                val dashShift = (tick % 24) / 24f
+                for (i in 0..7) {
+                    val t = ((i / 8f) + dashShift / 8f) % 1f
+                    val y = horizon + (bottom - horizon) * t
+                    val spread = 0.12f + t * 0.88f
+                    val dashW = w * (0.008f + t * 0.025f)
+                    for (laneLine in 1..2) {
+                        val x = center + (laneLine - 1.5f) * w * 0.14f * spread * 2f
+                        drawRoundRect(Color.White.copy(alpha = 0.10f + t * 0.23f), Offset(x - dashW / 2f, y), Size(dashW, 5f + t * 13f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(8f, 8f))
+                    }
+                }
+                if (fastMode && running && countdown == 0) {
+                    for (i in 0..13) {
+                        val x = (w * ((i * 37 % 100) / 100f))
+                        val y = horizon + ((i * 61 + tick * 11) % (h.toInt().coerceAtLeast(1))).toFloat()
+                        drawLine(Color(0xFFBDEFFF).copy(alpha = 0.22f), Offset(x, y), Offset(x - w * 0.035f, y + h * 0.055f), strokeWidth = 2f)
+                    }
+                }
+                // Pickups and spike strips scale as they approach the player.
                 items.forEach { item ->
-                    val x = laneWidth * (item.lane + 0.5f)
-                    val y = top + (bottom - top) * item.progress.coerceIn(0f, 1f)
+                    val t = item.progress.coerceIn(0f, 1f)
+                    val perspective = 0.15f + t * 0.85f
+                    val x = center + (item.lane - 1) * w * 0.235f * perspective
+                    val y = horizon + (bottom - horizon) * t
+                    val radius = 8f + t * if (item.type == GOLD_STAR) 28f else 23f
                     if (item.type == STAR) {
-                        drawCircle(Color(0xFFFFD54F), radius = 28f, center = Offset(x, y))
-                        drawCircle(Color.White.copy(alpha = 0.55f), radius = 9f, center = Offset(x - 7f, y - 8f))
+                        drawCircle(Color(0xFFFFB51B).copy(alpha = 0.25f), radius * 1.55f, Offset(x, y))
+                        drawCircle(Color(0xFFFFD54F), radius, Offset(x, y))
+                        drawCircle(Color.White.copy(alpha = 0.72f), radius * 0.27f, Offset(x - radius * 0.28f, y - radius * 0.3f))
                     } else if (item.type == GOLD_STAR) {
-                        drawCircle(Color(0xFFFFA000), radius = 34f, center = Offset(x, y))
-                        drawCircle(Color(0xFFFFE082), radius = 26f, center = Offset(x, y))
-                        drawCircle(Color.White.copy(alpha = 0.72f), radius = 9f, center = Offset(x - 8f, y - 9f))
-                        drawLine(Color.White.copy(alpha = 0.82f), Offset(x - 16f, y), Offset(x + 16f, y), strokeWidth = 4f)
-                        drawLine(Color.White.copy(alpha = 0.82f), Offset(x, y - 16f), Offset(x, y + 16f), strokeWidth = 4f)
+                        drawCircle(Color(0xFFFF8F00).copy(alpha = 0.3f), radius * 1.55f, Offset(x, y))
+                        drawCircle(Color(0xFFFFA000), radius * 1.18f, Offset(x, y))
+                        drawCircle(Color(0xFFFFE082), radius * 0.88f, Offset(x, y))
+                        drawLine(Color.White, Offset(x - radius * 0.48f, y), Offset(x + radius * 0.48f, y), strokeWidth = 3f + t * 2f)
+                        drawLine(Color.White, Offset(x, y - radius * 0.48f), Offset(x, y + radius * 0.48f), strokeWidth = 3f + t * 2f)
                     } else {
-                        val path = Path().apply {
-                            moveTo(x - 34f, y + 24f)
-                            lineTo(x - 24f, y - 22f)
-                            lineTo(x - 12f, y + 24f)
-                            lineTo(x, y - 22f)
-                            lineTo(x + 12f, y + 24f)
-                            lineTo(x + 24f, y - 22f)
-                            lineTo(x + 34f, y + 24f)
+                        val spike = Path().apply {
+                            moveTo(x - radius * 1.3f, y + radius * 0.65f)
+                            lineTo(x - radius * 0.8f, y - radius * 0.85f)
+                            lineTo(x - radius * 0.3f, y + radius * 0.65f)
+                            lineTo(x + radius * 0.15f, y - radius * 0.85f)
+                            lineTo(x + radius * 0.65f, y + radius * 0.65f)
+                            lineTo(x + radius * 1.1f, y - radius * 0.85f)
+                            lineTo(x + radius * 1.5f, y + radius * 0.65f)
                             close()
                         }
-                        drawPath(path, Color(0xFFE34B4B))
-                        drawLine(Color.White.copy(alpha = 0.9f), Offset(x - 28f, y + 20f), Offset(x + 28f, y + 20f), strokeWidth = 5f)
+                        drawRoundRect(Color(0xFF501E2A), Offset(x - radius * 1.65f, y + radius * 0.45f), Size(radius * 3.3f, radius * 0.48f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(5f, 5f))
+                        drawPath(spike, Color(0xFFFF5964))
+                        drawLine(Color(0xFFFFE4E6), Offset(x - radius * 1.3f, y + radius * 0.55f), Offset(x + radius * 1.4f, y + radius * 0.55f), strokeWidth = 2f + t * 4f)
                     }
                 }
             }
 
-            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = { if (finished) onBack() else running = !running },
-                        modifier = Modifier.size(50.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.30f))
-                    ) {
-                        Text(if (finished) "‹" else if (running) "Ⅱ" else "▶", color = Color.White, fontSize = 22.sp)
-                    }
-                    Card(
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.38f))
-                    ) {
-                        Row(modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Text("⭐ $score", color = Color.White, fontWeight = FontWeight.Black, fontSize = 15.sp)
-                            Text("⏱ $remaining", color = Color.White, fontWeight = FontWeight.Black, fontSize = 15.sp)
+            // Compact glass HUD with readable objective and round status.
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp),
+                shape = RoundedCornerShape(26.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xDD071522))
+            ) {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 9.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { if (finished) onBack() else running = !running }, modifier = Modifier.size(43.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.10f))) {
+                            Text(if (finished) "‹" else if (running) "Ⅱ" else "▶", color = Color.White, fontSize = 21.sp, fontWeight = FontWeight.Black)
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("مغامرة ريبو", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                            Text(if (fastMode) "وضع الاندفاع" else "اجمع النجوم وتفادَ الفخاخ", color = Color(0xFFB9D9E7), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text("⭐ $score", color = Color(0xFFFFD54F), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                            Text("⏱ $remaining ث", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
-                }
-                Spacer(Modifier.height(8.dp))
-                Text("مغامرة ريبو", modifier = Modifier.fillMaxWidth(), color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
-                Text("انطلق، اجمع النجوم وتجنب الفخاخ", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.88f), fontSize = 13.sp, textAlign = TextAlign.Center)
-                if (combo > 1) Text("🔥 سلسلة $combo", modifier = Modifier.fillMaxWidth(), color = Color(0xFFFFD54F), fontSize = 13.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(5.dp))
-                Box(Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.18f))) {
-                    Box(Modifier.fillMaxWidth((remaining.toFloat() / GAME_SECONDS).coerceIn(0f, 1f)).fillMaxSize().clip(RoundedCornerShape(8.dp)).background(Color(0xFFFFD54F)))
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.13f))) {
+                            Box(Modifier.fillMaxWidth((remaining.toFloat() / GAME_SECONDS).coerceIn(0f, 1f)).fillMaxSize().background(Brush.horizontalGradient(listOf(Color(0xFF37D6C0), Color(0xFFFFD54F)))))
+                        }
+                        Text("🔥 $combo", color = Color(0xFFFFD54F), fontSize = 12.sp, fontWeight = FontWeight.Black)
+                    }
                 }
             }
 
             Card(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 12.dp, vertical = 12.dp),
-                shape = RoundedCornerShape(30.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.30f))
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding().padding(horizontal = 12.dp, vertical = 10.dp),
+                shape = RoundedCornerShape(28.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xE610211E))
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    LaneJoystick(
-                        lane = playerLane,
-                        onLaneChange = { delta ->
-                            if (running && !finished && countdown == 0) playerLane = (playerLane + delta).coerceIn(0, 2)
+                Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    LaneJoystick(lane = playerLane, onLaneChange = { delta ->
+                        if (running && !finished && countdown == 0) playerLane = (playerLane + delta).coerceIn(0, 2)
+                    })
+                    Row(horizontalArrangement = Arrangement.spacedBy(13.dp), verticalAlignment = Alignment.CenterVertically) {
+                        ControlButton(label = if (fastMode) "⚡" else "🏃", caption = if (fastMode) "اندفاع ON" else "جري", active = fastMode) {
+                            if (running && !finished && countdown == 0) fastMode = !fastMode
                         }
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        ControlButton(
-                            label = if (fastMode) "⚡" else "🏃",
-                            caption = if (fastMode) "اندفاع" else "جري",
-                            active = fastMode,
-                            onClick = { if (running && !finished && countdown == 0) fastMode = !fastMode }
-                        )
-                        ControlButton(
-                            label = "↑",
-                            caption = "قفز",
-                            active = jumping,
-                            onClick = { if (running && !finished && countdown == 0 && !jumping) jumping = true }
-                        )
+                        ControlButton(label = "↑", caption = "قفز", active = jumping) {
+                            if (running && !finished && countdown == 0 && !jumping) jumping = true
+                        }
                     }
                 }
             }
 
             if (countdown > 0 && !finished) {
-                Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.28f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Card(shape = CircleShape, colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.94f))) {
-                        Box(Modifier.size(118.dp), contentAlignment = Alignment.Center) {
-                            Text(countdown.toString(), fontSize = 54.sp, fontWeight = FontWeight.Black, color = Color(0xFF315CFF))
+                Box(Modifier.fillMaxSize().background(Color(0x99020A13)), contentAlignment = Alignment.Center) {
+                    Card(shape = RoundedCornerShape(30.dp), colors = CardDefaults.cardColors(containerColor = Color(0xF20D2638))) {
+                        Column(Modifier.padding(horizontal = 35.dp, vertical = 25.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("استعد يا بطل!", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                            Text(countdown.toString(), color = Color(0xFFFFD54F), fontSize = 64.sp, fontWeight = FontWeight.Black)
+                            Text("حرّك ريبو بين المسارات", color = Color(0xFFB9D9E7), fontSize = 13.sp)
                         }
                     }
                 }
             }
 
             if (!running && !finished) {
-                Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.32f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Card(
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.96f))
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(horizontal = 28.dp, vertical = 22.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text("اللعبة متوقفة", fontSize = 22.sp, fontWeight = FontWeight.Black)
-                            Text("جاهز للعودة إلى المغامرة؟", fontSize = 14.sp, color = Color.DarkGray)
-                            Button(onClick = { running = true }) { Text("متابعة") }
+                Box(Modifier.fillMaxSize().background(Color(0xB8000911)), contentAlignment = Alignment.Center) {
+                    Card(shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F8FB))) {
+                        Column(Modifier.padding(28.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text("توقف مؤقت", fontSize = 25.sp, fontWeight = FontWeight.Black, color = Color(0xFF102B3E))
+                            Text("ريبو ينتظرك لتكمل التحدي", fontSize = 14.sp, color = Color(0xFF476174))
+                            Button(onClick = { running = true }) { Text("متابعة اللعب") }
                         }
                     }
                 }
             }
 
             if (finished) {
-                Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.58f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(0.86f).padding(12.dp),
-                        shape = RoundedCornerShape(28.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Text("نهاية الجولة 🎉", fontSize = 30.sp, fontWeight = FontWeight.Black)
-                            Text("جمعت $collected نجمة", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                            Text("النقاط  $score", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                            Text("تجاوزت $dodged حاجزًا بنجاح", fontSize = 14.sp, color = Color.Gray)
-                            Text("اصطدمت بـ $misses حاجزًا وخسرت نجومًا", fontSize = 14.sp, color = Color.Gray)
-                            Text("⭐ نجوم ذهبية: $goldCollected   🪤 فخاخ: $trapHits   🔥 أفضل سلسلة: $bestCombo", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                            Text("حصلت على ⭐ " + (collected / 2).coerceIn(0, 12) + " من نجوم التطبيق", textAlign = TextAlign.Center)
-                            Spacer(Modifier.height(4.dp))
+                Box(Modifier.fillMaxSize().background(Color(0xD9000810)), contentAlignment = Alignment.Center) {
+                    Card(Modifier.fillMaxWidth(0.9f).padding(8.dp), shape = RoundedCornerShape(30.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FBFF))) {
+                        Column(Modifier.padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                            Text("أحسنت يا بطل! 🎉", color = Color(0xFF102B3E), fontSize = 27.sp, fontWeight = FontWeight.Black)
+                            Text("انتهت مغامرة ريبو", color = Color(0xFF547083), fontSize = 14.sp)
+                            Text("⭐ $collected نجمة    •    النقاط $score", color = Color(0xFF163D56), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                            Text("تجاوزت $dodged فخًا  |  اصطدامات: $misses", color = Color(0xFF547083), fontSize = 13.sp)
+                            Text("النجوم الذهبية: $goldCollected   •   خسائر الفخاخ: $trapHits", color = Color(0xFF547083), fontSize = 12.sp)
+                            Text("أفضل سلسلة: $bestCombo", color = Color(0xFFB77900), fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                            Text("مكافأتك: ⭐ ${(collected / 2).coerceIn(0, 12)} من نجوم التطبيق", color = Color(0xFF163D56), fontSize = 14.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                            Spacer(Modifier.height(3.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                Button(onClick = { resetGame() }) { Text("العب مرة أخرى") }
+                                Button(onClick = { resetGame() }) { Text("العب مجددًا") }
                                 OutlinedButton(onClick = onBack) { Text("خروج") }
                             }
                         }
@@ -434,10 +418,7 @@ fun BreakGamePage(onBack: () -> Unit) {
 private fun LaneJoystick(lane: Int, onLaneChange: (Int) -> Unit) {
     var dragStartX by remember { mutableStateOf<Float?>(null) }
     Box(
-        modifier = Modifier
-            .size(112.dp)
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.10f))
+        modifier = Modifier.size(108.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.09f))
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset -> dragStartX = offset.x },
@@ -456,72 +437,25 @@ private fun LaneJoystick(lane: Int, onLaneChange: (Int) -> Unit) {
             },
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier.size(82.dp).clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.28f))
-        )
-        Row(
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 9.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
+        Box(Modifier.size(82.dp).clip(CircleShape).background(Color(0xB80A1720)))
+        Row(Modifier.align(Alignment.TopCenter).padding(top = 9.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             repeat(3) { index ->
-                Box(
-                    modifier = Modifier
-                        .size(if (index == lane) 8.dp else 6.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (index == lane) Color(0xFFFFD54F)
-                            else Color.White.copy(alpha = 0.30f)
-                        )
-                )
+                Box(Modifier.size(if (index == lane) 8.dp else 6.dp).clip(CircleShape).background(if (index == lane) Color(0xFFFFD54F) else Color.White.copy(alpha = 0.3f)))
             }
         }
-        Box(
-            modifier = Modifier
-                .size(54.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.90f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = when (lane) { 0 -> "←"; 2 -> "→"; else -> "↔" },
-                color = Color(0xFF183047),
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Black
-            )
+        Box(Modifier.size(52.dp).clip(CircleShape).background(Color(0xFFF1F7F9)), contentAlignment = Alignment.Center) {
+            Text(when (lane) { 0 -> "←"; 2 -> "→"; else -> "↔" }, color = Color(0xFF183047), fontSize = 25.sp, fontWeight = FontWeight.Black)
         }
-        Text(
-            text = "اسحب للتحرك",
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp),
-            color = Color.White.copy(alpha = 0.82f),
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Text("اسحب", Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp), color = Color.White.copy(alpha = 0.86f), fontSize = 9.sp, fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
 private fun ControlButton(label: String, caption: String, active: Boolean, onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(70.dp)
-                .clip(CircleShape)
-                .background(if (active) Color(0xFFFFD54F) else Color.Black.copy(alpha = 0.42f))
-                .padding(3.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            IconButton(
-                onClick = onClick,
-                modifier = Modifier.fillMaxSize().clip(CircleShape)
-                    .background(if (active) Color(0xFFFFE27A) else Color.White.copy(alpha = 0.08f))
-            ) {
-                Text(
-                    label,
-                    fontSize = 29.sp,
-                    color = if (active) Color(0xFF24324A) else Color.White,
-                    fontWeight = FontWeight.Black
-                )
+        Box(Modifier.size(68.dp).clip(CircleShape).background(if (active) Color(0xFFFFD54F) else Color(0xB90A1720)).padding(3.dp), contentAlignment = Alignment.Center) {
+            IconButton(onClick = onClick, modifier = Modifier.fillMaxSize().clip(CircleShape).background(if (active) Color(0xFFFFE27A) else Color.White.copy(alpha = 0.08f))) {
+                Text(label, fontSize = 29.sp, color = if (active) Color(0xFF24324A) else Color.White, fontWeight = FontWeight.Black)
             }
         }
         Spacer(Modifier.height(3.dp))
