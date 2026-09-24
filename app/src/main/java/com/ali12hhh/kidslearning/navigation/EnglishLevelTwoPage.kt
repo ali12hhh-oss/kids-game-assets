@@ -3,8 +3,7 @@ package com.ali12hhh.kidslearning.navigation
 import android.speech.tts.TextToSpeech
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,8 +20,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.awaitPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -106,26 +103,21 @@ private fun WritingBoard(guide: String, guideSize: androidx.compose.ui.unit.Text
 
     Card(modifier.fillMaxWidth().padding(horizontal = 2.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFDF7)), elevation = CardDefaults.cardElevation(7.dp)) {
         Canvas(Modifier.fillMaxSize().padding(10.dp).pointerInput(Unit) {
-            awaitEachGesture {
-                val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
-                var points = listOf(down.position)
-                currentStroke = points
-                while (true) {
-                    val event = awaitPointerEvent(PointerEventPass.Main)
-                    val change = event.changes.firstOrNull() ?: break
-                    if (change.pressed) {
-                        val point = change.position
-                        if (point != points.last()) {
-                            points = points + point
-                            currentStroke = points
-                        }
-                    } else {
-                        if (points.isNotEmpty()) strokes.add(points)
-                        currentStroke = emptyList()
-                        break
+            detectDragGestures(
+                onDragStart = { start -> currentStroke = listOf(start) },
+                onDrag = { change, _ ->
+                    val point = change.position
+                    val previous = currentStroke
+                    if (previous.isEmpty() || point != previous.last()) {
+                        currentStroke = previous + point
                     }
-                }
-            }
+                },
+                onDragEnd = {
+                    if (currentStroke.isNotEmpty()) strokes.add(currentStroke)
+                    currentStroke = emptyList()
+                },
+                onDragCancel = { currentStroke = emptyList() }
+            )
         }) {
             drawRect(Color(0xFFF8F0D8))
             drawLine(Color(0xFFD7C79D), Offset(0f, size.height * .78f), Offset(size.width, size.height * .78f), 2f)
