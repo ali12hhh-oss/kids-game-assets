@@ -107,7 +107,6 @@ private fun WritingBoard(guide: String, guideSize: androidx.compose.ui.unit.Text
         Canvas(Modifier.fillMaxSize().padding(10.dp).pointerInput(Unit) {
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
-                down.consume()
                 var points = listOf(down.position)
                 currentStroke = points
                 while (true) {
@@ -190,7 +189,7 @@ private fun LetterWritingSection() {
         WritingBoard(if (upper) lesson.upper else lesson.lower, 150.sp, modifier = Modifier.fillMaxWidth().weight(1f), onClear = {})
         Row(Modifier.fillMaxWidth().padding(top = 6.dp).navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ProLessonButton(modifier = Modifier.weight(1f).height(46.dp), enabled = index > 0, onClick = { index-- }) { Text("‹  السابق", fontWeight = FontWeight.ExtraBold) }
-            ProLessonButton(Modifier.weight(1f).height(46.dp), enabled = index < traceLetters.lastIndex, onClick = { index++ }) { Text("التالي  ›", fontWeight = FontWeight.ExtraBold) }
+            ProLessonButton(modifier = Modifier.weight(1f).height(46.dp), enabled = index < traceLetters.lastIndex, onClick = { index++ }) { Text("التالي  ›", fontWeight = FontWeight.ExtraBold) }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("${lesson.upper} — ${lesson.word}", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
