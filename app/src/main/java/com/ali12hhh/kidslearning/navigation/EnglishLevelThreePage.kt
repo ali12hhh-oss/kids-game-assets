@@ -37,10 +37,10 @@ private data class WordItem(val emoji: String, val word: String, val arabic: Str
 
 private val colorItems = listOf(
     ColorItem("White", "أبيض", Color.White), ColorItem("Black", "أسود", Color.Black),
-    ColorItem("Blue", Color(0xFF1976D2)), ColorItem("Green", Color(0xFF2E7D32)),
-    ColorItem("Orange", Color(0xFFFF8F00)), ColorItem("Yellow", Color(0xFFFFD600)),
-    ColorItem("Brown", Color(0xFF795548)), ColorItem("Red", Color(0xFFD32F2F)),
-    ColorItem("Purple", Color(0xFF7B1FA2))
+    ColorItem("Blue", "أزرق", Color(0xFF1976D2)), ColorItem("Green", "أخضر", Color(0xFF2E7D32)),
+    ColorItem("Orange", "برتقالي", Color(0xFFFF8F00)), ColorItem("Yellow", "أصفر", Color(0xFFFFD600)),
+    ColorItem("Brown", "بني", Color(0xFF795548)), ColorItem("Red", "أحمر", Color(0xFFD32F2F)),
+    ColorItem("Purple", "بنفسجي", Color(0xFF7B1FA2))
 )
 
 private val shapeItems = listOf(
@@ -61,7 +61,7 @@ private val wordItems = listOf(
     WordItem("🐘", "Elephant", "فيل", "Animals"), WordItem("🐰", "Rabbit", "أرنب", "Animals"),
     WordItem("🐻", "Bear", "دب", "Animals"), WordItem("🐼", "Panda", "باندا", "Animals"),
     WordItem("🐵", "Monkey", "قرد", "Animals"), WordItem("🦒", "Giraffe", "زرافة", "Animals"),
-    WordItem("🐘", "Elephant", "فيل", "Animals"), WordItem("🐦", "Bird", "طائر", "Animals"),
+    WordItem("🐴", "Horse", "حصان", "Animals"), WordItem("🐦", "Bird", "طائر", "Animals"),
     WordItem("🐟", "Fish", "سمكة", "Animals"), WordItem("🦋", "Butterfly", "فراشة", "Animals"),
     WordItem("🐝", "Bee", "نحلة", "Animals"), WordItem("🐢", "Turtle", "سلحفاة", "Animals"),
     WordItem("🚗", "Car", "سيارة", "Transport"), WordItem("🚆", "Train", "قطار", "Transport"),
