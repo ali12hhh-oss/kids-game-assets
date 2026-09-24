@@ -31,12 +31,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import java.util.Locale
 
-private data class ColorItem(val name: String, val color: Color)
-private data class ShapeItem(val name: String, val kind: Int)
-private data class WordItem(val emoji: String, val word: String, val category: String)
+private data class ColorItem(val name: String, val arabic: String, val color: Color)
+private data class ShapeItem(val name: String, val arabic: String, val kind: Int)
+private data class WordItem(val emoji: String, val word: String, val arabic: String, val category: String)
 
 private val colorItems = listOf(
-    ColorItem("White", Color.White), ColorItem("Black", Color.Black),
+    ColorItem("White", "أبيض", Color.White), ColorItem("Black", "أسود", Color.Black),
     ColorItem("Blue", Color(0xFF1976D2)), ColorItem("Green", Color(0xFF2E7D32)),
     ColorItem("Orange", Color(0xFFFF8F00)), ColorItem("Yellow", Color(0xFFFFD600)),
     ColorItem("Brown", Color(0xFF795548)), ColorItem("Red", Color(0xFFD32F2F)),
@@ -44,34 +44,34 @@ private val colorItems = listOf(
 )
 
 private val shapeItems = listOf(
-    ShapeItem("Square", 0), ShapeItem("Rectangle", 1),
-    ShapeItem("Circle", 2), ShapeItem("Triangle", 3)
+    ShapeItem("Square", "مربع", 0), ShapeItem("Rectangle", "مستطيل", 1),
+    ShapeItem("Circle", "دائرة", 2), ShapeItem("Triangle", "مثلث", 3)
 )
 
 private val wordItems = listOf(
-    WordItem("🌹", "Rose", "Plants"), WordItem("🌷", "Flower", "Plants"),
-    WordItem("🌳", "Tree", "Plants"), WordItem("🌱", "Plant", "Plants"),
-    WordItem("🌻", "Sunflower", "Plants"), WordItem("🍎", "Apple", "Fruits"),
-    WordItem("🍌", "Banana", "Fruits"), WordItem("🍊", "Orange", "Fruits"),
-    WordItem("🍇", "Grapes", "Fruits"), WordItem("🍓", "Strawberry", "Fruits"),
-    WordItem("🍉", "Watermelon", "Fruits"), WordItem("🍍", "Pineapple", "Fruits"),
-    WordItem("🥭", "Mango", "Fruits"), WordItem("🍋", "Lemon", "Fruits"),
-    WordItem("🐱", "Cat", "Animals"), WordItem("🐶", "Dog", "Animals"),
-    WordItem("🦁", "Lion", "Animals"), WordItem("🐯", "Tiger", "Animals"),
-    WordItem("🐘", "Elephant", "Animals"), WordItem("🐰", "Rabbit", "Animals"),
-    WordItem("🐻", "Bear", "Animals"), WordItem("🐼", "Panda", "Animals"),
-    WordItem("🐵", "Monkey", "Animals"), WordItem("🦒", "Giraffe", "Animals"),
-    WordItem("🐘", "Elephant", "Animals"), WordItem("🐦", "Bird", "Animals"),
-    WordItem("🐟", "Fish", "Animals"), WordItem("🦋", "Butterfly", "Animals"),
-    WordItem("🐝", "Bee", "Animals"), WordItem("🐢", "Turtle", "Animals"),
-    WordItem("🚗", "Car", "Transport"), WordItem("🚆", "Train", "Transport"),
-    WordItem("✈️", "Airplane", "Transport"), WordItem("🚌", "Bus", "Transport"),
-    WordItem("🚲", "Bicycle", "Transport"), WordItem("🚢", "Ship", "Transport"),
-    WordItem("🏠", "House", "Everyday"), WordItem("📚", "Book", "Everyday"),
-    WordItem("✏️", "Pencil", "Everyday"), WordItem("⚽", "Ball", "Everyday"),
-    WordItem("☀️", "Sun", "Nature"), WordItem("🌙", "Moon", "Nature"),
-    WordItem("⭐", "Star", "Nature"), WordItem("☁️", "Cloud", "Nature"),
-    WordItem("🌧️", "Rain", "Nature"), WordItem("🔥", "Fire", "Nature")
+    WordItem("🌹", "Rose", "وردة", "Plants"), WordItem("🌷", "Flower", "زهرة", "Plants"),
+    WordItem("🌳", "Tree", "شجرة", "Plants"), WordItem("🌱", "Plant", "نبات", "Plants"),
+    WordItem("🌻", "Sunflower", "عباد الشمس", "Plants"), WordItem("🍎", "Apple", "تفاحة", "Fruits"),
+    WordItem("🍌", "Banana", "موز", "Fruits"), WordItem("🍊", "Orange", "برتقال", "Fruits"),
+    WordItem("🍇", "Grapes", "عنب", "Fruits"), WordItem("🍓", "Strawberry", "فراولة", "Fruits"),
+    WordItem("🍉", "Watermelon", "بطيخ", "Fruits"), WordItem("🍍", "Pineapple", "أناناس", "Fruits"),
+    WordItem("🥭", "Mango", "مانجو", "Fruits"), WordItem("🍋", "Lemon", "ليمون", "Fruits"),
+    WordItem("🐱", "Cat", "قطة", "Animals"), WordItem("🐶", "Dog", "كلب", "Animals"),
+    WordItem("🦁", "Lion", "أسد", "Animals"), WordItem("🐯", "Tiger", "نمر", "Animals"),
+    WordItem("🐘", "Elephant", "فيل", "Animals"), WordItem("🐰", "Rabbit", "أرنب", "Animals"),
+    WordItem("🐻", "Bear", "دب", "Animals"), WordItem("🐼", "Panda", "باندا", "Animals"),
+    WordItem("🐵", "Monkey", "قرد", "Animals"), WordItem("🦒", "Giraffe", "زرافة", "Animals"),
+    WordItem("🐘", "Elephant", "فيل", "Animals"), WordItem("🐦", "Bird", "طائر", "Animals"),
+    WordItem("🐟", "Fish", "سمكة", "Animals"), WordItem("🦋", "Butterfly", "فراشة", "Animals"),
+    WordItem("🐝", "Bee", "نحلة", "Animals"), WordItem("🐢", "Turtle", "سلحفاة", "Animals"),
+    WordItem("🚗", "Car", "سيارة", "Transport"), WordItem("🚆", "Train", "قطار", "Transport"),
+    WordItem("✈️", "Airplane", "طائرة", "Transport"), WordItem("🚌", "Bus", "حافلة", "Transport"),
+    WordItem("🚲", "Bicycle", "دراجة", "Transport"), WordItem("🚢", "Ship", "سفينة", "Transport"),
+    WordItem("🏠", "House", "منزل", "Everyday"), WordItem("📚", "Book", "كتاب", "Everyday"),
+    WordItem("✏️", "Pencil", "قلم رصاص", "Everyday"), WordItem("⚽", "Ball", "كرة", "Everyday"),
+    WordItem("☀️", "Sun", "شمس", "Nature"), WordItem("🌙", "Moon", "قمر", "Nature"),
+    WordItem("⭐", "Star", "نجمة", "Nature"), WordItem("☁️", "Cloud", "سحابة", "Nature"),
+    WordItem("🌧️", "Rain", "مطر", "Nature"), WordItem("🔥", "Fire", "نار", "Nature")
 )
 
 @Composable
@@ -149,6 +149,7 @@ private fun ColorsSection() {
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(item.name, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
+                        Text(item.arabic, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF52657D))
                         SpeechButton(item.name, tts)
                     }
                 }
@@ -189,6 +190,7 @@ private fun ShapesSection() {
                     Spacer(Modifier.height(12.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(item.name, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+                        Text(item.arabic, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF52657D))
                         SpeechButton(item.name, tts)
                     }
                 }
@@ -252,6 +254,7 @@ private fun WordsSection() {
                     Column(Modifier.fillMaxSize().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                         Text(item.emoji, fontSize = 42.sp)
                         Text(item.word, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
+                        Text(item.arabic, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF52657D))
                         Text(item.category, fontSize = 10.sp, color = Color(0xFF72829A))
                     }
                 }
