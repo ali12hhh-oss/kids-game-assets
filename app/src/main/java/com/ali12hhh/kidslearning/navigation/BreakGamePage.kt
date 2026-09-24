@@ -198,8 +198,11 @@ fun BreakGamePage(onBack: () -> Unit) {
                 modelInstance = instance,
                 autoAnimate = true,
                 scaleToUnits = 1.08f,
-                centerOrigin = Position(x = 0f, y = -0.88f, z = 0f),
+                centerOrigin = Position(x = 0f, y = -0.88f, z = 0f)
+            )
+            .apply {
                 rotation = Rotation(y = 180f)
+            }
             )
         }
     }
