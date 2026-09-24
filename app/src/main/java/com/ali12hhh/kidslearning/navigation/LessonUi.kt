@@ -17,7 +17,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import io.github.sceneview.Scene
 import io.github.sceneview.rememberCameraNode
@@ -44,7 +43,7 @@ fun ProLessonButton(
 
     Surface(
         modifier = modifier
-            .shadow(elevation?.defaultElevation ?: 7.dp, shape)
+            .shadow(7.dp, shape)
             .clip(shape)
             .clickable(enabled = enabled, onClick = onClick),
         shape = shape,
