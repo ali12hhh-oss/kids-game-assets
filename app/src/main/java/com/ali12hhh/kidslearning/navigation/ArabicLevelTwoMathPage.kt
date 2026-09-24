@@ -45,17 +45,19 @@ private data class StrokeLine(val points: List<Offset>)
 private data class PlaceQuiz(val number: Int, val asked: String, val correct: Int, val options: List<Int>)
 
 private val placeQuizzes = listOf(
-    PlaceQuiz(7, "ما رقم الآحاد في العدد ٧؟", 7, listOf(7, 0, 1)),
-    PlaceQuiz(24, "ما رقم الآحاد في العدد ٢٤؟", 4, listOf(2, 4, 6)),
-    PlaceQuiz(38, "ما رقم العشرات في العدد ٣٨؟", 3, listOf(3, 8, 2)),
-    PlaceQuiz(51, "ما رقم الآحاد في العدد ٥١؟", 1, listOf(5, 1, 0)),
-    PlaceQuiz(67, "ما رقم العشرات في العدد ٦٧؟", 6, listOf(7, 6, 5)),
-    PlaceQuiz(82, "ما رقم الآحاد في العدد ٨٢؟", 2, listOf(8, 2, 0)),
-    PlaceQuiz(105, "ما رقم المئات في العدد ١٠٥؟", 1, listOf(1, 0, 5)),
-    PlaceQuiz(214, "ما رقم العشرات في العدد ٢١٤؟", 1, listOf(2, 1, 4)),
-    PlaceQuiz(356, "ما رقم المئات في العدد ٣٥٦؟", 3, listOf(3, 5, 6)),
-    PlaceQuiz(490, "ما رقم الآحاد في العدد ٤٩٠؟", 0, listOf(4, 9, 0))
+    PlaceQuiz(1, "ما رقم الآحاد في العدد ١؟", 1, listOf(1, 0, 2)),
+    PlaceQuiz(14, "ما رقم الآحاد في العدد ١٤؟", 4, listOf(1, 4, 6)),
+    PlaceQuiz(23, "ما رقم العشرات في العدد ٢٣؟", 2, listOf(2, 3, 5)),
+    PlaceQuiz(35, "ما رقم الآحاد في العدد ٣٥؟", 5, listOf(3, 5, 2)),
+    PlaceQuiz(47, "ما رقم العشرات في العدد ٤٧؟", 4, listOf(7, 4, 5)),
+    PlaceQuiz(52, "ما رقم الآحاد في العدد ٥٢؟", 2, listOf(5, 2, 0)),
+    PlaceQuiz(68, "ما رقم العشرات في العدد ٦٨؟", 6, listOf(8, 6, 4)),
+    PlaceQuiz(71, "ما رقم الآحاد في العدد ٧١؟", 1, listOf(7, 1, 0)),
+    PlaceQuiz(84, "ما رقم العشرات في العدد ٨٤؟", 8, listOf(4, 8, 6)),
+    PlaceQuiz(99, "ما رقم الآحاد في العدد ٩٩؟", 9, listOf(9, 0, 8))
 )
+
+@Composable
 
 @Composable
 fun ArabicLevelTwoMathPage(onBack: () -> Unit) {
@@ -125,7 +127,7 @@ private fun MathModeButton(
 @Composable
 private fun NumberWritingSection() {
     var number by remember { mutableStateOf(1) }
-    var strokes by remember(number) { mutableStateOf(emptyList<StrokeLine>()) }
+    val strokes = remember(number) { mutableStateListOf<StrokeLine>() }
     var activeStroke by remember { mutableStateOf<StrokeLine?>(null) }
     val context = LocalContext.current
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
@@ -155,7 +157,7 @@ private fun NumberWritingSection() {
         Card(Modifier.fillMaxWidth().weight(1f).shadow(10.dp, RoundedCornerShape(26.dp)), shape = RoundedCornerShape(26.dp), colors = CardDefaults.cardColors(Color.White)) {
             Box(Modifier.fillMaxSize().padding(12.dp)) {
                 Text(arDigits(number), Modifier.align(Alignment.Center), fontSize = 118.sp, fontWeight = FontWeight.Black, color = Color(0xFFE9EDF6))
-                Canvas(Modifier.fillMaxSize().pointerInput(Unit) {
+                Canvas(Modifier.fillMaxSize().pointerInput(number) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
                         down.consume()
@@ -166,7 +168,7 @@ private fun NumberWritingSection() {
                             val change = event.changes.firstOrNull() ?: break
                             if (!change.pressed) {
                                 val finished = if (points.size > 1) points else listOf(change.position)
-                                strokes = strokes + StrokeLine(finished)
+                                strokes.add(StrokeLine(finished))
                                 activeStroke = null
                                 break
                             }
@@ -205,7 +207,7 @@ private fun NumberWritingSection() {
         Spacer(Modifier.height(8.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ProLessonButton(
-                onClick = { strokes = emptyList(); activeStroke = null },
+                onClick = { strokes.clear(); activeStroke = null },
                 Modifier.weight(1f).height(54.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE05A5A))
             ) { Text("مسح", fontWeight = FontWeight.ExtraBold) }
@@ -251,17 +253,19 @@ private fun PlaceValueSection() {
 }
 
 private val learnExamples = listOf(
-    Triple("١", "آحاد", "الرقم ١ في مرتبة الآحاد لأنه لا توجد عشرات أو مئات."),
-    Triple("٢٤", "عشرات وآحاد", "٢ في العشرات و٤ في الآحاد؛ أي ٢٠ + ٤ = ٢٤."),
-    Triple("٣٧", "عشرات وآحاد", "٣ عشرات تساوي ٣٠، و٧ آحاد تساوي ٧؛ المجموع ٣٧."),
-    Triple("٥٠", "عشرات وآحاد", "٥ في العشرات و٠ في الآحاد؛ العدد يساوي خمس عشرات."),
-    Triple("٦٨", "عشرات وآحاد", "٦ عشرات تساوي ٦٠، و٨ آحاد تساوي ٨؛ المجموع ٦٨."),
-    Triple("١٠٠", "مئات وعشرات وآحاد", "١ في المئات و٠ في العشرات و٠ في الآحاد؛ أي مئة واحدة."),
-    Triple("١٢٥", "مئات وعشرات وآحاد", "١ مئة + ٢ عشرات + ٥ آحاد = ١٢٥."),
-    Triple("٢٠٣", "مئات وعشرات وآحاد", "٢ مئات = ٢٠٠، و٠ عشرات، و٣ آحاد؛ المجموع ٢٠٣."),
-    Triple("٤٥٦", "مئات وعشرات وآحاد", "٤ مئات + ٥ عشرات + ٦ آحاد = ٤٥٦."),
-    Triple("٧٩٠", "مئات وعشرات وآحاد", "٧ مئات + ٩ عشرات + ٠ آحاد = ٧٩٠.")
+    Triple("١", "الآحاد", "الرقم الموجود أقصى اليمين هو الآحاد. في العدد ١ لدينا آحاد واحد."),
+    Triple("٤", "الآحاد", "الرقم ٤ يمثل أربعة آحاد، لذلك ٤ = ٤ آحاد."),
+    Triple("١٢", "عشرات وآحاد", "في العدد ١٢: الرقم ١ في العشرات والرقم ٢ في الآحاد؛ أي ١٠ + ٢ = ١٢."),
+    Triple("٢٥", "عشرات وآحاد", "في العدد ٢٥: ٢ عشرات = ٢٠، و٥ آحاد = ٥؛ إذن ٢٠ + ٥ = ٢٥."),
+    Triple("٣٠", "عشرات وآحاد", "في العدد ٣٠: ٣ في العشرات و٠ في الآحاد؛ أي ٣ عشرات = ٣٠."),
+    Triple("٤٦", "عشرات وآحاد", "في العدد ٤٦: ٤ عشرات = ٤٠، و٦ آحاد = ٦؛ إذن ٤٠ + ٦ = ٤٦."),
+    Triple("٥٢", "عشرات وآحاد", "في العدد ٥٢: ٥ عشرات = ٥٠، و٢ آحاد = ٢؛ إذن ٥٠ + ٢ = ٥٢."),
+    Triple("٧٨", "عشرات وآحاد", "في العدد ٧٨: ٧ عشرات = ٧٠، و٨ آحاد = ٨؛ إذن ٧٠ + ٨ = ٧٨."),
+    Triple("٩٠", "عشرات وآحاد", "في العدد ٩٠: ٩ عشرات = ٩٠، و٠ آحاد؛ أي تسع عشرات كاملة."),
+    Triple("٩٩", "عشرات وآحاد", "في العدد ٩٩: ٩ عشرات = ٩٠، و٩ آحاد = ٩؛ إذن ٩٠ + ٩ = ٩٩.")
 )
+
+@Composable
 
 @Composable
 private fun PlaceValueLearn() {
@@ -327,7 +331,7 @@ private fun PlaceValueQuiz() {
         tts = e
         onDispose { e.stop(); e.shutdown() }
     }
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("اختبار ${index + 1} / ${placeQuizzes.size}", fontWeight = FontWeight.Bold, color = Color(0xFF65738A))
         Text("العدد ${arDigits(quiz.number)}", fontSize = 48.sp, fontWeight = FontWeight.Black, color = numberColor(index + 1))
         Text(quiz.asked, Modifier.fillMaxWidth(), fontSize = 19.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
@@ -359,21 +363,32 @@ private fun PlaceValueQuiz() {
                         }
                     }
                 }
-            }, Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(containerColor = color, contentColor = if (selected != null) Color.White else Color(0xFF24324A))) {
+            }, Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = color, contentColor = if (selected != null) Color.White else Color(0xFF24324A))) {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Text(arDigits(option), fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
                 }
             }
         }
+        Spacer(Modifier.weight(1f))
         CharacterReaction(reaction)
-        Text("النتيجة: ${arDigits(score)}", fontWeight = FontWeight.ExtraBold, color = Color(0xFF315CFF))
-        Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ProLessonButton(onClick = { if (index > 0) { index--; selected = null; reaction = 0 } }, Modifier.weight(1f), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق") }
-            ProLessonButton(onClick = { if (index < placeQuizzes.lastIndex) { index++; selected = null; reaction = 0 } }, Modifier.weight(1f)) { Text("التالي") }
+        Spacer(Modifier.height(4.dp))
+        Text("النتيجة: " + arDigits(score), fontWeight = FontWeight.ExtraBold, color = Color(0xFF315CFF))
+        Spacer(Modifier.height(4.dp))
+        Row(
+            Modifier.fillMaxWidth().navigationBarsPadding(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            ProLessonButton(
+                onClick = { if (index > 0) { index--; selected = null; reaction = 0 } },
+                modifier = Modifier.width(125.dp).height(52.dp),
+                colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))
+            ) { Text("◀ السابق", fontWeight = FontWeight.ExtraBold) }
+            ProLessonButton(
+                onClick = { if (index < placeQuizzes.lastIndex) { index++; selected = null; reaction = 0 } },
+                modifier = Modifier.width(125.dp).height(52.dp)
+            ) { Text("التالي ▶", fontWeight = FontWeight.ExtraBold) }
         }
-
     }
-}
 private fun numberColor(number: Int) = listOf(Color(0xFF315CFF), Color(0xFFE64A6B), Color(0xFF16A085), Color(0xFFE67E22), Color(0xFF7A4DCE), Color(0xFF008C95))[(number - 1) % 6]
 
 
@@ -382,11 +397,11 @@ private fun CharacterReaction(reaction: Int) {
     val engine = rememberEngine()
     val loader = rememberModelLoader(engine)
     val model = remember { runCatching { loader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull() }
-    val camera = rememberCameraNode(engine) { position = Position(z = 2.6f) }
+    val camera = rememberCameraNode(engine) { position = Position(z = 2.9f) }
     val node = remember(model) {
         model?.let {
-            ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = 2.2f).also {
-                it.position = Position(x = 0f, y = -0.28f, z = 0f)
+            ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = 2.45f).also {
+                it.position = Position(x = 0f, y = -0.42f, z = 0f)
             }
         }
     }
@@ -405,7 +420,7 @@ private fun CharacterReaction(reaction: Int) {
         }
     }
     Card(
-        Modifier.fillMaxWidth().height(105.dp),
+        Modifier.fillMaxWidth().height(125.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(Color(0xFFF8FAFF))
     ) {
