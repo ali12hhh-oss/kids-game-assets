@@ -28,4 +28,5 @@ object AppRoutes {
     const val ENGLISH_LEVEL_THREE_WORDS = "english_level_three_words"
     const val NUMBERS = "numbers"
     const val PLAY = "play"
+    const val BREAK_GAME = "break_game"
 }
