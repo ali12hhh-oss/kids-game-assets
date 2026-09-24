@@ -164,6 +164,9 @@ private fun LetterFormsSection(
     val context = LocalContext.current
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
     var ready by remember { mutableStateOf(false) }
+    var selectedForm by remember(lesson.letter) { mutableStateOf(0) }
+    val forms = listOf(lesson.initial, lesson.medial, lesson.final)
+    val labels = listOf("أولي", "وسطي", "أخري")
 
     DisposableEffect(Unit) {
         val engine = TextToSpeech(context) { status ->
@@ -174,6 +177,12 @@ private fun LetterFormsSection(
         }
         tts = engine
         onDispose { engine.stop(); engine.shutdown(); tts = null }
+    }
+
+    LaunchedEffect(lesson.letter, selectedForm, ready) {
+        if (ready && AppSettings.isSpeechEnabled(context)) {
+            tts?.speak(lesson.name + "، " + labels[selectedForm], TextToSpeech.QUEUE_FLUSH, null, "letter_form_" + lesson.letter + "_" + selectedForm)
+        }
     }
 
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -193,9 +202,15 @@ private fun LetterFormsSection(
                 Text(lesson.letter, fontSize = 78.sp, fontWeight = FontWeight.Black, color = Color(0xFF315CFF))
                 Text(lesson.name, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF25344E))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    LetterFormCard("أولي", lesson.initial, Modifier.weight(1f))
-                    LetterFormCard("وسطي", lesson.medial, Modifier.weight(1f))
-                    LetterFormCard("أخري", lesson.final, Modifier.weight(1f))
+                    forms.forEachIndexed { formIndex, form ->
+                        LetterFormCard(
+                            title = labels[formIndex],
+                            form = form,
+                            selected = selectedForm == formIndex,
+                            modifier = Modifier.weight(1f),
+                            onClick = { selectedForm = formIndex }
+                        )
+                    }
                 }
                 ProLessonButton(
                     onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
@@ -211,19 +226,25 @@ private fun LetterFormsSection(
 }
 
 @Composable
-private fun LetterFormCard(title: String, form: String, modifier: Modifier) {
+private fun LetterFormCard(
+    title: String,
+    form: String,
+    selected: Boolean,
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
     Card(
-        modifier.height(145.dp).shadow(5.dp, RoundedCornerShape(20.dp)),
+        modifier.height(145.dp).shadow(5.dp, RoundedCornerShape(20.dp)).clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F5FF))
+        colors = CardDefaults.cardColors(containerColor = if (selected) Color(0xFFE8EEFF) else Color(0xFFF1F5FF))
     ) {
         Column(
             Modifier.fillMaxSize().padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(title, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF63718A))
-            Text(form, fontSize = 45.sp, fontWeight = FontWeight.Black, color = Color(0xFF263B72))
+            Text(title, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = if (selected) Color(0xFF315CFF) else Color(0xFF63718A))
+            Text(form, fontSize = 45.sp, fontWeight = FontWeight.Black, color = if (selected) Color(0xFF315CFF) else Color(0xFF263B72))
         }
     }
 }
@@ -299,7 +320,7 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
                             points.firstOrNull()?.let { moveTo(it.x, it.y) }
                             points.drop(1).forEach { lineTo(it.x, it.y) }
                         }
-                        drawPath(path, Color(0xFF315CFF), style = Stroke(width = 9f, cap = StrokeCap.Round))
+                        drawPath(path, Color(0xFF315CFF), style = Stroke(width = 30f, cap = StrokeCap.Round))
                     }
                     if (currentStroke.size > 1) {
                         val path = Path().apply {
@@ -326,10 +347,12 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
         Text("اكتب الحرف الظاهر بإصبعك، ولا تنسَ نقاط الحرف ✨", fontSize = 13.sp, color = Color(0xFF63718A), fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(5.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(
+            ProLessonButton(
                 onClick = { strokes.clear(); currentStroke = emptyList() },
-                modifier = Modifier.weight(0.8f)
-            ) { Text("مسح ✨", fontWeight = FontWeight.Bold) }
+                modifier = Modifier.weight(1f).height(55.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE05A5A))
+            ) { Text("مسح", fontWeight = FontWeight.ExtraBold) }
             NavigationButtons(onPrevious, onNext, Modifier.weight(2f))
         }
     }
