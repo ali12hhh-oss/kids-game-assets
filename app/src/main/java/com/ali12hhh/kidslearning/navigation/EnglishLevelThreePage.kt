@@ -1,5 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
+import com.ali12hhh.kidslearning.navigation.ProLessonButton
+
 import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.Canvas
