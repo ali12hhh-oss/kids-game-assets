@@ -186,22 +186,32 @@ private fun QuizOperation(title:String,quizzes:List<ArithmeticQuiz>){
             CharacterReactionMath(reaction)
         }
 
-        if(index>0){
+        Row(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             ProLessonButton(
-                onClick={tts?.stop();index--;selected=null;reaction=0},
-                modifier=Modifier.align(Alignment.CenterStart).width(62.dp).height(58.dp),
-                colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF5B6B88)),
-                shape=RoundedCornerShape(18.dp)
-            ){Text("‹\nالسابق",fontWeight=FontWeight.ExtraBold,textAlign=TextAlign.Center)}
-        }
-
-        if(index<quizzes.lastIndex){
+                onClick={if(index>0){tts?.stop();index--;selected=null;reaction=0}},
+                modifier=Modifier.weight(1f).height(52.dp),
+                colors=ButtonDefaults.buttonColors(
+                    containerColor=if(index>0) Color(0xFF5B6B88) else Color(0xFFD9DFEA),
+                    contentColor=if(index>0) Color.White else Color(0xFF8A94A6)
+                ),
+                shape=RoundedCornerShape(16.dp)
+            ){Text("‹  السابق",fontWeight=FontWeight.ExtraBold)}
             ProLessonButton(
-                onClick={tts?.stop();index++;selected=null;reaction=0},
-                modifier=Modifier.align(Alignment.CenterEnd).width(62.dp).height(58.dp),
-                colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF315CFF)),
-                shape=RoundedCornerShape(18.dp)
-            ){Text("التالي\n›",fontWeight=FontWeight.ExtraBold,textAlign=TextAlign.Center)}
+                onClick={if(index<quizzes.lastIndex){tts?.stop();index++;selected=null;reaction=0}},
+                modifier=Modifier.weight(1f).height(52.dp),
+                colors=ButtonDefaults.buttonColors(
+                    containerColor=if(index<quizzes.lastIndex) Color(0xFF315CFF) else Color(0xFFD9DFEA),
+                    contentColor=if(index<quizzes.lastIndex) Color.White else Color(0xFF8A94A6)
+                ),
+                shape=RoundedCornerShape(16.dp)
+            ){Text("التالي  ›",fontWeight=FontWeight.ExtraBold)}
         }
     }
 }
@@ -217,9 +227,9 @@ private fun CharacterReactionMath(reaction:Int){
             ModelNode(
                 modelInstance=it,
                 autoAnimate=false,
-                scaleToUnits=2.65f
+                scaleToUnits=2.35f
             ).also{
-                it.position=Position(x=0f,y=-0.62f,z=0f)
+                it.position=Position(x=0f,y=-0.78f,z=0f)
             }
         }
     }
@@ -240,7 +250,7 @@ private fun CharacterReactionMath(reaction:Int){
     }
 
     Card(
-        Modifier.fillMaxWidth().height(145.dp),
+        Modifier.fillMaxWidth().height(105.dp),
         shape=RoundedCornerShape(20.dp),
         colors=CardDefaults.cardColors(Color(0xFFF8FAFF))
     ){
