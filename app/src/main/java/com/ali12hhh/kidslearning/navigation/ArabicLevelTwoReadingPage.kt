@@ -202,7 +202,7 @@ private fun LetterFormsSection(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text(lesson.letter, fontSize = 78.sp, fontWeight = FontWeight.Black, color = Color(0xFF315CFF))
+                Text(forms[selectedForm], fontSize = 78.sp, fontWeight = FontWeight.Black, color = Color(0xFF315CFF))
                 Text(lesson.name, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF25344E))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     forms.forEachIndexed { formIndex, form ->
@@ -259,6 +259,11 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
     var currentStroke by remember(lesson.letter) { mutableStateOf<List<Offset>>(emptyList()) }
     val forms = listOf(lesson.initial, lesson.medial, lesson.final)
     val labels = listOf("أولي", "وسطي", "أخري")
+    LaunchedEffect(lesson.letter) {
+        selectedForm = 0
+        strokes.clear()
+        currentStroke = emptyList()
+    }
     val context = LocalContext.current
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
     var ready by remember { mutableStateOf(false) }
@@ -286,10 +291,16 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
             forms.forEachIndexed { i, form ->
                 val selected = selectedForm == i
                 Card(
-                    Modifier.weight(1f).height(62.dp).clickable { selectedForm = i
+                    Modifier.weight(1f).height(62.dp).clickable {
+                        if (selectedForm != i) {
+                            selectedForm = i
+                            strokes.clear()
+                            currentStroke = emptyList()
+                        }
                         if (ready && AppSettings.isSpeechEnabled(context)) {
                             LetterSpeech.speakArabic(tts, lesson.letter, "writing_form_" + lesson.letter + "_" + i)
-                        } },
+                        }
+                    },
                     shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(containerColor = if (selected) Color(0xFF315CFF) else Color.White)
                 ) {
