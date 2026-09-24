@@ -187,7 +187,7 @@ fun BreakGamePage(onBack: () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Color(0xFF10233A), Color(0xFF1E4C5F), Color(0xFF8AC6A8))))
+                .background(Brush.verticalGradient(listOf(Color(0xFF081525), Color(0xFF163B52), Color(0xFF3C7A72), Color(0xFFB6D68A))))
         ) {
             Scene(
                 modifier = Modifier.fillMaxSize(),
@@ -212,10 +212,10 @@ fun BreakGamePage(onBack: () -> Unit) {
                 val bottom = size.height * 0.98f
                 for (i in 1..2) {
                     val x = laneWidth * i
-                    drawLine(Color.White.copy(alpha = 0.20f), Offset(x, top), Offset(x, bottom), strokeWidth = 3f)
+                    drawLine(Color.White.copy(alpha = 0.12f), Offset(x, top), Offset(x, bottom), strokeWidth = 2f)
                 }
                 drawLine(
-                    Color.White.copy(alpha = 0.18f),
+                    Color(0xFFFFD54F).copy(alpha = 0.22f),
                     Offset(0f, size.height * 0.83f),
                     Offset(size.width, size.height * 0.83f),
                     strokeWidth = 5f
@@ -224,7 +224,7 @@ fun BreakGamePage(onBack: () -> Unit) {
                     val x = laneWidth * (item.lane + 0.5f)
                     val y = top + (bottom - top) * item.progress.coerceIn(0f, 1f)
                     if (item.type == STAR) {
-                        drawCircle(Color(0xFFFFD54F), radius = 24f, center = Offset(x, y))
+                        drawCircle(Color(0xFFFFD54F), radius = 28f, center = Offset(x, y))
                         drawCircle(Color.White.copy(alpha = 0.55f), radius = 9f, center = Offset(x - 7f, y - 8f))
                     } else {
                         val half = 25f
@@ -252,18 +252,18 @@ fun BreakGamePage(onBack: () -> Unit) {
                         Text(if (finished) "‹" else if (running) "Ⅱ" else "▶", color = Color.White, fontSize = 22.sp)
                     }
                     Card(
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.28f))
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.38f))
                     ) {
                         Row(modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Text("⭐ $score", color = Color.White, fontWeight = FontWeight.Black)
-                            Text("⏱ $remaining", color = Color.White, fontWeight = FontWeight.Black)
+                            Text("⭐ $score", color = Color.White, fontWeight = FontWeight.Black, fontSize = 15.sp)
+                            Text("⏱ $remaining", color = Color.White, fontWeight = FontWeight.Black, fontSize = 15.sp)
                         }
                     }
                 }
                 Spacer(Modifier.height(8.dp))
-                Text("مغامرة دبدوب", modifier = Modifier.fillMaxWidth(), color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
-                Text("اجمع النجوم وتجاوز الحواجز", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.88f), fontSize = 13.sp, textAlign = TextAlign.Center)
+                Text("مغامرة ريبو", modifier = Modifier.fillMaxWidth(), color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
+                Text("انطلق، اجمع النجوم وتجاوز الحواجز", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.88f), fontSize = 13.sp, textAlign = TextAlign.Center)
             }
 
             Row(
