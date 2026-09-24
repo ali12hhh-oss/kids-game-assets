@@ -1,6 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
 import android.speech.tts.TextToSpeech
+import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -162,8 +163,7 @@ private fun LetterWritingSection() {
         var engineRef: TextToSpeech? = null
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                engineRef?.language = Locale.ENGLISH
-                engineRef?.setSpeechRate(.8f)
+                engineRef?.let { LessonSpeech.configure(it, LessonSpeech.ENGLISH_LOCALE) }
                 engineRef?.setPitch(1f)
             }
         }
@@ -204,8 +204,7 @@ private fun NumberWritingSection() {
         var engineRef: TextToSpeech? = null
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                engineRef?.language = Locale.ENGLISH
-                engineRef?.setSpeechRate(.8f)
+                engineRef?.let { LessonSpeech.configure(it, LessonSpeech.ENGLISH_LOCALE) }
                 engineRef?.setPitch(1f)
             }
         }
