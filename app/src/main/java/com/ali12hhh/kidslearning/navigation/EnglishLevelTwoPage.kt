@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.awaitPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -230,7 +231,7 @@ private fun NumberWritingSection() {
             IconButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(name, TextToSpeech.QUEUE_FLUSH, null, "number") }) { Text("🔊", fontSize = 18.sp) }
         }
         Row(Modifier.fillMaxWidth().padding(top = 6.dp).navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ProLessonButton(Modifier.weight(1f).height(46.dp), enabled = number > 1, onClick = { number-- }) { Text("‹  السابق", fontWeight = FontWeight.ExtraBold) }
+            ProLessonButton(modifier = Modifier.weight(1f).height(46.dp), enabled = number > 1, onClick = { number-- }) { Text("‹  السابق", fontWeight = FontWeight.ExtraBold) }
             ProLessonButton(Modifier.weight(1f).height(46.dp), enabled = number < 99, onClick = { number++ }) { Text("التالي  ›", fontWeight = FontWeight.ExtraBold) }
         }
         Text("${arabicDigits(number)} من ٩٩", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF61728B))
