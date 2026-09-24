@@ -610,97 +610,26 @@ private fun RealCharacterHero(
     }
 
     DisposableEffect(context, greetOnEntry) {
-        val mainHandler = Handler(Looper.getMainLooper())
-        var tts: TextToSpeech? = null
-        var released = false
-
-        fun finishGreeting() {
-            if (!released) {
-                mainHandler.post {
-                    if (!released) greetingActive = false
-                }
-            }
-        }
-
-        val initListener = TextToSpeech.OnInitListener { status ->
-            if (released || !greetOnEntry) return@OnInitListener
-            val speaker = tts ?: return@OnInitListener
-
-            if (status != TextToSpeech.SUCCESS) {
-                finishGreeting()
-                return@OnInitListener
-            }
-
-            // Use Modern Standard Arabic when the engine exposes it, then fall back to
-            // Saudi Arabic. The voice selector explicitly prefers male voice identifiers.
-            val arabicLocale = Locale.forLanguageTag("ar-XA")
-            val localeResult = speaker.setLanguage(arabicLocale)
-            if (localeResult == TextToSpeech.LANG_NOT_SUPPORTED ||
-                localeResult == TextToSpeech.LANG_MISSING_DATA
-            ) {
-                speaker.language = Locale("ar", "SA")
-            }
-            if (!AppSettings.isSpeechEnabled(context)) {
-                finishGreeting()
-                return@OnInitListener
-            }
-            speaker.setSpeechRate(AppSettings.speechRate(context))
-            speaker.setPitch(0.96f)
-
-            selectArabicMaleVoice(speaker)?.let { speaker.voice = it }
-
-            speaker.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-                override fun onStart(utteranceId: String?) {
-                    if (utteranceId == GREETING_UTTERANCE_ID) {
-                        mainHandler.post { if (!released) greetingActive = true }
-                    }
-                }
-
-                override fun onDone(utteranceId: String?) {
-                    if (utteranceId == GREETING_UTTERANCE_ID) finishGreeting()
-                }
-
-                @Deprecated("Deprecated by Android; kept for API compatibility.")
-                override fun onError(utteranceId: String?) {
-                    if (utteranceId == GREETING_UTTERANCE_ID) finishGreeting()
-                }
-
-                override fun onError(utteranceId: String?, errorCode: Int) {
-                    if (utteranceId == GREETING_UTTERANCE_ID) finishGreeting()
-                }
-            })
-
-            val params = Bundle().apply {
-                putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, GREETING_UTTERANCE_ID)
-            }
-            val childName = AppSettings.childName(context).trim()
-            val greetingText = if (childName.isBlank() || childName == "صديقي الصغير") {
-                GREETING_TEXT
-            } else {
-                "مرحبا $childName. اختر ماذا نتعلم اليوم."
-            }
-            val result = speaker.speak(greetingText, TextToSpeech.QUEUE_FLUSH, params, GREETING_UTTERANCE_ID)
-            if (result == TextToSpeech.ERROR) finishGreeting()
-        }
-
         if (!greetOnEntry) {
             return@DisposableEffect onDispose { }
         }
 
-        // Prefer Google's Android TTS engine when it is installed, otherwise use
-        // whatever Arabic TTS engine is available on the device.
-        val googleEngine = speakerEnginePackage(context)
-        tts = if (googleEngine != null) {
-            TextToSpeech(context, initListener, googleEngine)
+        val childName = AppSettings.childName(context).trim()
+        val greetingText = if (childName.isBlank() || childName == "صديقي الصغير") {
+            GREETING_TEXT
         } else {
-            TextToSpeech(context, initListener)
+            "مرحبا $childName. اختر ماذا نتعلم اليوم."
         }
 
+        HomeGreetingSpeech.speak(
+            context = context,
+            text = greetingText,
+            onStart = { greetingActive = true },
+            onDone = { greetingActive = false }
+        )
+
         onDispose {
-            released = true
-            mainHandler.removeCallbacksAndMessages(null)
-            tts?.stop()
-            tts?.shutdown()
+            HomeGreetingSpeech.cancel()
         }
     }
 
