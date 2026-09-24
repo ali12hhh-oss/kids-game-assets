@@ -124,7 +124,7 @@ private fun MathModeButton(
 @Composable
 private fun NumberWritingSection() {
     var number by remember { mutableStateOf(1) }
-    var strokes by remember(number) { mutableStateOf(emptyList<StrokeLine>()) }
+    var strokes by remember(number) { mutableStateOf(emptyList<StrokeLine>()) }\n    var activeStroke by remember { mutableStateOf<StrokeLine?>(null) }
     val context = LocalContext.current
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
     var ready by remember { mutableStateOf(false) }
@@ -153,25 +153,25 @@ private fun NumberWritingSection() {
         Card(Modifier.fillMaxWidth().weight(1f).shadow(10.dp, RoundedCornerShape(26.dp)), shape = RoundedCornerShape(26.dp), colors = CardDefaults.cardColors(Color.White)) {
             Box(Modifier.fillMaxSize().padding(12.dp)) {
                 Text(arDigits(number), Modifier.align(Alignment.Center), fontSize = 118.sp, fontWeight = FontWeight.Black, color = Color(0xFFE9EDF6))
-                Canvas(Modifier.fillMaxSize().pointerInput(number) {
+                Canvas(Modifier.fillMaxSize().pointerInput(Unit) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
                         down.consume()
                         var points = listOf(down.position)
-                        var moved = false
 
                         while (true) {
                             val event = awaitPointerEvent(PointerEventPass.Main)
                             val change = event.changes.firstOrNull() ?: break
                             if (!change.pressed) {
-                                strokes = strokes + StrokeLine(if (moved) points else listOf(change.position))
+                                val finished = if (points.size > 1) points else listOf(change.position)
+                                strokes = strokes + StrokeLine(finished)
+                                activeStroke = null
                                 break
                             }
                             change.consume()
                             if (change.position != points.last()) {
-                                moved = true
                                 points = points + change.position
-                                strokes = if (strokes.isEmpty()) strokes else strokes.dropLast(1) + StrokeLine(points)
+                                activeStroke = StrokeLine(points)
                             }
                         }
                     }
@@ -185,13 +185,24 @@ private fun NumberWritingSection() {
                             drawPath(path, Color(0xFF315CFF), style = Stroke(width = 30f, cap = StrokeCap.Round))
                         } else if (line.points.isNotEmpty()) drawCircle(Color(0xFF315CFF), 15f, line.points.first())
                     }
+                    activeStroke?.let { line ->
+                        if (line.points.size > 1) {
+                            val path = Path().apply {
+                                moveTo(line.points.first().x, line.points.first().y)
+                                line.points.drop(1).forEach { lineTo(it.x, it.y) }
+                            }
+                            drawPath(path, Color(0xFF315CFF), style = Stroke(width = 30f, cap = StrokeCap.Round))
+                        } else if (line.points.isNotEmpty()) {
+                            drawCircle(Color(0xFF315CFF), 15f, line.points.first())
+                        }
+                    }
                 }
             }
         }
         Spacer(Modifier.height(8.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ProLessonButton(
-                onClick = { strokes = emptyList() },
+                onClick = { strokes = emptyList(); activeStroke = null },
                 Modifier.weight(1f).height(54.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE05A5A))
             ) { Text("مسح", fontWeight = FontWeight.ExtraBold) }
@@ -335,17 +346,24 @@ private fun PlaceValueQuiz() {
                         reaction = -1
                         if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak("حاول مرة أخرى", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
                     }
+                    scope.launch {
+                        delay(900)
+                        if (index < placeQuizzes.lastIndex) {
+                            index++
+                            selected = null
+                            reaction = 0
+                        }
+                    }
                 }
             }, Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(containerColor = color, contentColor = if (selected != null) Color.White else Color(0xFF24324A))) {
-                Text(arDigits(option), fontSize = 20.sp, fontWeight = FontWeight.Black)
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(arDigits(option), fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
+                }
             }
         }
         CharacterReaction(reaction)
         Text("النتيجة: ${arDigits(score)}", fontWeight = FontWeight.ExtraBold, color = Color(0xFF315CFF))
-        Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ProLessonButton(onClick = { if (index > 0) { index--; selected = null } }, Modifier.weight(1f), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق") }
-            ProLessonButton(onClick = { if (index < placeQuizzes.lastIndex) { index++; selected = null } }, Modifier.weight(1f)) { Text("التالي") }
-        }
+
     }
 }
 private fun numberColor(number: Int) = listOf(Color(0xFF315CFF), Color(0xFFE64A6B), Color(0xFF16A085), Color(0xFFE67E22), Color(0xFF7A4DCE), Color(0xFF008C95))[(number - 1) % 6]
