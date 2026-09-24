@@ -232,7 +232,7 @@ private fun NumberWritingSection() {
         }
         Row(Modifier.fillMaxWidth().padding(top = 6.dp).navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ProLessonButton(modifier = Modifier.weight(1f).height(46.dp), enabled = number > 1, onClick = { number-- }) { Text("‹  السابق", fontWeight = FontWeight.ExtraBold) }
-            ProLessonButton(Modifier.weight(1f).height(46.dp), enabled = number < 99, onClick = { number++ }) { Text("التالي  ›", fontWeight = FontWeight.ExtraBold) }
+            ProLessonButton(modifier = Modifier.weight(1f).height(46.dp), enabled = number < 99, onClick = { number++ }) { Text("التالي  ›", fontWeight = FontWeight.ExtraBold) }
         }
         Text("${arabicDigits(number)} من ٩٩", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF61728B))
     }
