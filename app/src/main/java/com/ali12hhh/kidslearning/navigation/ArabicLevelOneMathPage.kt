@@ -1,5 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
+import com.ali12hhh.kidslearning.navigation.ProLessonButton
+
 import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.background
@@ -58,18 +60,18 @@ fun ArabicLevelOneMathPage(onBack: () -> Unit) {
                     Text(arabicDigits(number), fontSize = 88.sp, fontWeight = FontWeight.Black, color = numberColor(number))
                 }
                 if (number >= 10) PlaceValueCard(number) else SimpleUnitsCard(number)
-                Button(onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(numberSpeech(number), TextToSpeech.QUEUE_FLUSH, null, "number_" + number) }, modifier = Modifier.height(54.dp), shape = RoundedCornerShape(18.dp)) {
+                ProLessonButton(onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(numberSpeech(number), TextToSpeech.QUEUE_FLUSH, null, "number_" + number) }, modifier = Modifier.height(54.dp), shape = RoundedCornerShape(18.dp)) {
                     Text("🔊  نطق العدد", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
                 }
                 Text(arabicDigits(number) + " / ١٠٠", fontSize = 14.sp, color = Color(0xFF718099), fontWeight = FontWeight.Bold)
             }
         }
         Spacer(Modifier.height(9.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(onClick = { if (number > 1) number-- }, Modifier.weight(1f).height(58.dp), shape = RoundedCornerShape(19.dp), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) {
+        Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ProLessonButton(onClick = { if (number > 1) number-- }, Modifier.weight(1f).height(58.dp), shape = RoundedCornerShape(19.dp), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) {
                 Text("السابق ◀", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
             }
-            Button(onClick = { if (number < 100) number++ }, Modifier.weight(1f).height(58.dp), shape = RoundedCornerShape(19.dp)) {
+            ProLessonButton(onClick = { if (number < 100) number++ }, Modifier.weight(1f).height(58.dp), shape = RoundedCornerShape(19.dp)) {
                 Text("التالي ▶", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold)
             }
         }
