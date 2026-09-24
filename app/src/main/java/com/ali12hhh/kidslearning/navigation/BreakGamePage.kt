@@ -455,6 +455,22 @@ private fun LaneJoystick(lane: Int, onLaneChange: (Int) -> Unit) {
             modifier = Modifier.size(82.dp).clip(CircleShape)
                 .background(Color.Black.copy(alpha = 0.28f))
         )
+        Row(
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 9.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            repeat(3) { index ->
+                Box(
+                    modifier = Modifier
+                        .size(if (index == lane) 8.dp else 6.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (index == lane) Color(0xFFFFD54F)
+                            else Color.White.copy(alpha = 0.30f)
+                        )
+                )
+            }
+        }
         Box(
             modifier = Modifier
                 .size(54.dp)
@@ -462,10 +478,15 @@ private fun LaneJoystick(lane: Int, onLaneChange: (Int) -> Unit) {
                 .background(Color.White.copy(alpha = 0.90f)),
             contentAlignment = Alignment.Center
         ) {
-            Text("↔", color = Color(0xFF183047), fontSize = 25.sp, fontWeight = FontWeight.Black)
+            Text(
+                text = when (lane) { 0 -> "←"; 2 -> "→"; else -> "↔" },
+                color = Color(0xFF183047),
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Black
+            )
         }
         Text(
-            text = when (lane) { 0 -> "يسار"; 2 -> "يمين"; else -> "وسط" },
+            text = "اسحب للتحرك",
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 6.dp),
             color = Color.White.copy(alpha = 0.82f),
             fontSize = 9.sp,
