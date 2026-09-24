@@ -1,6 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
 import android.speech.tts.TextToSpeech
+import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -121,8 +122,7 @@ private fun ColorsSection() {
     DisposableEffect(context) {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale.ENGLISH
-                tts?.setSpeechRate(.82f)
+                tts?.let { LessonSpeech.configure(it, LessonSpeech.ENGLISH_LOCALE) }
             }
         }
         tts = engine
@@ -162,8 +162,7 @@ private fun ShapesSection() {
     DisposableEffect(context) {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale.ENGLISH
-                tts?.setSpeechRate(.82f)
+                tts?.let { LessonSpeech.configure(it, LessonSpeech.ENGLISH_LOCALE) }
             }
         }
         tts = engine
@@ -224,8 +223,7 @@ private fun WordsSection() {
     DisposableEffect(context) {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale.ENGLISH
-                tts?.setSpeechRate(.78f)
+                tts?.let { LessonSpeech.configure(it, LessonSpeech.ENGLISH_LOCALE) }
             }
         }
         tts = engine
