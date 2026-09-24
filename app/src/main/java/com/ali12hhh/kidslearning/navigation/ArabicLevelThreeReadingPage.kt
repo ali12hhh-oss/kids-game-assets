@@ -7,6 +7,7 @@ import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -163,7 +164,9 @@ private fun LearnReadingSection(
         }
     }
 
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {\n        LaunchedEffect(index, ready) { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak("حرف ${lesson.first} مع حرف ${lesson.second}، ننطقهما معًا: ${lesson.result}", TextToSpeech.QUEUE_FLUSH, null, "lesson_change_${index}") }
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        LaunchedEffect(index, ready) { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak("نستمع إلى الحرف الأول: ${lesson.first}. ثم الحرف الثاني: ${lesson.second}. والآن نصل الصوتين معًا فنقول: ${lesson.result}.", TextToSpeech.QUEUE_FLUSH, null, "lesson_change_${index}") }
+        fun speak(text: String, id: String) { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, id) }
         Text(
             "نركّب الحرفين معًا ثم ننطق المقطع بوضوح",
             fontSize = 15.sp, color = Color(0xFF66748B), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center
@@ -183,12 +186,12 @@ private fun LearnReadingSection(
                 Text("مثال تعليمي ${index + 1}", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF718099))
 
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                    LessonLetterCard(lesson.first, Modifier.weight(1f))
+                    LessonLetterCard(lesson.first, Modifier.weight(1f)) { speak("حرف ${lesson.first}", "letter_first_${index}") }
                     Text("+", modifier = Modifier.padding(horizontal = 8.dp), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF6C7890))
-                    LessonLetterCard(lesson.second, Modifier.weight(1f))
+                    LessonLetterCard(lesson.second, Modifier.weight(1f)) { speak("حرف ${lesson.second}", "letter_second_${index}") }
                     Text("=", modifier = Modifier.padding(horizontal = 8.dp), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color(0xFF6C7890))
                     Card(
-                        modifier = Modifier.height(112.dp).weight(1f).shadow(8.dp, RoundedCornerShape(22.dp)),
+                        modifier = Modifier.height(112.dp).weight(1f).shadow(8.dp, RoundedCornerShape(22.dp)).clickable { speak(lesson.result, "result_${index}") },
                         shape = RoundedCornerShape(22.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF0FF))
                     ) {
@@ -231,9 +234,9 @@ private fun LearnReadingSection(
 }
 
 @Composable
-private fun LessonLetterCard(letter: String, modifier: Modifier) {
+private fun LessonLetterCard(letter: String, modifier: Modifier, onClick: () -> Unit) {
     Card(
-        modifier = modifier.height(112.dp).shadow(7.dp, RoundedCornerShape(22.dp)),
+        modifier = modifier.height(112.dp).shadow(7.dp, RoundedCornerShape(22.dp)).clickable(onClick = onClick),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F5FF))
     ) {
@@ -283,7 +286,7 @@ private fun WritingSection(
                             onDragStart = { offset -> currentStroke = listOf(offset) },
                             onDrag = { change, _ -> change.consume(); currentStroke = currentStroke + change.position },
                             onDragEnd = {
-                                if (currentStroke.size > 1) strokes.add(currentStroke)
+                                if (currentStroke.size == 1 || currentStroke.size > 1) strokes.add(currentStroke)
                                 currentStroke = emptyList()
                             }
                         )
@@ -291,8 +294,9 @@ private fun WritingSection(
                 ) {
                     drawWritingGuides()
                     drawTextGuide(lesson.result, center, min(size.width, size.height) * 0.58f)
-                    strokes.forEach { drawStroke(it) }
-                    if (currentStroke.size > 1) drawStroke(currentStroke)\n                    currentStroke.firstOrNull()?.let { drawCircle(Color(0xFF315CFF), 15f, it) }
+                    strokes.forEach { stroke -> if (stroke.size == 1) drawCircle(Color(0xFF315CFF), 15f, stroke.first()) else drawStroke(stroke) }
+                    if (currentStroke.size > 1) drawStroke(currentStroke)
+                    currentStroke.firstOrNull()?.let { drawCircle(Color(0xFF315CFF), 15f, it) }
                 }
             }
         }
