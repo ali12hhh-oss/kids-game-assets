@@ -1,5 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
+import com.ali12hhh.kidslearning.navigation.ProLessonButton
+
 import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.animation.AnimatedContent
@@ -85,8 +87,8 @@ Text(title,fontSize=22.sp,fontWeight=FontWeight.Black,color=if(title=="الجم�
 Text(arDigits(ex.left)+" "+(if(title=="الجمع")"+" else "-")+" "+arDigits(ex.right)+" = "+arDigits(ex.answer),fontSize=56.sp,fontWeight=FontWeight.Black,color=numberColor(index+1));
 Text(if(index<5)"مثال من مرتبة واحدة" else "مثال من مرتبتين",fontSize=16.sp,fontWeight=FontWeight.Bold,color=Color(0xFF65738A));Spacer(Modifier.height(12.dp));
 Text(ex.explanation,Modifier.fillMaxWidth(),fontSize=18.sp,lineHeight=28.sp,textAlign=TextAlign.Center,fontWeight=FontWeight.Bold);Spacer(Modifier.height(14.dp));
-Button(onClick={if(ready)if (AppSettings.isSpeechEnabled(context)) tts?.speak(ex.explanation,TextToSpeech.QUEUE_FLUSH,null,"example_"+title+"_"+index)},Modifier.height(52.dp)){Text("🔊 اسمع الشرح",fontWeight=FontWeight.ExtraBold)}}}
-Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){Button(onClick={if(index>0)index--},Modifier.weight(1f).height(54.dp),colors=ButtonDefaults.buttonColors(Color(0xFF5B6B88))){Text("السابق",fontWeight=FontWeight.ExtraBold)};Button(onClick={if(index<examples.lastIndex)index++},Modifier.weight(1f).height(54.dp)){Text("التالي",fontWeight=FontWeight.ExtraBold)}}}}
+ProLessonButton(onClick={if(ready)if (AppSettings.isSpeechEnabled(context)) tts?.speak(ex.explanation,TextToSpeech.QUEUE_FLUSH,null,"example_"+title+"_"+index)},Modifier.height(52.dp)){Text("🔊 اسمع الشرح",fontWeight=FontWeight.ExtraBold)}}}
+Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){ProLessonButton(onClick={if(index>0)index--},Modifier.weight(1f).height(54.dp),colors=ButtonDefaults.buttonColors(Color(0xFF5B6B88))){Text("السابق",fontWeight=FontWeight.ExtraBold)};ProLessonButton(onClick={if(index<examples.lastIndex)index++},Modifier.weight(1f).height(54.dp)){Text("التالي",fontWeight=FontWeight.ExtraBold)}}}}
 
 @Composable private fun QuizOperation(title:String,quizzes:List<ArithmeticQuiz>){
 var index by remember(title){mutableStateOf(0)};var selected by remember(title){mutableStateOf<Int?>(null)};var score by remember(title){mutableStateOf(0)};var reaction by remember(title){mutableStateOf(0)};val context=LocalContext.current;var ready by remember{mutableStateOf(false)};var tts by remember{mutableStateOf<TextToSpeech?>(null)};val q=quizzes[index]
@@ -96,9 +98,9 @@ Column(Modifier.fillMaxSize(),horizontalAlignment=Alignment.CenterHorizontally,v
 Text("سؤال "+arDigits(index+1)+" / "+arDigits(quizzes.size)+" • النتيجة "+arDigits(score),fontWeight=FontWeight.Bold,color=Color(0xFF65738A));
 Card(Modifier.fillMaxWidth().shadow(7.dp,RoundedCornerShape(22.dp)),shape=RoundedCornerShape(22.dp),colors=CardDefaults.cardColors(Color.White)){Column(Modifier.fillMaxWidth().padding(14.dp),horizontalAlignment=Alignment.CenterHorizontally){
 Text(arDigits(q.left)+" "+(if(title=="الجمع")"+" else "-")+" "+arDigits(q.right)+" = ؟",fontSize=42.sp,fontWeight=FontWeight.Black,color=numberColor(index+1));Text(q.question,Modifier.fillMaxWidth(),fontSize=18.sp,fontWeight=FontWeight.Black,textAlign=TextAlign.Center);OutlinedButton(onClick={speak(q.question,"question_"+title+"_"+index)}){Text("🔊 صوت السؤال",fontWeight=FontWeight.ExtraBold)}}}
-q.options.forEach{option->val correct=option==q.answer;val c=when{selected==option&&correct->Color(0xFF2EAD67);selected==option&&!correct->Color(0xFFE05A5A);else->Color.White};Button(onClick={if(selected==null){selected=option;if(correct){score++;reaction=1;AppSettings.awardCorrectAnswer(context);speak("أحسنت! إجابة صحيحة","correct_"+title+"_"+index)}else{reaction=-1;speak("حاول مرة ثانية","wrong_"+title+"_"+index)}}},Modifier.fillMaxWidth().height(48.dp),colors=ButtonDefaults.buttonColors(containerColor=c,contentColor=if(selected!=null)Color.White else Color(0xFF24324A))){Text(arDigits(option),fontSize=20.sp,fontWeight=FontWeight.Black)}}}
+q.options.forEach{option->val correct=option==q.answer;val c=when{selected==option&&correct->Color(0xFF2EAD67);selected==option&&!correct->Color(0xFFE05A5A);else->Color.White};ProLessonButton(onClick={if(selected==null){selected=option;if(correct){score++;reaction=1;AppSettings.awardCorrectAnswer(context);speak("أحسنت! إجابة صحيحة","correct_"+title+"_"+index)}else{reaction=-1;speak("حاول مرة ثانية","wrong_"+title+"_"+index)}}},Modifier.fillMaxWidth().height(48.dp),colors=ButtonDefaults.buttonColors(containerColor=c,contentColor=if(selected!=null)Color.White else Color(0xFF24324A))){Text(arDigits(option),fontSize=20.sp,fontWeight=FontWeight.Black)}}}
 CharacterReactionMath(reaction)
-Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){Button(onClick={if(index>0){index--;selected=null;reaction=0}},Modifier.weight(1f),colors=ButtonDefaults.buttonColors(Color(0xFF5B6B88))){Text("السابق")};Button(onClick={if(index<quizzes.lastIndex){index++;selected=null;reaction=0}},Modifier.weight(1f)){Text("التالي")}}}
+Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){ProLessonButton(onClick={if(index>0){index--;selected=null;reaction=0}},Modifier.weight(1f),colors=ButtonDefaults.buttonColors(Color(0xFF5B6B88))){Text("السابق")};ProLessonButton(onClick={if(index<quizzes.lastIndex){index++;selected=null;reaction=0}},Modifier.weight(1f)){Text("التالي")}}}
 
 @Composable private fun CharacterReactionMath(reaction:Int){
 val engine=rememberEngine();val loader=rememberModelLoader(engine);val model=remember{runCatching{loader.createModelInstance("Mannequin_Medium_Anim.glb")}.getOrNull()};val camera=rememberCameraNode(engine){position=Position(z=3.5f)};val node=remember(model){model?.let{ModelNode(modelInstance=it,autoAnimate=false,scaleToUnits=1.0f).also{it.position=Position(x=0f,y=-0.45f,z=0f)}}}
