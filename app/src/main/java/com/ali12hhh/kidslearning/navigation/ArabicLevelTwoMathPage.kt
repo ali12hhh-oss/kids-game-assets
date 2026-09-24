@@ -308,6 +308,7 @@ private fun PlaceValueQuiz() {
     var selected by remember { mutableStateOf<Int?>(null) }
     var score by remember { mutableStateOf(0) }
     var reaction by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
     var ready by remember { mutableStateOf(false) }
@@ -363,6 +364,10 @@ private fun PlaceValueQuiz() {
         }
         CharacterReaction(reaction)
         Text("النتيجة: ${arDigits(score)}", fontWeight = FontWeight.ExtraBold, color = Color(0xFF315CFF))
+        Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ProLessonButton(onClick = { if (index > 0) { index--; selected = null; reaction = 0 } }, Modifier.weight(1f), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق") }
+            ProLessonButton(onClick = { if (index < placeQuizzes.lastIndex) { index++; selected = null; reaction = 0 } }, Modifier.weight(1f)) { Text("التالي") }
+        }
 
     }
 }
@@ -411,10 +416,5 @@ private fun CharacterReaction(reaction: Int) {
                 isOpaque = false,
                 childNodes = listOfNotNull(node)
             )
-        }
-        Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ProLessonButton(onClick = { if (index > 0) { index--; selected = null; reaction = 0 } }, Modifier.weight(1f), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق") }
-            ProLessonButton(onClick = { if (index < placeQuizzes.lastIndex) { index++; selected = null; reaction = 0 } }, Modifier.weight(1f)) { Text("التالي") }
-        }
-    }
+        }    }
 }
