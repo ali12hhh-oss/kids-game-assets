@@ -365,24 +365,33 @@ private fun PlaceValueQuiz() {
                 }
             }
         }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(3.dp))
         CharacterReaction(reaction)
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(2.dp))
         Text("النتيجة: " + arDigits(score), fontWeight = FontWeight.ExtraBold, color = Color(0xFF315CFF))
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(2.dp))
         Row(
-            Modifier.fillMaxWidth().navigationBarsPadding(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            Modifier.fillMaxWidth().navigationBarsPadding().height(52.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             ProLessonButton(
                 onClick = { if (index > 0) { index--; selected = null; reaction = 0 } },
-                modifier = Modifier.width(125.dp).height(52.dp),
-                colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))
-            ) { Text("◀ السابق", fontWeight = FontWeight.ExtraBold) }
+                modifier = Modifier.weight(1f).height(52.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (index > 0) Color(0xFF5B6B88) else Color(0xFFD9DFEA),
+                    contentColor = if (index > 0) Color.White else Color(0xFF8A94A6)
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) { Text("‹  السابق", fontWeight = FontWeight.ExtraBold) }
             ProLessonButton(
                 onClick = { if (index < placeQuizzes.lastIndex) { index++; selected = null; reaction = 0 } },
-                modifier = Modifier.width(125.dp).height(52.dp)
-            ) { Text("التالي ▶", fontWeight = FontWeight.ExtraBold) }
+                modifier = Modifier.weight(1f).height(52.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (index < placeQuizzes.lastIndex) Color(0xFF315CFF) else Color(0xFFD9DFEA),
+                    contentColor = if (index < placeQuizzes.lastIndex) Color.White else Color(0xFF8A94A6)
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) { Text("التالي  ›", fontWeight = FontWeight.ExtraBold) }
         }
     }
 }
@@ -398,8 +407,8 @@ private fun CharacterReaction(reaction: Int) {
     val camera = rememberCameraNode(engine) { position = Position(z = 2.9f) }
     val node = remember(model) {
         model?.let {
-            ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = 2.45f).also {
-                it.position = Position(x = 0f, y = -0.42f, z = 0f)
+            ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = 2.25f).also {
+                it.position = Position(x = 0f, y = -0.62f, z = 0f)
             }
         }
     }
@@ -418,7 +427,7 @@ private fun CharacterReaction(reaction: Int) {
         }
     }
     Card(
-        Modifier.fillMaxWidth().height(125.dp),
+        Modifier.fillMaxWidth().height(100.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(Color(0xFFF8FAFF))
     ) {
