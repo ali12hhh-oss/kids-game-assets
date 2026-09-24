@@ -65,9 +65,26 @@ fun ArabicLevelTwoMathPage(onBack: () -> Unit) {
                 Text("الرياضيات • المستوى الثاني", fontSize = 21.sp, fontWeight = FontWeight.Black, color = Color(0xFF24324A))
             }
             Spacer(Modifier.height(8.dp))
-            TabRow(selectedTabIndex = tab) {
-                Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("كتابة الأرقام") })
-                Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("مراتب الأعداد") })
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                MathModeButton(
+                    modifier = Modifier.weight(1f),
+                    selected = tab == 0,
+                    icon = "🔢",
+                    title = "كتابة الأعداد",
+                    color = Color(0xFF315CFF),
+                    onClick = { tab = 0 }
+                )
+                MathModeButton(
+                    modifier = Modifier.weight(1f),
+                    selected = tab == 1,
+                    icon = "🏷️",
+                    title = "مراتب الأعداد",
+                    color = Color(0xFF16A085),
+                    onClick = { tab = 1 }
+                )
             }
             Spacer(Modifier.height(8.dp))
             AnimatedContent(targetState = tab, transitionSpec = { fadeIn() togetherWith fadeOut() }, label = "math2tabs") {
@@ -78,9 +95,55 @@ fun ArabicLevelTwoMathPage(onBack: () -> Unit) {
 }
 
 @Composable
+private fun MathModeButton(
+    modifier: Modifier,
+    selected: Boolean,
+    icon: String,
+    title: String,
+    color: Color,
+    onClick: () -> Unit
+) {
+    ProLessonButton(
+        onClick = onClick,
+        modifier = modifier.height(62.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (selected) color else Color.White,
+            contentColor = if (selected) Color.White else Color(0xFF35445C)
+        )
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(icon, fontSize = 21.sp)
+            Text(title, fontSize = 13.sp, fontWeight = FontWeight.ExtraBold)
+        }
+    }
+}
+
+@Composable
 private fun NumberWritingSection() {
     var number by remember { mutableStateOf(1) }
     var strokes by remember(number) { mutableStateOf(emptyList<StrokeLine>()) }
+    val context = LocalContext.current
+    var tts by remember { mutableStateOf<TextToSpeech?>(null) }
+    var ready by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        val engine = TextToSpeech(context) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                LessonSpeech.configure(engine, LessonSpeech.ARABIC_LOCALE)
+                ready = true
+            }
+        }
+        tts = engine
+        onDispose { engine.stop(); engine.shutdown(); tts = null }
+    }
+
+    LaunchedEffect(number, ready) {
+        if (ready && AppSettings.isSpeechEnabled(context)) {
+            tts?.speak(arDigits(number), TextToSpeech.QUEUE_FLUSH, null, "number_writing_" + number)
+        }
+    }
+
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("اكتب الرقم كما تراه", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFF53647A))
         Text(arDigits(number), fontSize = 72.sp, fontWeight = FontWeight.Black, color = numberColor(number))
@@ -113,9 +176,21 @@ private fun NumberWritingSection() {
         }
         Spacer(Modifier.height(8.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { strokes = emptyList() }, Modifier.weight(1f).height(54.dp)) { Text("مسح", fontWeight = FontWeight.ExtraBold) }
-            ProLessonButton(onClick = { if (number > 1) number-- }, Modifier.weight(1f).height(54.dp), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق", fontWeight = FontWeight.ExtraBold) }
-            ProLessonButton(onClick = { if (number < 100) number++ }, Modifier.weight(1f).height(54.dp)) { Text("التالي", fontWeight = FontWeight.ExtraBold) }
+            ProLessonButton(
+                onClick = { strokes = emptyList() },
+                Modifier.weight(1f).height(54.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE05A5A))
+            ) { Text("مسح", fontWeight = FontWeight.ExtraBold) }
+            ProLessonButton(
+                onClick = { if (number > 1) number-- },
+                Modifier.weight(1f).height(54.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5B6B88))
+            ) { Text("السابق", fontWeight = FontWeight.ExtraBold) }
+            ProLessonButton(
+                onClick = { if (number < 100) number++ },
+                Modifier.weight(1f).height(54.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF315CFF))
+            ) { Text("التالي", fontWeight = FontWeight.ExtraBold) }
         }
     }
 }
@@ -124,9 +199,23 @@ private fun NumberWritingSection() {
 private fun PlaceValueSection() {
     var mode by remember { mutableStateOf(0) }
     Column(Modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = mode) {
-            Tab(selected = mode == 0, onClick = { mode = 0 }, text = { Text("تعلم") })
-            Tab(selected = mode == 1, onClick = { mode = 1 }, text = { Text("اختبر نفسك") })
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MathModeButton(
+                modifier = Modifier.weight(1f),
+                selected = mode == 0,
+                icon = "📚",
+                title = "تعلم",
+                color = Color(0xFF7A4DCE),
+                onClick = { mode = 0 }
+            )
+            MathModeButton(
+                modifier = Modifier.weight(1f),
+                selected = mode == 1,
+                icon = "⭐",
+                title = "اختبر نفسك",
+                color = Color(0xFFE67E22),
+                onClick = { mode = 1 }
+            )
         }
         Spacer(Modifier.height(8.dp))
         if (mode == 0) PlaceValueLearn() else PlaceValueQuiz()
@@ -164,6 +253,11 @@ private fun PlaceValueLearn() {
         onDispose { e.stop(); e.shutdown() }
     }
     val ex = learnExamples[index]
+    LaunchedEffect(index, ready) {
+        if (ready && AppSettings.isSpeechEnabled(context)) {
+            tts?.speak(ex.first + "، " + ex.second + "، " + ex.third, TextToSpeech.QUEUE_FLUSH, null, "place_learn_" + index)
+        }
+    }
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
         Text("مثال ${index + 1} من ${learnExamples.size}", fontWeight = FontWeight.Bold, color = Color(0xFF65738A))
         Card(Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(26.dp)), shape = RoundedCornerShape(26.dp), colors = CardDefaults.cardColors(Color.White)) {
