@@ -20,12 +20,9 @@ import kotlin.random.Random
 
 private data class RewardTitle(val id: String, val name: String, val cost: Int)
 private val premiumTitles = listOf(
-    RewardTitle("lucky_title_01", "تاج الملوك الصغار", 0), RewardTitle("lucky_title_02", "أسطورة المجرّة", 0),
-    RewardTitle("lucky_title_03", "عبقري الحروف", 0), RewardTitle("lucky_title_04", "قائد الأحلام", 0),
-    RewardTitle("lucky_title_05", "جوهرة التميّز", 0), RewardTitle("lucky_title_06", "فارس الضوء", 0),
-    RewardTitle("lucky_title_07", "بطل المستحيل", 0), RewardTitle("lucky_title_08", "صانع المعجزات", 0),
-    RewardTitle("lucky_title_09", "العبقري اللامع", 0), RewardTitle("lucky_title_10", "أسطورة دبدوب", 0)
-)
+    "تاج الملوك الصغار", "أسطورة المجرّة", "عبقري الحروف", "قائد الأحلام", "جوهرة التميّز",
+    "فارس الضوء", "بطل المستحيل", "صانع المعجزات", "العبقري اللامع", "أسطورة دبدوب"
+).mapIndexed { index, name -> RewardTitle("lucky_title_${(index + 1).toString().padStart(2, '0')}", name, 0) }
 private val regularTitles = listOf(
     "ملك النجوم", "أمير المعرفة", "نجم متألق", "بطل الماس", "نجم المستقبل", "كأس التفوق", "ساحر الكلمات", "حارس النجاح", "فارس الإنجاز", "بطل الشجاعة",
     "حالم النجوم", "صانع النور", "قلب ذهبي", "قوس الفرح", "كنز المعرفة", "نجم المرح", "صديق الجميع", "صانع الابتسامة", "بطل الحروف", "فارس الأرقام",
@@ -53,14 +50,9 @@ private fun RewardChestCard(
         colors = CardDefaults.cardColors(containerColor = colors.first()),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
-        Row(
-            Modifier.fillMaxWidth().background(Brush.horizontalGradient(colors)).padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(Modifier.fillMaxWidth().background(Brush.horizontalGradient(colors)).padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Surface(shape = RoundedCornerShape(22.dp), color = Color.White.copy(alpha = 0.78f)) {
-                Box(Modifier.size(76.dp), contentAlignment = Alignment.Center) {
-                    Text(icon, fontSize = 43.sp)
-                }
+                Box(Modifier.size(76.dp), contentAlignment = Alignment.Center) { Text(icon, fontSize = 43.sp) }
             }
             Spacer(Modifier.width(13.dp))
             Column(Modifier.weight(1f)) {
@@ -69,13 +61,12 @@ private fun RewardChestCard(
                 Text(description, fontSize = 13.sp, color = ink.copy(alpha = 0.88f), lineHeight = 18.sp)
                 Spacer(Modifier.height(7.dp))
                 Surface(shape = RoundedCornerShape(50), color = Color.White.copy(alpha = 0.72f)) {
-                    Text(detail, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = ink)
+                    Text(detail, Modifier.padding(horizontal = 10.dp, vertical = 5.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = ink)
                 }
                 Spacer(Modifier.height(9.dp))
-                Button(
-                    onClick = onClick, enabled = enabled, modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(15.dp), colors = ButtonDefaults.buttonColors(containerColor = ink)
-                ) { Text(buttonLabel, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center) }
+                Button(onClick = onClick, enabled = enabled, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(15.dp), colors = ButtonDefaults.buttonColors(containerColor = ink)) {
+                    Text(buttonLabel, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                }
             }
         }
     }
@@ -93,7 +84,6 @@ fun ShopPage(initialCollection: Boolean = false, onBack: () -> Unit) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     val dailyReady = now - lastDaily >= 24L * 60L * 60L * 1000L
     val allTitles = regularTitles + premiumTitles
-
     fun refresh() { stars = AppSettings.childStars(context); owned = AppSettings.ownedItems(context) }
     fun openDaily() {
         if (!dailyReady) return
@@ -112,8 +102,7 @@ fun ShopPage(initialCollection: Boolean = false, onBack: () -> Unit) {
         val available = premiumTitles.filterNot { it.id in owned }
         if (available.isNotEmpty() && Random.nextInt(100) < 35) {
             val reward = available.random()
-            val updated = AppSettings.ownedItems(context) + reward.id
-            prefs.edit().putStringSet("owned_items", updated).apply()
+            prefs.edit().putStringSet("owned_items", AppSettings.ownedItems(context) + reward.id).apply()
             message = "✨ مبروك! حصلت على اللقب المميز: ${reward.name}"
         } else {
             val prize = Random.nextInt(10, 31)
@@ -131,36 +120,32 @@ fun ShopPage(initialCollection: Boolean = false, onBack: () -> Unit) {
                 Text("كل إنجاز يستحق مكافأة ⭐", fontSize = 12.sp, color = muted)
             }
             Surface(shape = RoundedCornerShape(50), color = Color(0xFFFFF0B8), shadowElevation = 3.dp) {
-                Text("⭐ $stars", modifier = Modifier.padding(horizontal = 13.dp, vertical = 9.dp), fontWeight = FontWeight.Black, fontSize = 16.sp, color = Color(0xFF805500))
+                Text("⭐ $stars", Modifier.padding(horizontal = 13.dp, vertical = 9.dp), fontWeight = FontWeight.Black, fontSize = 16.sp, color = Color(0xFF805500))
             }
         }
         Spacer(Modifier.height(12.dp))
         Surface(shape = RoundedCornerShape(18.dp), color = Color.White, shadowElevation = 2.dp, modifier = Modifier.fillMaxWidth()) {
             Row(Modifier.padding(5.dp), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                if (!collection) {
-                    Button(onClick = { collection = false }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) { Text("🛍 المتجر") }
-                    OutlinedButton(onClick = { collection = true }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) { Text("🎒 مقتنياتي (${owned.size})") }
-                } else {
+                if (collection) {
                     OutlinedButton(onClick = { collection = false }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) { Text("🛍 المتجر") }
                     Button(onClick = { collection = true }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) { Text("🎒 مقتنياتي (${owned.size})") }
+                } else {
+                    Button(onClick = { collection = false }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) { Text("🛍 المتجر") }
+                    OutlinedButton(onClick = { collection = true }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) { Text("🎒 مقتنياتي (${owned.size})") }
                 }
             }
         }
         if (!collection) {
             LazyColumn(contentPadding = PaddingValues(bottom = 26.dp), verticalArrangement = Arrangement.spacedBy(11.dp)) {
                 item { ShopSectionHeading("🎁 هدايا ومفاجآت", "ابدأ بصناديق المكافآت واجمع النجوم والألقاب النادرة") }
-                item {
-                    RewardChestCard("صندوق الحظ", "🎁", "مفاجأة عشوائية في كل مرة: نجوم إضافية أو لقب مميز من مجموعة الألقاب النادرة.", "25 ⭐  •  قابل للشراء بلا حد", stars >= 25, listOf(Color(0xFFFFE7A3), Color(0xFFFFF4D5)), ::openLuck)
-                }
-                item {
-                    RewardChestCard("افتح واربح", "🌈", "هدية يومية مجانية تمنحك من نجمة واحدة إلى 10 نجوم.", if (dailyReady) "هدية اليوم جاهزة!" else "هدية جديدة كل 24 ساعة", dailyReady, listOf(Color(0xFFB9E8FF), Color(0xFFE3F6FF)), ::openDaily)
-                }
+                item { RewardChestCard("صندوق الحظ", "🎁", "مفاجأة عشوائية في كل مرة: نجوم إضافية أو لقب مميز من مجموعة الألقاب النادرة.", "25 ⭐ • قابل للشراء بلا حد", "افتح الصندوق", stars >= 25, listOf(Color(0xFFFFE7A3), Color(0xFFFFF4D5)), ::openLuck) }
+                item { RewardChestCard("افتح واربح", "🌈", "هدية يومية مجانية تمنحك من نجمة واحدة إلى 10 نجوم.", if (dailyReady) "هدية اليوم جاهزة!" else "هدية جديدة كل 24 ساعة", "احصل على هديتك", dailyReady, listOf(Color(0xFFB9E8FF), Color(0xFFE3F6FF)), ::openDaily) }
                 if (message.isNotBlank()) item {
                     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFE1F7E8))) {
                         Text(message, Modifier.fillMaxWidth().padding(14.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, color = Color(0xFF176534))
                     }
                 }
-                item { ShopSectionHeading("🏆 ألقاب الأبطال", "اختر لقبك المفضل واظهر إنجازاتك") }
+                item { ShopSectionHeading("🏆 ألقاب الأبطال", "اختر لقبك المفضل وأظهر إنجازاتك") }
                 items(regularTitles, key = { it.id }) { title ->
                     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(2.dp)) {
                         Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -170,10 +155,10 @@ fun ShopPage(initialCollection: Boolean = false, onBack: () -> Unit) {
                                 Text("لقب تشجيعي • أضفه إلى مجموعتك", fontSize = 11.sp, color = muted)
                             }
                             if (title.id in owned) Surface(shape = RoundedCornerShape(50), color = Color(0xFFDDF5E5)) {
-                                Text("تمتلكه ✓", modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF176534))
+                                Text("تمتلكه ✓", Modifier.padding(horizontal = 10.dp, vertical = 7.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF176534))
                             } else Button(onClick = {
                                 if (AppSettings.buyItem(context, title.id, title.cost)) { message = "🎉 أصبح لقب ${title.name} من مقتنياتك!"; refresh() }
-                                else { message = "رصيدك من النجوم لا يكفي لشراء هذا اللقب." }
+                                else message = "رصيدك من النجوم لا يكفي لشراء هذا اللقب."
                             }, shape = RoundedCornerShape(13.dp), contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)) { Text("⭐ ${title.cost}", fontWeight = FontWeight.Bold) }
                         }
                     }
@@ -192,7 +177,7 @@ fun ShopPage(initialCollection: Boolean = false, onBack: () -> Unit) {
                             Text("🎁", fontSize = 48.sp)
                             Spacer(Modifier.height(10.dp))
                             Text("مقتنياتك بانتظار أول هدية!", fontSize = 18.sp, fontWeight = FontWeight.Black, color = ink, textAlign = TextAlign.Center)
-                            Text("افتح الصندوق اليومي أو اجمع النجوم من الدروس لشراء ألقابك.", modifier = Modifier.padding(top = 7.dp), color = muted, textAlign = TextAlign.Center, fontSize = 13.sp)
+                            Text("افتح الصندوق اليومي أو اجمع النجوم من الدروس لشراء ألقابك.", Modifier.padding(top = 7.dp), color = muted, textAlign = TextAlign.Center, fontSize = 13.sp)
                             Spacer(Modifier.height(14.dp))
                             Button(onClick = { collection = false }, shape = RoundedCornerShape(14.dp)) { Text("اكتشف المتجر") }
                         }
@@ -207,10 +192,12 @@ fun ShopPage(initialCollection: Boolean = false, onBack: () -> Unit) {
                                     Box(Modifier.size(52.dp), contentAlignment = Alignment.Center) { Text(if (title.id.startsWith("lucky_")) "💎" else "🏅", fontSize = 29.sp) }
                                 }
                                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                                    Text(title.name, fontSize = 16.sp, fontWeight = FontWeight.Black, color = ink)
-                                    Text(if (title.id.startsWith("lucky_")) "لقب نادر • جائزة صندوق الحظ" else "لقب تشجيعي • ملكك الآن", fontSize = 12.sp, color = muted)
+                                    Text(title.name, fontWeight = FontWeight.Black, fontSize = 16.sp, color = ink)
+                                    Text(if (title.id.startsWith("lucky_")) "لقب نادر • جائزة صندوق الحظ" else "لقب مكتسب", fontSize = 11.sp, color = muted)
                                 }
-                                Text("✓", fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color(0xFF199354))
+                                Surface(shape = RoundedCornerShape(50), color = Color(0xFFDDF5E5)) {
+                                    Text("مملوك ✓", Modifier.padding(horizontal = 10.dp, vertical = 7.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF176534))
+                                }
                             }
                         }
                     }
