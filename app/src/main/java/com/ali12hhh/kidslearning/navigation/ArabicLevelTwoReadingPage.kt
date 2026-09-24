@@ -261,7 +261,8 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
     var ready by remember { mutableStateOf(false) }
 
     DisposableEffect(Unit) {
-        val engine = TextToSpeech(context) { status ->
+        lateinit var engine: TextToSpeech
+        engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 LessonSpeech.configure(engine, LessonSpeech.ARABIC_LOCALE)
                 ready = true
@@ -273,7 +274,7 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
 
     LaunchedEffect(lesson.letter, ready) {
         if (ready && AppSettings.isSpeechEnabled(context)) {
-            tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "writing_letter_" + lesson.letter)
+            tts?.speak(lesson.letter, TextToSpeech.QUEUE_FLUSH, null, "writing_letter_" + lesson.letter)
         }
     }
 
