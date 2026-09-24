@@ -211,7 +211,7 @@ fun BreakGamePage(onBack: () -> Unit) {
 
     LaunchedEffect(characterNode, running, jumping, fastMode) {
         val node = characterNode ?: return@LaunchedEffect
-        if (running && !jumping) runCatching { node.playAnimation(0, if (fastMode) 1.35f else 1.05f, true) }
+        if (running && !jumping) runCatching { node.playAnimation(1, if (fastMode) 1.35f else 1.05f, true) }
     }
 
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF071421)) {
