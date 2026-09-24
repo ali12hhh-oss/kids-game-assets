@@ -128,7 +128,8 @@ private fun NumberWritingSection() {
     var ready by remember { mutableStateOf(false) }
 
     DisposableEffect(Unit) {
-        val engine = TextToSpeech(context) { status ->
+        lateinit var engine: TextToSpeech
+        engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 LessonSpeech.configure(engine, LessonSpeech.ARABIC_LOCALE)
                 ready = true
