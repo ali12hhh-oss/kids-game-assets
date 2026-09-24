@@ -6,13 +6,18 @@ import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -105,8 +110,7 @@ private fun WritingBoard(
     guideSize: androidx.compose.ui.unit.TextUnit,
     onClear: () -> Unit
 ) {
-    val strokes = remember { mutableStateListOf<Path>() }
-    var activePath by remember { mutableStateOf<Path?>(null) }
+    val strokes = remember { mutableStateListOf<List<Offset>>() }
 
     Card(
         Modifier.fillMaxWidth().height(310.dp),
@@ -114,43 +118,78 @@ private fun WritingBoard(
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFDF7)),
         elevation = CardDefaults.cardElevation(8.dp)
     ) {
-        Box(
-            Modifier.fillMaxSize().pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { offset ->
-                        activePath = Path().apply { moveTo(offset.x, offset.y) }
-                        strokes.add(activePath!!)
-                    },
-                    onDrag = { change, _ ->
-                        activePath?.lineTo(change.position.x, change.position.y)
-                    },
-                    onDragEnd = { activePath = null },
-                    onDragCancel = { activePath = null }
-                )
+        Canvas(
+            Modifier.fillMaxSize().padding(12.dp).pointerInput(Unit) {
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
+                    down.consume()
+                    var points = listOf(down.position)
+                    var moved = false
+
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Main)
+                        val change = event.changes.firstOrNull() ?: break
+                        if (!change.pressed) {
+                            if (moved && points.size > 1) {
+                                strokes.add(points)
+                            } else {
+                                strokes.add(listOf(change.position))
+                            }
+                            break
+                        }
+                        change.consume()
+                        if (change.position != points.last()) {
+                            moved = true
+                            points = points + change.position
+                        }
+                    }
+                }
             }
         ) {
-            Canvas(Modifier.fillMaxSize().padding(12.dp)) {
-                drawRect(Color(0xFFF8F0D8))
-                drawLine(Color(0xFFD7C79D), androidx.compose.ui.geometry.Offset(0f, size.height * .78f),
-                    androidx.compose.ui.geometry.Offset(size.width, size.height * .78f), 2f)
-                drawIntoCanvas { canvas ->
-                    val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                        color = android.graphics.Color.argb(55, 50, 80, 130)
-                        textSize = guideSize.toPx()
-                        textAlign = android.graphics.Paint.Align.CENTER
-                        typeface = android.graphics.Typeface.DEFAULT_BOLD
-                    }
-                    canvas.nativeCanvas.drawText(guide, size.width / 2f, size.height * .65f, paint)
+            drawRect(Color(0xFFF8F0D8))
+            drawLine(
+                Color(0xFFD7C79D),
+                Offset(0f, size.height * .78f),
+                Offset(size.width, size.height * .78f),
+                2f
+            )
+            drawIntoCanvas { canvas ->
+                val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                    color = android.graphics.Color.argb(55, 50, 80, 130)
+                    textSize = guideSize.toPx()
+                    textAlign = android.graphics.Paint.Align.CENTER
+                    typeface = android.graphics.Typeface.DEFAULT_BOLD
                 }
-                strokes.forEach { drawPath(it, Color(0xFF2456A6), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 10f)) }
+                canvas.nativeCanvas.drawText(guide, size.width / 2f, size.height * .65f, paint)
+            }
+
+            strokes.forEach { points ->
+                if (points.size == 1) {
+                    drawCircle(Color(0xFF2456A6), 15f, points.first())
+                } else {
+                    val path = Path().apply {
+                        moveTo(points.first().x, points.first().y)
+                        points.drop(1).forEach { lineTo(it.x, it.y) }
+                    }
+                    drawPath(
+                        path,
+                        Color(0xFF2456A6),
+                        style = Stroke(width = 10f, cap = StrokeCap.Round)
+                    )
+                }
             }
         }
     }
+
     Spacer(Modifier.height(8.dp))
-    OutlinedButton(onClick = {
-        strokes.clear()
-        onClear()
-    }) { Text("مسح السبورة") }
+    ProLessonButton(
+        onClick = {
+            strokes.clear()
+            onClear()
+        },
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF476F))
+    ) { Text("مسح", fontWeight = FontWeight.ExtraBold) }
 }
 
 @Composable
