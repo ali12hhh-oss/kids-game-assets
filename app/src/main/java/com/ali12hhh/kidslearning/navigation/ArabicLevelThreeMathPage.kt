@@ -28,7 +28,8 @@ import io.github.sceneview.node.ModelNode
 import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
-import kotlinx.coroutines.delay\nimport androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.LaunchedEffect
 import java.util.Locale
 
 private data class ArithmeticExample(val left:Int,val right:Int,val answer:Int,val explanation:String)
@@ -76,11 +77,14 @@ Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){TextBu
 Spacer(Modifier.height(6.dp));Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){MathSectionButton(Modifier.weight(1f),operation==0,"➕  الجمع"){operation=0};MathSectionButton(Modifier.weight(1f),operation==1,"➖  الطرح"){operation=1}}
 Spacer(Modifier.height(8.dp));AnimatedContent(targetState=operation,transitionSpec={fadeIn() togetherWith fadeOut()},label="operation"){if(it==0) OperationSection("الجمع",addExamples,addQuiz) else OperationSection("الطرح",subExamples,subQuiz)}}}
 
-@Composable private fun MathSectionButton(modifier: Modifier, selected: Boolean, title: String, onClick: () -> Unit) { ProLessonButton(onClick=onClick, modifier=modifier.height(54.dp), shape=RoundedCornerShape(16.dp), colors=ButtonDefaults.buttonColors(containerColor=if(selected) Color(0xFF315CFF) else Color(0xFFE8EEF9), contentColor=if(selected) Color.White else Color(0xFF24324A)), elevation=ButtonDefaults.buttonElevation(defaultElevation=if(selected) 5.dp else 1.dp)){ Text(title,fontWeight=FontWeight.ExtraBold,fontSize=15.sp,textAlign=TextAlign.Center) } }\n\n@Composable private fun OperationSection(title:String,examples:List<ArithmeticExample>,quizzes:List<ArithmeticQuiz>){var mode by remember(title){mutableStateOf(0)};Column(Modifier.fillMaxSize()){Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){MathSectionButton(Modifier.weight(1f),mode==0,"📚  تعلم"){mode=0};MathSectionButton(Modifier.weight(1f),mode==1,"⭐  اختبر نفسك"){mode=1}};Spacer(Modifier.height(8.dp));if(mode==0)LearnOperation(title,examples)else QuizOperation(title,quizzes)}}
+@Composable private fun MathSectionButton(modifier: Modifier, selected: Boolean, title: String, onClick: () -> Unit) { ProLessonButton(onClick=onClick, modifier=modifier.height(54.dp), shape=RoundedCornerShape(16.dp), colors=ButtonDefaults.buttonColors(containerColor=if(selected) Color(0xFF315CFF) else Color(0xFFE8EEF9), contentColor=if(selected) Color.White else Color(0xFF24324A)), elevation=ButtonDefaults.buttonElevation(defaultElevation=if(selected) 5.dp else 1.dp)){ Text(title,fontWeight=FontWeight.ExtraBold,fontSize=15.sp,textAlign=TextAlign.Center) } }
+
+@Composable private fun OperationSection(title:String,examples:List<ArithmeticExample>,quizzes:List<ArithmeticQuiz>){var mode by remember(title){mutableStateOf(0)};Column(Modifier.fillMaxSize()){Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){MathSectionButton(Modifier.weight(1f),mode==0,"📚  تعلم"){mode=0};MathSectionButton(Modifier.weight(1f),mode==1,"⭐  اختبر نفسك"){mode=1}};Spacer(Modifier.height(8.dp));if(mode==0)LearnOperation(title,examples)else QuizOperation(title,quizzes)}}
 
 @Composable private fun LearnOperation(title:String,examples:List<ArithmeticExample>){
 var index by remember(title){mutableStateOf(0)};val context=LocalContext.current;var ready by remember{mutableStateOf(false)};var tts by remember{mutableStateOf<TextToSpeech?>(null)};val ex=examples[index]
-DisposableEffect(title){lateinit var e:TextToSpeech;e=TextToSpeech(context){s->if(s==TextToSpeech.SUCCESS){e.setLanguage(Locale.forLanguageTag("ar-XA"));e.setSpeechRate(0.82f);ready=true}};tts=e;onDispose{e.stop();e.shutdown()}}\nLaunchedEffect(index){ tts?.stop() }
+DisposableEffect(title){lateinit var e:TextToSpeech;e=TextToSpeech(context){s->if(s==TextToSpeech.SUCCESS){e.setLanguage(Locale.forLanguageTag("ar-XA"));e.setSpeechRate(0.82f);ready=true}};tts=e;onDispose{e.stop();e.shutdown()}}
+LaunchedEffect(index){ tts?.stop() }
 Column(Modifier.fillMaxSize(),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(8.dp)){Text("مثال "+arDigits(index+1)+" من "+arDigits(examples.size),fontWeight=FontWeight.Bold,color=Color(0xFF65738A));
 Card(Modifier.fillMaxWidth().weight(1f).shadow(8.dp,RoundedCornerShape(26.dp)),shape=RoundedCornerShape(26.dp),colors=CardDefaults.cardColors(Color.White)){Column(Modifier.fillMaxSize().padding(18.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center){
 Text(title,fontSize=22.sp,fontWeight=FontWeight.Black,color=if(title=="الجمع")Color(0xFF16A085)else Color(0xFFE05A5A));Spacer(Modifier.height(8.dp));
