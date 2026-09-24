@@ -74,6 +74,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ali12hhh.kidslearning.core.LearningCatalog
+import com.ali12hhh.kidslearning.HomeGreetingSpeech
 import java.util.Locale
 
 private const val CLIP_IDLE = 0
