@@ -55,8 +55,6 @@ private fun MainSettings(context: Context, onBack: () -> Unit, onOpen: (Settings
         }
     }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            item { Header("👤", "الحساب وملف الطفل", secondary) }
-            item { CardBox(card) { RowItem("👦", "ملف الطفل", "اسم الطفل وإدارة ملفه", text) { onOpen(SettingsScreen.PROFILE) } } }
             item { Header("🎨", "المظهر", secondary) }
             item { CardBox(card) { ToggleItem("🌙", "الوضع الليلي", "يُحفظ ويُطبّق على الشاشة الرئيسية", darkMode, text) { darkMode = it; AppSettings.setDarkMode(context, it) } } }
             item { Header("🗣️", "النطق", secondary) }
