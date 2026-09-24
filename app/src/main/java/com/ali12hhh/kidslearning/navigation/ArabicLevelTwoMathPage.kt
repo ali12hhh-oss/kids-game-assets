@@ -185,6 +185,7 @@ private fun NumberWritingSection() {
                             drawPath(path, Color(0xFF315CFF), style = Stroke(width = 30f, cap = StrokeCap.Round))
                         } else if (line.points.isNotEmpty()) drawCircle(Color(0xFF315CFF), 15f, line.points.first())
                     }
+                    // The active stroke is rendered on every Canvas redraw while the finger is down.
                     activeStroke?.let { line ->
                         if (line.points.size > 1) {
                             val path = Path().apply {
