@@ -272,7 +272,7 @@ private fun HomePage(
     val cardColor = if (darkMode) Color(0xFF2E3E5C) else Color.White.copy(alpha = 0.95f)
 
     if (showChildProfile) {
-        ChildProfileDialog(onDismiss = { showChildProfile = false }, onSaved = { showChildProfile = false })
+        ChildProfileDialog(onDismiss = { showChildProfile = false }, onSaved = { showChildProfile = false; refreshKey++ })
     }
 
     Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
@@ -302,7 +302,7 @@ private fun HomePage(
                     }
 
                     Spacer(Modifier.height(4.dp))
-                    ChildProfileCard(cardColor, textColor, onCollection) { showChildProfile = true }
+                    key(refreshKey) { ChildProfileCard(cardColor, textColor, onCollection) { showChildProfile = true } }
                     Spacer(Modifier.weight(1f))
 
                     Row(
