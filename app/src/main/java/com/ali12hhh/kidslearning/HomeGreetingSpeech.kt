@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import java.util.Locale
+import com.ali12hhh.kidslearning.navigation.AppSettings
 
 object HomeGreetingSpeech {
     private const val UTTERANCE_ID = "home_greeting"
