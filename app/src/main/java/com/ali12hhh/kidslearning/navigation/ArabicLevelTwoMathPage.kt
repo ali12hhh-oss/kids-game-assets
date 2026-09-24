@@ -38,6 +38,7 @@ import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.math.Position
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private fun arDigits(v: Int) = v.toString().map { ('٠'.code + (it.code - '0'.code)).toChar() }.joinToString("")
 private data class StrokeLine(val points: List<Offset>)
@@ -124,7 +125,8 @@ private fun MathModeButton(
 @Composable
 private fun NumberWritingSection() {
     var number by remember { mutableStateOf(1) }
-    var strokes by remember(number) { mutableStateOf(emptyList<StrokeLine>()) }\n    var activeStroke by remember { mutableStateOf<StrokeLine?>(null) }
+    var strokes by remember(number) { mutableStateOf(emptyList<StrokeLine>()) }
+    var activeStroke by remember { mutableStateOf<StrokeLine?>(null) }
     val context = LocalContext.current
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
     var ready by remember { mutableStateOf(false) }
