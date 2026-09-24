@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -162,7 +163,7 @@ private fun LearnReadingSection(
         }
     }
 
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {\n        LaunchedEffect(index, ready) { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak("حرف ${lesson.first} مع حرف ${lesson.second}، ننطقهما معًا: ${lesson.result}", TextToSpeech.QUEUE_FLUSH, null, "lesson_change_${index}") }
         Text(
             "نركّب الحرفين معًا ثم ننطق المقطع بوضوح",
             fontSize = 15.sp, color = Color(0xFF66748B), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center
@@ -197,7 +198,7 @@ private fun LearnReadingSection(
                     }
                 }
 
-                Text(lesson.example, fontSize = 27.sp, fontWeight = FontWeight.Black, color = Color(0xFF263B72), textAlign = TextAlign.Center)
+                Text("نقول صوت الحرف الأول، ثم نصلُه بصوت الحرف الثاني، فيتكوّن المقطع: ${lesson.result}", fontSize = 19.sp, fontWeight = FontWeight.Bold, color = Color(0xFF263B72), textAlign = TextAlign.Center)
 
                 Card(
                     Modifier.fillMaxWidth(),
@@ -264,7 +265,7 @@ private fun WritingSection(
             Column(Modifier.fillMaxWidth().padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("الكلمة المطلوبة", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF718099))
                 Text(lesson.result, fontSize = 44.sp, fontWeight = FontWeight.Black, color = Color(0xFF315CFF))
-                Text(lesson.example, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF263B72))
+                Text("صوتا الحرفين يلتقيان ليكوّنا: ${lesson.result}", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF263B72))
             }
         }
 
@@ -291,7 +292,7 @@ private fun WritingSection(
                     drawWritingGuides()
                     drawTextGuide(lesson.result, center, min(size.width, size.height) * 0.58f)
                     strokes.forEach { drawStroke(it) }
-                    if (currentStroke.size > 1) drawStroke(currentStroke)
+                    if (currentStroke.size > 1) drawStroke(currentStroke)\n                    currentStroke.firstOrNull()?.let { drawCircle(Color(0xFF315CFF), 15f, it) }
                 }
             }
         }
@@ -306,7 +307,7 @@ private fun WritingSection(
                 modifier = Modifier.weight(0.9f).height(55.dp),
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF476F))
-            ) { Text("⌫  المسح", fontWeight = FontWeight.ExtraBold) }
+            ) { Text("مسح", fontWeight = FontWeight.ExtraBold) }
 
             ProLessonButton(
                 onClick = onPrevious,
@@ -341,7 +342,7 @@ private fun DrawScope.drawStroke(points: List<Offset>) {
         moveTo(points.first().x, points.first().y)
         points.drop(1).forEach { lineTo(it.x, it.y) }
     }
-    drawPath(path, Color(0xFF315CFF), style = Stroke(width = 9f, cap = StrokeCap.Round))
+    drawPath(path, Color(0xFF315CFF), style = Stroke(width = 30f, cap = StrokeCap.Round))
 }
 
 private fun DrawScope.drawTextGuide(text: String, center: Offset, size: Float) {
