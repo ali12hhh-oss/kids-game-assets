@@ -73,6 +73,7 @@ fun BreakGamePage(onBack: () -> Unit) {
     var spawnCounter by remember { mutableIntStateOf(0) }
     var combo by remember { mutableIntStateOf(0) }
     var countdown by remember { mutableIntStateOf(3) }
+    var roundId by remember { mutableIntStateOf(0) }
     val items = remember { mutableStateListOf<BreakItem>() }
 
     fun resetGame() {
@@ -87,12 +88,13 @@ fun BreakGamePage(onBack: () -> Unit) {
         spawnCounter = 0
         combo = 0
         countdown = 3
+        roundId++
         tick++
         finished = false
         running = true
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(roundId) {
         for (value in 3 downTo 1) {
             countdown = value
             delay(700)
@@ -100,7 +102,7 @@ fun BreakGamePage(onBack: () -> Unit) {
         countdown = 0
     }
 
-    LaunchedEffect(running, finished) {
+    LaunchedEffect(running, finished, countdown, roundId) {
         if (!running || finished || countdown > 0) return@LaunchedEffect
         var elapsedMs = 0L
         var spawnMs = 0L
