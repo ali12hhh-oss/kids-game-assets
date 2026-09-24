@@ -149,9 +149,9 @@ private fun ColorsSection() {
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(item.name, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
-                        Text(item.arabic, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF52657D))
                         SpeechButton(item.name, tts)
                     }
+                    Text(item.arabic, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF52657D), textAlign = TextAlign.Center)
                 }
             }
         }
@@ -190,9 +190,9 @@ private fun ShapesSection() {
                     Spacer(Modifier.height(12.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(item.name, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
-                        Text(item.arabic, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF52657D))
                         SpeechButton(item.name, tts)
                     }
+                    Text(item.arabic, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF52657D), textAlign = TextAlign.Center)
                 }
             }
         }
