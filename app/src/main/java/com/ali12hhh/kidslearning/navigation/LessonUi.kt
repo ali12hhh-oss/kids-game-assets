@@ -5,25 +5,28 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.LaunchedEffect
 import io.github.sceneview.Scene
+import io.github.sceneview.math.Position
+import io.github.sceneview.node.ModelNode
 import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
-import io.github.sceneview.node.ModelNode
-import io.github.sceneview.math.Position
 import kotlinx.coroutines.delay
 
 @Composable
@@ -36,10 +39,10 @@ fun ProLessonButton(
     elevation: androidx.compose.material3.ButtonElevation? = ButtonDefaults.buttonElevation(defaultElevation = 7.dp),
     content: @Composable () -> Unit
 ) {
-    val base = colors.containerColor(enabled)
-    val contentColor = colors.contentColor(enabled)
-    val top = if (enabled) base.copy(alpha = 1f) else base.copy(alpha = .55f)
-    val bottom = if (enabled) base.copy(alpha = .78f) else base.copy(alpha = .40f)
+    val base = if (enabled) Color(0xFF1976D2) else Color(0xFF90A4AE)
+    val contentColor = if (enabled) Color.White else Color(0xFFE0E0E0)
+    val top = base
+    val bottom = base.copy(alpha = .78f)
 
     Surface(
         modifier = modifier
@@ -60,7 +63,6 @@ fun ProLessonButton(
     }
 }
 
-
 @Composable
 fun LessonCharacter3D(
     modifier: Modifier = Modifier,
@@ -68,13 +70,13 @@ fun LessonCharacter3D(
 ) {
     val engine = rememberEngine()
     val loader = rememberModelLoader(engine)
-    val model = androidx.compose.runtime.remember {
+    val model = remember {
         runCatching { loader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull()
     }
     val camera = rememberCameraNode(engine) {
         position = Position(x = 0f, y = 0f, z = 3.7f)
     }
-    val node = androidx.compose.runtime.remember(model) {
+    val node = remember(model) {
         model?.let {
             ModelNode(
                 modelInstance = it,
@@ -86,8 +88,6 @@ fun LessonCharacter3D(
 
     LaunchedEffect(node, dancing) {
         val n = node ?: return@LaunchedEffect
-        runCatching { n.stopAnimation(0) }
-        runCatching { n.stopAnimation(7) }
         if (dancing) {
             runCatching { n.playAnimation(7, 1f, true) }
         } else {
