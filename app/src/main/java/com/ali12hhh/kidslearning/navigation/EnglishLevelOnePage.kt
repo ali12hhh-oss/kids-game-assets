@@ -1,6 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
 import android.speech.tts.TextToSpeech
+import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -123,9 +124,7 @@ private fun EnglishLettersSection() {
     DisposableEffect(context) {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale.ENGLISH
-                tts?.setSpeechRate(0.82f)
-                tts?.setPitch(1.0f)
+                tts?.let { LessonSpeech.configure(it, LessonSpeech.ENGLISH_LOCALE) }
             }
         }
         tts = engine
@@ -198,9 +197,7 @@ private fun EnglishNumbersSection() {
     DisposableEffect(context) {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale.ENGLISH
-                tts?.setSpeechRate(0.82f)
-                tts?.setPitch(1.0f)
+                tts?.let { LessonSpeech.configure(it, LessonSpeech.ENGLISH_LOCALE) }
             }
         }
         tts = engine
