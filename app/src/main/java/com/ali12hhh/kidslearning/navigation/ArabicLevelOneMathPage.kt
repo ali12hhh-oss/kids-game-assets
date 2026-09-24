@@ -1,6 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
 import android.speech.tts.TextToSpeech
+import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,9 +36,7 @@ fun ArabicLevelOneMathPage(onBack: () -> Unit) {
         lateinit var engine: TextToSpeech
         engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                val result = engine.setLanguage(Locale.forLanguageTag("ar-XA"))
-                if (result == TextToSpeech.LANG_NOT_SUPPORTED || result == TextToSpeech.LANG_MISSING_DATA) engine.language = Locale("ar")
-                engine.setSpeechRate(0.82f)
+                LessonSpeech.configure(engine, LessonSpeech.ARABIC_LOCALE)
                 ready = true
             }
         }
