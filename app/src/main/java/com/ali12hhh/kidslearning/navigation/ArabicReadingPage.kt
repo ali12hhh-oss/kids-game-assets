@@ -70,13 +70,13 @@ fun ArabicReadingPage(onBack: () -> Unit) {
 
     LaunchedEffect(index, ttsReady) {
         if (ttsReady && AppSettings.isSpeechEnabled(context)) {
-            tts?.speak(lesson.sound, TextToSpeech.QUEUE_FLUSH, null, "arabic_letter_" + index)
+            LetterSpeech.speakArabic(tts, lesson.letter, "arabic_letter_" + index)
         }
     }
     val colors = listOf(Color(0xFFEF476F), Color(0xFF118AB2), Color(0xFF06A77D), Color(0xFFFF9F1C), Color(0xFF7353BA), Color(0xFF3A86FF))
     val letterColor = colors[index % colors.size]
     val pop by animateFloatAsState(targetValue = 1f, animationSpec = tween(420), label = "letterPop")
-    fun speak(text: String) { if (ttsReady) if (AppSettings.isSpeechEnabled(context)) tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "arabic_lesson") }
+    fun speakSound(letter: String) { if (ttsReady && AppSettings.isSpeechEnabled(context)) LetterSpeech.speakArabic(tts, letter, "arabic_lesson_sound") }\n    fun speakName(letter: String) { if (ttsReady && AppSettings.isSpeechEnabled(context)) tts?.speak(LetterSpeech.arabicName(letter), TextToSpeech.QUEUE_FLUSH, null, "arabic_lesson_name") }\n    fun speakWord(word: String) { if (ttsReady && AppSettings.isSpeechEnabled(context)) tts?.speak(word, TextToSpeech.QUEUE_FLUSH, null, "arabic_lesson_word") }
 
     CompositionLocalProvider(androidx.compose.ui.platform.LocalLayoutDirection provides LayoutDirection.Rtl) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFFFFF7E8), Color(0xFFE5F5FF)))).padding(14.dp)) {
@@ -98,7 +98,7 @@ fun ArabicReadingPage(onBack: () -> Unit) {
                     Card(Modifier.weight(1.65f).height(220.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF174B3D)), elevation = CardDefaults.cardElevation(12.dp)) {
                         Box(Modifier.fillMaxSize().padding(10.dp).background(Brush.verticalGradient(listOf(Color(0xFF236B54), Color(0xFF123B32))), RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
                             AnimatedContent(targetState = index, transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(180)) }, label = "letterChange") { current ->
-                                Text(arabicLessons[current].letter, Modifier.scale(pop).clickable { speak(arabicLessons[current].sound) }, fontSize = 126.sp, fontWeight = FontWeight.Black, color = colors[current % colors.size], textAlign = TextAlign.Center)
+                                Text(arabicLessons[current].letter, Modifier.scale(pop).clickable { speakSound(arabicLessons[current].letter) }, fontSize = 126.sp, fontWeight = FontWeight.Black, color = colors[current % colors.size], textAlign = TextAlign.Center)
                             }
                         }
                     }
@@ -112,15 +112,15 @@ fun ArabicReadingPage(onBack: () -> Unit) {
                             Spacer(Modifier.width(12.dp))
                             Text(lesson.word, fontSize = 35.sp, color = letterColor, fontWeight = FontWeight.ExtraBold)
                         }
-                        ProLessonButton(onClick = { speak(lesson.word) }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF118AB2)), shape = RoundedCornerShape(18.dp)) {
+                        ProLessonButton(onClick = { speakWord(lesson.word) }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF118AB2)), shape = RoundedCornerShape(18.dp)) {
                             Text("🔊 انطق الكلمة", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
                 Spacer(Modifier.height(8.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = { speak(lesson.letter) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp)) { Text("🔊 انطق اسم الحرف", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center) }
-                    ProLessonButton(onClick = { speak(lesson.sound) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = letterColor)) { Text("🎵 صوت الحرف", fontWeight = FontWeight.Bold) }
+                    OutlinedButton(onClick = { speakName(lesson.letter) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp)) { Text("🔊 انطق اسم الحرف", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center) }
+                    ProLessonButton(onClick = { speakSound(lesson.letter) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = letterColor)) { Text("🎵 صوت الحرف", fontWeight = FontWeight.Bold) }
                 }
                 Spacer(Modifier.weight(1f))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
