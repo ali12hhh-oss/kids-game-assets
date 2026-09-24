@@ -56,6 +56,7 @@ private data class BreakItem(val id: Int, val lane: Int, val type: Int, var prog
 private const val GAME_SECONDS = 45
 private const val STAR = 0
 private const val BARRIER = 1
+private const val GOLD_STAR = 2
 
 @Composable
 fun BreakGamePage(onBack: () -> Unit) {
