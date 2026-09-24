@@ -1,4 +1,6 @@
 package com.ali12hhh.kidslearning.navigation
+
+import com.ali12hhh.kidslearning.navigation.ProLessonButton
 import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.animation.AnimatedContent
@@ -112,8 +114,8 @@ private fun NumberWritingSection() {
         Spacer(Modifier.height(8.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { strokes = emptyList() }, Modifier.weight(1f).height(54.dp)) { Text("مسح", fontWeight = FontWeight.ExtraBold) }
-            Button(onClick = { if (number > 1) number-- }, Modifier.weight(1f).height(54.dp), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق", fontWeight = FontWeight.ExtraBold) }
-            Button(onClick = { if (number < 100) number++ }, Modifier.weight(1f).height(54.dp)) { Text("التالي", fontWeight = FontWeight.ExtraBold) }
+            ProLessonButton(onClick = { if (number > 1) number-- }, Modifier.weight(1f).height(54.dp), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق", fontWeight = FontWeight.ExtraBold) }
+            ProLessonButton(onClick = { if (number < 100) number++ }, Modifier.weight(1f).height(54.dp)) { Text("التالي", fontWeight = FontWeight.ExtraBold) }
         }
     }
 }
@@ -171,12 +173,12 @@ private fun PlaceValueLearn() {
                 Spacer(Modifier.height(12.dp))
                 Text(ex.third, fontSize = 18.sp, lineHeight = 29.sp, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(14.dp))
-                Button(onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(ex.third, TextToSpeech.QUEUE_FLUSH, null, "learn_${index}") }) { Text("🔊 اسمع الشرح", fontWeight = FontWeight.ExtraBold) }
+                ProLessonButton(onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(ex.third, TextToSpeech.QUEUE_FLUSH, null, "learn_${index}") }) { Text("🔊 اسمع الشرح", fontWeight = FontWeight.ExtraBold) }
             }
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(onClick = { if (index > 0) index-- }, Modifier.weight(1f).height(56.dp), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق") }
-            Button(onClick = { if (index < learnExamples.lastIndex) index++ }, Modifier.weight(1f).height(56.dp)) { Text("التالي") }
+        Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ProLessonButton(onClick = { if (index > 0) index-- }, Modifier.weight(1f).height(56.dp), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق") }
+            ProLessonButton(onClick = { if (index < learnExamples.lastIndex) index++ }, Modifier.weight(1f).height(56.dp)) { Text("التالي") }
         }
     }
 }
@@ -213,7 +215,7 @@ private fun PlaceValueQuiz() {
                 selected == option && option != quiz.correct -> Color(0xFFE05A5A)
                 else -> Color.White
             }
-            Button(onClick = {
+            ProLessonButton(onClick = {
                 if (selected == null) {
                     selected = option
                     if (option == quiz.correct) {
@@ -232,9 +234,9 @@ private fun PlaceValueQuiz() {
         }
         CharacterReaction(reaction)
         Text("النتيجة: ${arDigits(score)}", fontWeight = FontWeight.ExtraBold, color = Color(0xFF315CFF))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(onClick = { if (index > 0) { index--; selected = null } }, Modifier.weight(1f), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق") }
-            Button(onClick = { if (index < placeQuizzes.lastIndex) { index++; selected = null } }, Modifier.weight(1f)) { Text("التالي") }
+        Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ProLessonButton(onClick = { if (index > 0) { index--; selected = null } }, Modifier.weight(1f), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق") }
+            ProLessonButton(onClick = { if (index < placeQuizzes.lastIndex) { index++; selected = null } }, Modifier.weight(1f)) { Text("التالي") }
         }
     }
 }
