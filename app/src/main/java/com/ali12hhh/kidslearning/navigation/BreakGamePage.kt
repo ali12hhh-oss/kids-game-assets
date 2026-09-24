@@ -75,6 +75,7 @@ fun BreakGamePage(onBack: () -> Unit) {
     var combo by remember { mutableIntStateOf(0) }
     var dodged by remember { mutableIntStateOf(0) }
     var perfects by remember { mutableIntStateOf(0) }
+    var goldCollected by remember { mutableIntStateOf(0) }
     var countdown by remember { mutableIntStateOf(3) }
     var roundId by remember { mutableIntStateOf(0) }
     val items = remember { mutableStateListOf<BreakItem>() }
@@ -92,6 +93,7 @@ fun BreakGamePage(onBack: () -> Unit) {
         combo = 0
         dodged = 0
         perfects = 0
+        goldCollected = 0
         countdown = 3
         roundId++
         tick++
@@ -129,7 +131,10 @@ fun BreakGamePage(onBack: () -> Unit) {
                             combo += 1
                             val base = if (item.type == GOLD_STAR) 25 else 10
                             score += base + (combo.coerceAtMost(8) - 1) * 2
-                            if (item.type == GOLD_STAR) perfects += 1
+                            if (item.type == GOLD_STAR) {
+                                perfects += 1
+                                goldCollected += 1
+                            }
                         } else if (!jumping) {
                             misses += 1
                             combo = 0
@@ -397,7 +402,9 @@ fun BreakGamePage(onBack: () -> Unit) {
                             Text("نهاية الجولة 🎉", fontSize = 30.sp, fontWeight = FontWeight.Black)
                             Text("جمعت $collected نجمة", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                             Text("النقاط  $score", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                            Text("تجاوزت $misses حاجزًا", fontSize = 14.sp, color = Color.Gray)
+                            Text("تجاوزت $dodged حاجزًا بنجاح", fontSize = 14.sp, color = Color.Gray)
+                            Text("اصطدمت بـ $misses حاجز", fontSize = 14.sp, color = Color.Gray)
+                            Text("⭐ نجوم ذهبية: $goldCollected   🔥 أفضل سلسلة: $combo", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                             Text("حصلت على ⭐ " + (collected / 2).coerceIn(1, 12) + " من نجوم التطبيق", textAlign = TextAlign.Center)
                             Spacer(Modifier.height(4.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
