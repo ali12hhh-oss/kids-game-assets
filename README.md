@@ -1,4 +1,4 @@
-# براعم المعرفة — Android Native
+# تعلّم مع ريبو — Android Native
 
 تطبيق تعليمي للأطفال مبني باستخدام Kotlin وJetpack Compose.
 
