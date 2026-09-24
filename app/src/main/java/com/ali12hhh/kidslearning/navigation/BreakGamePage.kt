@@ -73,6 +73,8 @@ fun BreakGamePage(onBack: () -> Unit) {
     var tick by remember { mutableIntStateOf(0) }
     var spawnCounter by remember { mutableIntStateOf(0) }
     var combo by remember { mutableIntStateOf(0) }
+    var dodged by remember { mutableIntStateOf(0) }
+    var perfects by remember { mutableIntStateOf(0) }
     var countdown by remember { mutableIntStateOf(3) }
     var roundId by remember { mutableIntStateOf(0) }
     val items = remember { mutableStateListOf<BreakItem>() }
@@ -88,6 +90,8 @@ fun BreakGamePage(onBack: () -> Unit) {
         fastMode = false
         spawnCounter = 0
         combo = 0
+        dodged = 0
+        perfects = 0
         countdown = 3
         roundId++
         tick++
@@ -112,23 +116,28 @@ fun BreakGamePage(onBack: () -> Unit) {
             tick++
             elapsedMs += 50
             spawnMs += 50
-            val speed = if (fastMode) 0.00155f else 0.00105f
+            val difficulty = 1f + ((GAME_SECONDS - remaining).toFloat() / GAME_SECONDS) * 0.65f
+            val speed = (if (fastMode) 0.00155f else 0.00105f) * difficulty
             items.forEach { it.progress += speed * 50f }
 
             val removeIds = mutableListOf<Int>()
             items.forEach { item ->
                 if (item.progress >= 0.83f) {
                     if (item.lane == playerLane) {
-                        if (item.type == STAR) {
+                        if (item.type == STAR || item.type == GOLD_STAR) {
                             collected += 1
                             combo += 1
-                            score += 10 + (combo.coerceAtMost(5) - 1) * 2
+                            val base = if (item.type == GOLD_STAR) 25 else 10
+                            score += base + (combo.coerceAtMost(8) - 1) * 2
+                            if (item.type == GOLD_STAR) perfects += 1
                         } else if (!jumping) {
                             misses += 1
                             combo = 0
                             score = (score - 4).coerceAtLeast(0)
                         } else {
-                            score += 6
+                            dodged += 1
+                            combo += 1
+                            score += 8 + combo.coerceAtMost(5)
                         }
                     }
                     removeIds += item.id
@@ -136,11 +145,15 @@ fun BreakGamePage(onBack: () -> Unit) {
             }
             items.removeAll { it.id in removeIds }
 
-            if (spawnMs >= if (fastMode) 650L else 850L) {
+            if (spawnMs >= (if (fastMode) 650L else 850L) / difficulty) {
                 spawnMs = 0L
                 spawnCounter += 1
                 val lane = Random.nextInt(0, 3)
-                val type = if (spawnCounter % 4 == 0) BARRIER else STAR
+                val type = when {
+                    spawnCounter % 7 == 0 -> GOLD_STAR
+                    spawnCounter % 4 == 0 -> BARRIER
+                    else -> STAR
+                }
                 items += BreakItem(spawnCounter, lane, type, -0.08f)
             }
 
