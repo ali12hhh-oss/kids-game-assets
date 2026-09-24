@@ -9,7 +9,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -152,16 +154,23 @@ private fun NumberWritingSection() {
             Box(Modifier.fillMaxSize().padding(12.dp)) {
                 Text(arDigits(number), Modifier.align(Alignment.Center), fontSize = 118.sp, fontWeight = FontWeight.Black, color = Color(0xFFE9EDF6))
                 Canvas(Modifier.fillMaxSize().pointerInput(number) {
-                    detectDragGestures(
-                        onDragStart = { p -> strokes = strokes + StrokeLine(listOf(p)) },
-                        onDrag = { change, _ ->
-                            change.consume()
-                            if (strokes.isNotEmpty()) {
-                                val last = strokes.last()
-                                strokes = strokes.dropLast(1) + StrokeLine(last.points + change.position)
+                    awaitEachGesture {
+                        awaitPointerEventScope {
+                            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Main)
+                            down.consume()
+                            var points = listOf(down.position)
+                            strokes = strokes + StrokeLine(points)
+
+                            while (true) {
+                                val event = awaitPointerEvent(PointerEventPass.Main)
+                                val change = event.changes.firstOrNull() ?: break
+                                if (!change.pressed) break
+                                change.consume()
+                                points = points + change.position
+                                strokes = strokes.dropLast(1) + StrokeLine(points)
                             }
                         }
-                    )
+                    }
                 }) {
                     strokes.forEach { line ->
                         if (line.points.size > 1) {
