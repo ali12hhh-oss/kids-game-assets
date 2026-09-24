@@ -1,6 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
 import android.speech.tts.TextToSpeech
+import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
@@ -56,7 +57,7 @@ fun ArabicReadingPage(onBack: () -> Unit) {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 ttsReady = true
-                tts?.language = Locale("ar")
+                tts?.let { LessonSpeech.configure(it, LessonSpeech.ARABIC_LOCALE) }
             }
         }
         tts = engine
