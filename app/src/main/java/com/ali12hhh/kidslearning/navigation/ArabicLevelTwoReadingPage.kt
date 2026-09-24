@@ -184,7 +184,7 @@ private fun LetterFormsSection(
 
     LaunchedEffect(lesson.letter, selectedForm, ready) {
         if (ready && AppSettings.isSpeechEnabled(context)) {
-            tts?.speak(lesson.name + "، " + labels[selectedForm], TextToSpeech.QUEUE_FLUSH, null, "letter_form_" + lesson.letter + "_" + selectedForm)
+            LetterSpeech.speakArabic(tts, lesson.letter, "letter_form_" + lesson.letter + "_" + selectedForm)
         }
     }
 
@@ -216,7 +216,7 @@ private fun LetterFormsSection(
                     }
                 }
                 ProLessonButton(
-                    onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
+                    onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(LetterSpeech.arabicName(lesson.letter), TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
                     shape = RoundedCornerShape(18.dp)
                 ) { Text("🔊  سماع اسم الحرف", fontWeight = FontWeight.ExtraBold) }
                 Text("${index + 1} / ${levelTwoLetters.size}", color = Color(0xFF718099), fontWeight = FontWeight.Bold)
@@ -277,7 +277,7 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
 
     LaunchedEffect(lesson.letter, ready) {
         if (ready && AppSettings.isSpeechEnabled(context)) {
-            tts?.speak(lesson.letter, TextToSpeech.QUEUE_FLUSH, null, "writing_letter_" + lesson.letter)
+            LetterSpeech.speakArabic(tts, lesson.letter, "writing_letter_" + lesson.letter)
         }
     }
 
@@ -288,7 +288,7 @@ private fun WritingSection(lesson: ArabicLetterForms, onPrevious: () -> Unit, on
                 Card(
                     Modifier.weight(1f).height(62.dp).clickable { selectedForm = i
                         if (ready && AppSettings.isSpeechEnabled(context)) {
-                            tts?.speak(lesson.name + "، " + labels[i], TextToSpeech.QUEUE_FLUSH, null, "writing_form_" + lesson.letter + "_" + i)
+                            LetterSpeech.speakArabic(tts, lesson.letter, "writing_form_" + lesson.letter + "_" + i)
                         } },
                     shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(containerColor = if (selected) Color(0xFF315CFF) else Color.White)
