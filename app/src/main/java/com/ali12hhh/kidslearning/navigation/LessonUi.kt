@@ -66,7 +66,8 @@ fun ProLessonButton(
 @Composable
 fun LessonCharacter3D(
     modifier: Modifier = Modifier,
-    dancing: Boolean = true
+    dancing: Boolean = true,
+    verticalOffset: Float = -0.05f
 ) {
     val engine = rememberEngine()
     val loader = rememberModelLoader(engine)
@@ -82,7 +83,7 @@ fun LessonCharacter3D(
                 modelInstance = it,
                 autoAnimate = false,
                 scaleToUnits = 2.2f
-            ).also { n -> n.position = Position(x = 0f, y = -0.05f, z = 0f) }
+            ).also { n -> n.position = Position(x = 0f, y = verticalOffset, z = 0f) }
         }
     }
 
