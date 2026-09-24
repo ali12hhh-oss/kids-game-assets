@@ -371,7 +371,7 @@ private fun PlaceValueQuiz() {
         Text("النتيجة: " + arDigits(score), fontWeight = FontWeight.ExtraBold, color = Color(0xFF315CFF))
         Spacer(Modifier.height(2.dp))
         Row(
-            Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 12.dp).height(52.dp),
+            Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 28.dp).height(52.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             ProLessonButton(
@@ -408,7 +408,7 @@ private fun CharacterReaction(reaction: Int) {
     val node = remember(model) {
         model?.let {
             ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = 2.25f).also {
-                it.position = Position(x = 0f, y = -0.78f, z = 0f)
+                it.position = Position(x = 0f, y = -1.00f, z = 0f)
             }
         }
     }
