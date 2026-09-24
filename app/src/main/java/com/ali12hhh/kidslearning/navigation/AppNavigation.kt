@@ -232,7 +232,7 @@ fun AppNavigation() {
         composable(AppRoutes.ENGLISH_LEVEL_THREE_SHAPES) { EnglishLevelThreePage(onBack = { navController.popBackStack() }, initialSection = 1) }
         composable(AppRoutes.ENGLISH_LEVEL_THREE_WORDS) { EnglishLevelThreePage(onBack = { navController.popBackStack() }, initialSection = 2) }
         composable(AppRoutes.NUMBERS) { ContentPage("الأرقام والعدّ", LearningCatalog.digits.joinToString("  ")) }
-        composable(AppRoutes.PLAY) { ContentPage("وقت اللعب", "منطقة الألعاب قيد التجهيز") }
+        composable(AppRoutes.PLAY) { BreakGamePage(onBack = { navController.popBackStack() }) }
     }
 }
 
