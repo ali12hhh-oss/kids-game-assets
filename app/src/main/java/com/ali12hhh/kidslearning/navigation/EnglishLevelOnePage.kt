@@ -118,6 +118,7 @@ private fun EnglishLettersSection() {
     val context = LocalContext.current
     var caseTab by remember { mutableIntStateOf(0) }
     var index by remember { mutableIntStateOf(0) }
+    var ttsReady by remember { mutableStateOf(false) }
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
     val lesson = englishLetters[index]
     val activeColor by animateColorAsState(
@@ -129,10 +130,17 @@ private fun EnglishLettersSection() {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 tts?.let { LessonSpeech.configure(it, LessonSpeech.ENGLISH_LOCALE) }
+                ttsReady = true
             }
         }
         tts = engine
         onDispose { engine.stop(); engine.shutdown() }
+    }
+
+    LaunchedEffect(index, ttsReady) {
+        if (ttsReady && AppSettings.isSpeechEnabled(context)) {
+            LetterSpeech.speakEnglish(tts, lesson.lower, "letter_auto")
+        }
     }
 
     Column(
@@ -283,11 +291,13 @@ private fun EnglishNumbersSection() {
     val context = LocalContext.current
     var number by remember { mutableIntStateOf(1) }
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
+    var ttsReady by remember { mutableStateOf(false) }
 
     DisposableEffect(context) {
         val engine = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 tts?.let { LessonSpeech.configure(it, LessonSpeech.ENGLISH_LOCALE) }
+                ttsReady = true
             }
         }
         tts = engine
@@ -295,6 +305,12 @@ private fun EnglishNumbersSection() {
     }
 
     val english = englishNumberText(number)
+
+    LaunchedEffect(number, ttsReady) {
+        if (ttsReady && AppSettings.isSpeechEnabled(context)) {
+            tts?.speak(english, TextToSpeech.QUEUE_FLUSH, null, "number_auto")
+        }
+    }
     val color = listOf(Color(0xFF2563EB),Color(0xFF7C3AED),Color(0xFF059669),Color(0xFFEA580C))[number % 4]
 
     Column(
