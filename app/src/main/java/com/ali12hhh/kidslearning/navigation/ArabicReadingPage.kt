@@ -66,6 +66,12 @@ fun ArabicReadingPage(onBack: () -> Unit) {
         onDispose { engine.stop(); engine.shutdown(); tts = null }
     }
     val lesson = arabicLessons[index]
+
+    LaunchedEffect(index, ttsReady) {
+        if (ttsReady && AppSettings.isSpeechEnabled(context)) {
+            tts?.speak(lesson.sound, TextToSpeech.QUEUE_FLUSH, null, "arabic_letter_" + index)
+        }
+    }
     val colors = listOf(Color(0xFFEF476F), Color(0xFF118AB2), Color(0xFF06A77D), Color(0xFFFF9F1C), Color(0xFF7353BA), Color(0xFF3A86FF))
     val letterColor = colors[index % colors.size]
     val pop by animateFloatAsState(targetValue = 1f, animationSpec = tween(420), label = "letterPop")
@@ -83,17 +89,16 @@ fun ArabicReadingPage(onBack: () -> Unit) {
                 Text("هَيَّا نَتَعَلَّمُ الحُرُوفَ!", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF52647D))
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Card(Modifier.weight(0.78f).height(180.dp), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6A7)), elevation = CardDefaults.cardElevation(10.dp)) {
+                    Card(Modifier.weight(0.78f).height(220.dp), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6A7)), elevation = CardDefaults.cardElevation(10.dp)) {
                         Box(Modifier.fillMaxSize().padding(4.dp), contentAlignment = Alignment.Center) {
-                            LessonCharacter3D(modifier = Modifier.fillMaxSize(), dancing = true)
+                            LessonCharacter3D(modifier = Modifier.fillMaxSize(), dancing = true, verticalOffset = -0.52f)
                         }
                     }
                     Card(Modifier.weight(1.65f).height(220.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF174B3D)), elevation = CardDefaults.cardElevation(12.dp)) {
                         Box(Modifier.fillMaxSize().padding(10.dp).background(Brush.verticalGradient(listOf(Color(0xFF236B54), Color(0xFF123B32))), RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) {
                             AnimatedContent(targetState = index, transitionSpec = { fadeIn(tween(250)) togetherWith fadeOut(tween(180)) }, label = "letterChange") { current ->
-                                Text(arabicLessons[current].letter, Modifier.scale(pop), fontSize = 126.sp, fontWeight = FontWeight.Black, color = colors[current % colors.size], textAlign = TextAlign.Center)
+                                Text(arabicLessons[current].letter, Modifier.scale(pop).clickable { speak(arabicLessons[current].sound) }, fontSize = 126.sp, fontWeight = FontWeight.Black, color = colors[current % colors.size], textAlign = TextAlign.Center)
                             }
-                            Text("الصَّبُّورَة", Modifier.align(Alignment.TopCenter).padding(top = 5.dp), color = Color(0xFFD9F3D6), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
