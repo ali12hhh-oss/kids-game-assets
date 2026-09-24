@@ -1,5 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
+import com.ali12hhh.kidslearning.navigation.ProLessonButton
+
 import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.Canvas
@@ -116,7 +118,7 @@ fun ArabicLevelThreeReadingPage(onBack: () -> Unit) {
 
 @Composable
 private fun TabButton(modifier: Modifier, selected: Boolean, title: String, onClick: () -> Unit) {
-    Button(
+    ProLessonButton(
         onClick = onClick,
         modifier = modifier.height(54.dp),
         shape = RoundedCornerShape(18.dp),
@@ -204,7 +206,7 @@ private fun LearnReadingSection(
                 ) {
                     Column(Modifier.fillMaxWidth().padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("اسمع ثم كرّر", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF66748B))
-                        Button(
+                        ProLessonButton(
                             onClick = {
                                 if (ready) {
                                     if (AppSettings.isSpeechEnabled(context)) tts?.speak(
@@ -299,21 +301,21 @@ private fun WritingSection(
         Spacer(Modifier.height(5.dp))
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-            Button(
+            ProLessonButton(
                 onClick = { strokes.clear(); currentStroke = emptyList() },
                 modifier = Modifier.weight(0.9f).height(55.dp),
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF476F))
             ) { Text("⌫  المسح", fontWeight = FontWeight.ExtraBold) }
 
-            Button(
+            ProLessonButton(
                 onClick = onPrevious,
                 modifier = Modifier.weight(1.2f).height(55.dp),
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5B6B88))
             ) { Text("◀  السابق", fontWeight = FontWeight.ExtraBold) }
 
-            Button(
+            ProLessonButton(
                 onClick = onNext,
                 modifier = Modifier.weight(1.2f).height(55.dp),
                 shape = RoundedCornerShape(18.dp),
@@ -355,13 +357,13 @@ private fun DrawScope.drawTextGuide(text: String, center: Offset, size: Float) {
 @Composable
 private fun NavigationButtons(onPrevious: () -> Unit, onNext: () -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-        Button(
+        ProLessonButton(
             onClick = onPrevious,
             modifier = Modifier.weight(1f).height(55.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5B6B88))
         ) { Text("◀  السابق", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold) }
-        Button(
+        ProLessonButton(
             onClick = onNext,
             modifier = Modifier.weight(1f).height(55.dp),
             shape = RoundedCornerShape(18.dp),
