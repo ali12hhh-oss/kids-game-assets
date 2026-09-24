@@ -66,12 +66,12 @@ fun ArabicLevelOneMathPage(onBack: () -> Unit) {
         Spacer(Modifier.height(6.dp))
         Card(Modifier.fillMaxWidth().weight(1f).shadow(12.dp, RoundedCornerShape(28.dp)), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(Color.White)) {
             Column(Modifier.fillMaxSize().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceEvenly) {
-                Text("العدد " + arabicDigits(number), fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF66748B))
-                Box(Modifier.fillMaxWidth().background(Color(0xFFF1F5FF), RoundedCornerShape(26.dp)).padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-                    Text(arabicDigits(number), Modifier.clickable { speakNumberNow(number) }, fontSize = 88.sp, fontWeight = FontWeight.Black, color = numberColor(number))
+                Box(Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                    LessonCharacter3D(modifier = Modifier.fillMaxSize(), dancing = true, verticalOffset = -0.52f)
                 }
+                Text(arabicDigits(number), Modifier.clickable { speakNumberNow(number) }, fontSize = 78.sp, fontWeight = FontWeight.Black, color = numberColor(number), textAlign = TextAlign.Center)
                 if (number >= 10) PlaceValueCard(number) else SimpleUnitsCard(number)
-                ProLessonButton(onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(numberSpeech(number), TextToSpeech.QUEUE_FLUSH, null, "number_" + number) }, modifier = Modifier.height(54.dp), shape = RoundedCornerShape(18.dp)) {
+                ProLessonButton(onClick = { if (ready && AppSettings.isSpeechEnabled(context)) tts?.speak(numberSpeech(number), TextToSpeech.QUEUE_FLUSH, null, "number_" + number) }, modifier = Modifier.height(54.dp), shape = RoundedCornerShape(18.dp)) {
                     Text("🔊  نطق العدد", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
                 }
                 Text(arabicDigits(number) + " / ١٠٠", fontSize = 14.sp, color = Color(0xFF718099), fontWeight = FontWeight.Bold)
@@ -132,5 +132,5 @@ private fun numberColor(number: Int) = listOf(Color(0xFF315CFF), Color(0xFFE64A6
 
 private fun numberSpeech(number: Int): String {
     val words = mapOf(1 to "واحد", 2 to "اثنان", 3 to "ثلاثة", 4 to "أربعة", 5 to "خمسة", 6 to "ستة", 7 to "سبعة", 8 to "ثمانية", 9 to "تسعة", 10 to "عشرة", 100 to "مئة")
-    return words[number] ?: "العدد " + arabicDigits(number)
+    return words[number] ?: arabicDigits(number)
 }
