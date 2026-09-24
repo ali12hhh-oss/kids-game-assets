@@ -166,11 +166,11 @@ private fun EnglishLettersSection() {
                 Text("الصوت التدريبي: ${lesson.soundHint}", fontSize = 14.sp, color = activeColor)
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ProLessonButton(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
+                    ProLessonButton(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(LetterSpeech.englishName(lesson.upper), TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
                         colors = ButtonDefaults.buttonColors(Color(0xFF5B4BCE))) {
                         Text("🔊"); Spacer(Modifier.width(5.dp)); Text("اسم الحرف")
                     }
-                    ProLessonButton(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.soundHint, TextToSpeech.QUEUE_FLUSH, null, "letter_sound") },
+                    ProLessonButton(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) LetterSpeech.speakEnglish(tts, lesson.lower, "letter_sound") },
                         colors = ButtonDefaults.buttonColors(activeColor)) {
                         Text("🔉"); Spacer(Modifier.width(5.dp)); Text("صوت الحرف")
                     }
