@@ -192,8 +192,7 @@ private fun QuizOperation(title:String,quizzes:List<ArithmeticQuiz>){
                 modifier=Modifier.align(Alignment.CenterStart).width(62.dp).height(58.dp),
                 colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF5B6B88)),
                 shape=RoundedCornerShape(18.dp)
-            ){Text("‹
-السابق",fontWeight=FontWeight.ExtraBold,textAlign=TextAlign.Center)}
+            ){Text("‹\nالسابق",fontWeight=FontWeight.ExtraBold,textAlign=TextAlign.Center)}
         }
 
         if(index<quizzes.lastIndex){
@@ -202,8 +201,7 @@ private fun QuizOperation(title:String,quizzes:List<ArithmeticQuiz>){
                 modifier=Modifier.align(Alignment.CenterEnd).width(62.dp).height(58.dp),
                 colors=ButtonDefaults.buttonColors(containerColor=Color(0xFF315CFF)),
                 shape=RoundedCornerShape(18.dp)
-            ){Text("التالي
-›",fontWeight=FontWeight.ExtraBold,textAlign=TextAlign.Center)}
+            ){Text("التالي\n›",fontWeight=FontWeight.ExtraBold,textAlign=TextAlign.Center)}
         }
     }
 }
