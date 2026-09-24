@@ -412,5 +412,9 @@ private fun CharacterReaction(reaction: Int) {
                 childNodes = listOfNotNull(node)
             )
         }
+        Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            ProLessonButton(onClick = { if (index > 0) { index--; selected = null; reaction = 0 } }, Modifier.weight(1f), colors = ButtonDefaults.buttonColors(Color(0xFF5B6B88))) { Text("السابق") }
+            ProLessonButton(onClick = { if (index < placeQuizzes.lastIndex) { index++; selected = null; reaction = 0 } }, Modifier.weight(1f)) { Text("التالي") }
+        }
     }
 }
