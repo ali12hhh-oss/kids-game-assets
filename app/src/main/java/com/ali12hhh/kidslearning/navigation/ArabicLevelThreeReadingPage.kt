@@ -296,7 +296,6 @@ private fun WritingSection(
                     drawTextGuide(lesson.result, center, min(size.width, size.height) * 0.58f)
                     strokes.forEach { stroke -> if (stroke.size == 1) drawCircle(Color(0xFF315CFF), 15f, stroke.first()) else drawStroke(stroke) }
                     if (currentStroke.size > 1) drawStroke(currentStroke)
-                    currentStroke.firstOrNull()?.let { drawCircle(Color(0xFF315CFF), 15f, it) }
                 }
             }
         }
