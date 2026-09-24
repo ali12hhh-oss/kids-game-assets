@@ -1,5 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
+import com.ali12hhh.kidslearning.navigation.ProLessonButton
+
 import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.animation.AnimatedContent
@@ -106,7 +108,7 @@ fun ArabicReadingPage(onBack: () -> Unit) {
                             Spacer(Modifier.width(12.dp))
                             Text(lesson.word, fontSize = 35.sp, color = letterColor, fontWeight = FontWeight.ExtraBold)
                         }
-                        Button(onClick = { speak(lesson.word) }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF118AB2)), shape = RoundedCornerShape(18.dp)) {
+                        ProLessonButton(onClick = { speak(lesson.word) }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF118AB2)), shape = RoundedCornerShape(18.dp)) {
                             Text("🔊 انطق الكلمة", fontWeight = FontWeight.Bold)
                         }
                     }
@@ -114,12 +116,12 @@ fun ArabicReadingPage(onBack: () -> Unit) {
                 Spacer(Modifier.height(8.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(onClick = { speak(lesson.letter) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp)) { Text("🔊 انطق اسم الحرف", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center) }
-                    Button(onClick = { speak(lesson.sound) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = letterColor)) { Text("🎵 صوت الحرف", fontWeight = FontWeight.Bold) }
+                    ProLessonButton(onClick = { speak(lesson.sound) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = letterColor)) { Text("🎵 صوت الحرف", fontWeight = FontWeight.Bold) }
                 }
                 Spacer(Modifier.weight(1f))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Button(onClick = { if (index > 0) index-- }, enabled = index > 0, modifier = Modifier.weight(1f).height(54.dp), shape = RoundedCornerShape(18.dp)) { Text("السابق", fontSize = 18.sp, fontWeight = FontWeight.Bold) }
-                    Button(onClick = { if (index < arabicLessons.lastIndex) index++ else index = 0 }, modifier = Modifier.weight(1f).height(54.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06A77D))) { Text(if (index == arabicLessons.lastIndex) "ابدأ من جديد ⟲" else "التالي ➜", fontSize = 18.sp, fontWeight = FontWeight.Bold) }
+                    ProLessonButton(onClick = { if (index > 0) index-- }, enabled = index > 0, modifier = Modifier.weight(1f).height(54.dp), shape = RoundedCornerShape(18.dp)) { Text("السابق", fontSize = 18.sp, fontWeight = FontWeight.Bold) }
+                    ProLessonButton(onClick = { if (index < arabicLessons.lastIndex) index++ else index = 0 }, modifier = Modifier.weight(1f).height(54.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF06A77D))) { Text(if (index == arabicLessons.lastIndex) "ابدأ من جديد ⟲" else "التالي ➜", fontSize = 18.sp, fontWeight = FontWeight.Bold) }
                 }
                 Spacer(Modifier.height(4.dp))
                 Text("${index + 1} / ${arabicLessons.size}", color = Color(0xFF6C7890), fontWeight = FontWeight.Bold)
