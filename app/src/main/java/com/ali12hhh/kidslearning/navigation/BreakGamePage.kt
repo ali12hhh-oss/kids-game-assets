@@ -267,6 +267,12 @@ fun BreakGamePage(onBack: () -> Unit) {
                     if (item.type == STAR) {
                         drawCircle(Color(0xFFFFD54F), radius = 28f, center = Offset(x, y))
                         drawCircle(Color.White.copy(alpha = 0.55f), radius = 9f, center = Offset(x - 7f, y - 8f))
+                    } else if (item.type == GOLD_STAR) {
+                        drawCircle(Color(0xFFFFA000), radius = 34f, center = Offset(x, y))
+                        drawCircle(Color(0xFFFFE082), radius = 26f, center = Offset(x, y))
+                        drawCircle(Color.White.copy(alpha = 0.72f), radius = 9f, center = Offset(x - 8f, y - 9f))
+                        drawLine(Color.White.copy(alpha = 0.82f), Offset(x - 16f, y), Offset(x + 16f, y), strokeWidth = 4f)
+                        drawLine(Color.White.copy(alpha = 0.82f), Offset(x, y - 16f), Offset(x, y + 16f), strokeWidth = 4f)
                     } else {
                         val half = 25f
                         drawRoundRect(
