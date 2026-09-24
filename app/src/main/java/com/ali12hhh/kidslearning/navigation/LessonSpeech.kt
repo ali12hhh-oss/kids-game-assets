@@ -58,6 +58,7 @@ object LetterSpeech {
         "غ" to "غَ", "ف" to "فَ", "ق" to "قَ", "ك" to "كَ", "ل" to "لَ", "م" to "مَ", "ن" to "نَ",
         "ه" to "هَ", "و" to "وَ", "ي" to "يَ"
     )
+    private val arabicNames = mapOf("ا" to "ألف", "ب" to "باء", "ت" to "تاء", "ث" to "ثاء", "ج" to "جيم", "ح" to "حاء", "خ" to "خاء", "د" to "دال", "ذ" to "ذال", "ر" to "راء", "ز" to "زاي", "س" to "سين", "ش" to "شين", "ص" to "صاد", "ض" to "ضاد", "ط" to "طاء", "ظ" to "ظاء", "ع" to "عين", "غ" to "غين", "ف" to "فاء", "ق" to "قاف", "ك" to "كاف", "ل" to "لام", "م" to "ميم", "ن" to "نون", "ه" to "هاء", "و" to "واو", "ي" to "ياء")
     private val englishSounds = mapOf(
         "a" to "æ", "b" to "buh", "c" to "kuh", "d" to "duh", "e" to "eh", "f" to "fuh", "g" to "guh",
         "h" to "huh", "i" to "ih", "j" to "juh", "k" to "kuh", "l" to "luh", "m" to "muh", "n" to "nuh",
@@ -65,6 +66,8 @@ object LetterSpeech {
         "v" to "vuh", "w" to "wuh", "x" to "ks", "y" to "yuh", "z" to "zuh"
     )
     fun arabic(letter: String): String = arabicSounds[letter.trim().firstOrNull()?.toString()] ?: letter
+    fun arabicName(letter: String): String = arabicNames[letter.trim().firstOrNull()?.toString()] ?: letter
+    fun englishName(letter: String): String = letter.trim().uppercase()
     fun english(letter: String): String = englishSounds[letter.trim().lowercase().firstOrNull()?.toString()] ?: letter
     fun speakArabic(tts: TextToSpeech?, letter: String, id: String = "letter_sound") =
         tts?.speak(arabic(letter), TextToSpeech.QUEUE_FLUSH, null, id)
