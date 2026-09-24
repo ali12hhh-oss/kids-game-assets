@@ -8,6 +8,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -133,60 +135,146 @@ private fun EnglishLettersSection() {
         onDispose { engine.stop(); engine.shutdown() }
     }
 
-    Column(Modifier.fillMaxSize().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("الحروف — Letters", fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
-        Text("الحروف الصغيرة والكبيرة، صوت الحرف، اسم الحرف، وكلمة تعريفية.",
-            Modifier.padding(top = 4.dp), fontSize = 13.sp, color = Color(0xFF61728B), textAlign = TextAlign.Center)
+    Column(
+        Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("الحروف — Letters", fontSize = 23.sp, fontWeight = FontWeight.ExtraBold)
+        Text(
+            "الحروف الصغيرة والكبيرة، صوت الحرف، اسم الحرف، وكلمة تعريفية.",
+            Modifier.padding(top = 3.dp),
+            fontSize = 12.sp,
+            color = Color(0xFF61728B),
+            textAlign = TextAlign.Center
+        )
 
-        TabRow(caseTab, modifier = Modifier.padding(top = 12.dp), containerColor = Color.White) {
-            Tab(caseTab == 0, { caseTab = 0 }) { Text("حروف صغيرة  a–z", Modifier.padding(12.dp), fontWeight = FontWeight.Bold) }
-            Tab(caseTab == 1, { caseTab = 1 }) { Text("حروف كبيرة  A–Z", Modifier.padding(12.dp), fontWeight = FontWeight.Bold) }
+        TabRow(
+            caseTab,
+            modifier = Modifier.padding(top = 8.dp),
+            containerColor = Color.White
+        ) {
+            Tab(caseTab == 0, { caseTab = 0 }) {
+                Text("حروف صغيرة  a–z", Modifier.padding(vertical = 10.dp, horizontal = 4.dp), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            }
+            Tab(caseTab == 1, { caseTab = 1 }) {
+                Text("حروف كبيرة  A–Z", Modifier.padding(vertical = 10.dp, horizontal = 4.dp), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            }
         }
 
-        Card(Modifier.fillMaxWidth().padding(top = 14.dp).shadow(10.dp, RoundedCornerShape(28.dp)),
-            shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(Color.White.copy(alpha = .97f))) {
-            Column(Modifier.fillMaxWidth().padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(if (caseTab == 0) lesson.lower else lesson.upper, fontSize = 104.sp, fontWeight = FontWeight.Black, color = activeColor)
-                Text("الحرف الحالي: ${lesson.lower.uppercase()} / ${lesson.lower}", fontSize = 13.sp, color = Color(0xFF66758B))
-                Spacer(Modifier.height(8.dp))
-                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(Color(0xFFF1F6FF))) {
-                    Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(lesson.picture, fontSize = 54.sp)
-                        Spacer(Modifier.width(12.dp))
+        Card(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(top = 8.dp)
+                .shadow(8.dp, RoundedCornerShape(24.dp)),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(Color.White.copy(alpha = .97f))
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    if (caseTab == 0) lesson.lower else lesson.upper,
+                    fontSize = 82.sp,
+                    fontWeight = FontWeight.Black,
+                    color = activeColor
+                )
+                Text("الحرف الحالي: ${lesson.lower.uppercase()} / ${lesson.lower}", fontSize = 12.sp, color = Color(0xFF66758B))
+                Spacer(Modifier.height(6.dp))
+
+                Card(
+                    Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(Color(0xFFF1F6FF))
+                ) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(lesson.picture, fontSize = 46.sp)
+                        Spacer(Modifier.width(10.dp))
                         Column(Modifier.weight(1f)) {
-                            Text(lesson.example, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
-                            Text(lesson.arabicMeaning, fontSize = 15.sp, color = Color(0xFF4F6078))
-                            Text("صورة تعريفية تساعد الطفل على ربط الحرف بالكلمة.", fontSize = 11.sp, color = Color(0xFF77869A))
+                            Text(lesson.example, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                            Text(lesson.arabicMeaning, fontSize = 14.sp, color = Color(0xFF4F6078))
+                            Text("صورة تعريفية تساعد الطفل على ربط الحرف بالكلمة.", fontSize = 10.sp, color = Color(0xFF77869A))
                         }
                     }
                 }
-                Spacer(Modifier.height(10.dp))
-                Text("اسم الحرف: ${lesson.name}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Text("الصوت التدريبي: ${lesson.soundHint}", fontSize = 14.sp, color = activeColor)
-                Spacer(Modifier.height(10.dp))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ProLessonButton(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(LetterSpeech.englishName(lesson.upper), TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
-                        colors = ButtonDefaults.buttonColors(Color(0xFF5B4BCE))) {
-                        Text("🔊"); Spacer(Modifier.width(5.dp)); Text("اسم الحرف")
-                    }
-                    ProLessonButton(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) LetterSpeech.speakEnglish(tts, lesson.lower, "letter_sound") },
-                        colors = ButtonDefaults.buttonColors(activeColor)) {
-                        Text("🔉"); Spacer(Modifier.width(5.dp)); Text("صوت الحرف")
-                    }
-                }
+
                 Spacer(Modifier.height(8.dp))
-                TextButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.example, TextToSpeech.QUEUE_FLUSH, null, "example") }) {
-                    Text("🔊 اسمع الكلمة: ${lesson.example}")
+                Text("اسم الحرف: ${lesson.name}", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                Text("الصوت التدريبي: ${lesson.soundHint}", fontSize = 13.sp, color = activeColor)
+                Spacer(Modifier.height(8.dp))
+
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ProLessonButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (AppSettings.isSpeechEnabled(context)) {
+                                tts?.speak(LetterSpeech.englishName(lesson.upper), TextToSpeech.QUEUE_FLUSH, null, "letter_name")
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(Color(0xFF5B4BCE))
+                    ) {
+                        Text("🔊"); Spacer(Modifier.width(4.dp)); Text("اسم الحرف", fontSize = 12.sp)
+                    }
+                    ProLessonButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (AppSettings.isSpeechEnabled(context)) {
+                                LetterSpeech.speakEnglish(tts, lesson.lower, "letter_sound")
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(activeColor)
+                    ) {
+                        Text("🔉"); Spacer(Modifier.width(4.dp)); Text("صوت الحرف", fontSize = 12.sp)
+                    }
                 }
-                Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ProLessonButton(modifier = Modifier.weight(1f), enabled = index > 0, onClick = { index-- }, shape = RoundedCornerShape(18.dp)) { Text("السابق") }
-                    ProLessonButton(modifier = Modifier.weight(1f), enabled = index < englishLetters.lastIndex, onClick = { index++ }, shape = RoundedCornerShape(18.dp)) { Text("التالي") }
+
+                TextButton(
+                    onClick = {
+                        if (AppSettings.isSpeechEnabled(context)) {
+                            tts?.speak(lesson.example, TextToSpeech.QUEUE_FLUSH, null, "example")
+                        }
+                    }
+                ) {
+                    Text("🔊 اسمع الكلمة: ${lesson.example}", fontSize = 13.sp)
                 }
-                Spacer(Modifier.height(5.dp))
-                Text("${index + 1} / ${englishLetters.size}", fontWeight = FontWeight.Bold, color = activeColor)
             }
         }
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            ProLessonButton(
+                modifier = Modifier.weight(1f),
+                enabled = index > 0,
+                onClick = { index-- },
+                shape = RoundedCornerShape(18.dp)
+            ) { Text("السابق") }
+            ProLessonButton(
+                modifier = Modifier.weight(1f),
+                enabled = index < englishLetters.lastIndex,
+                onClick = { index++ },
+                shape = RoundedCornerShape(18.dp)
+            ) { Text("التالي") }
+        }
+
+        Text(
+            "${index + 1} / ${englishLetters.size}",
+            Modifier.padding(top = 3.dp),
+            fontWeight = FontWeight.Bold,
+            color = activeColor,
+            fontSize = 13.sp
+        )
     }
 }
 
@@ -209,33 +297,88 @@ private fun EnglishNumbersSection() {
     val english = englishNumberText(number)
     val color = listOf(Color(0xFF2563EB),Color(0xFF7C3AED),Color(0xFF059669),Color(0xFFEA580C))[number % 4]
 
-    Column(Modifier.fillMaxSize().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("الأرقام — Numbers", fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
-        Text("من 1 إلى 100، مع الرقم الكبير والاسم الإنجليزي والشرح العربي والنطق.",
-            Modifier.padding(top = 4.dp), fontSize = 13.sp, color = Color(0xFF61728B), textAlign = TextAlign.Center)
+    Column(
+        Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("الأرقام — Numbers", fontSize = 23.sp, fontWeight = FontWeight.ExtraBold)
+        Text(
+            "من 1 إلى 100، مع الرقم الكبير والاسم الإنجليزي والشرح العربي والنطق.",
+            Modifier.padding(top = 3.dp),
+            fontSize = 12.sp,
+            color = Color(0xFF61728B),
+            textAlign = TextAlign.Center
+        )
 
-        Card(Modifier.fillMaxWidth().padding(top = 14.dp).shadow(10.dp, RoundedCornerShape(28.dp)),
-            shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(Color.White.copy(alpha = .97f))) {
-            Column(Modifier.fillMaxWidth().padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(arabicDigits(number), fontSize = 88.sp, fontWeight = FontWeight.Black, color = color)
-                Text(number.toString(), fontSize = 25.sp, fontWeight = FontWeight.Bold)
-                Text(english, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = color)
+        Card(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(top = 8.dp)
+                .shadow(8.dp, RoundedCornerShape(24.dp)),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(Color.White.copy(alpha = .97f))
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(arabicDigits(number), fontSize = 72.sp, fontWeight = FontWeight.Black, color = color)
+                Text(number.toString(), fontSize = 23.sp, fontWeight = FontWeight.Bold)
+                Text(english, fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, color = color)
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "هذا هو العدد رقم ${arabicDigits(number)}. نتعلم شكله واسمه ونطقه باللغة الإنجليزية.",
+                    Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontSize = 13.sp,
+                    color = Color(0xFF53647A)
+                )
                 Spacer(Modifier.height(8.dp))
-                Text("هذا هو العدد رقم ${arabicDigits(number)}. نتعلم شكله واسمه ونطقه باللغة الإنجليزية.",
-                    Modifier.fillMaxWidth(), textAlign = TextAlign.Center, fontSize = 15.sp, color = Color(0xFF53647A))
-                Spacer(Modifier.height(10.dp))
-                ProLessonButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(english, TextToSpeech.QUEUE_FLUSH, null, "number") },
-                    shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(color)) {
-                    Text("🔊"); Spacer(Modifier.width(6.dp)); Text("نطق العدد بالإنجليزية")
+                ProLessonButton(
+                    onClick = {
+                        if (AppSettings.isSpeechEnabled(context)) {
+                            tts?.speak(english, TextToSpeech.QUEUE_FLUSH, null, "number")
+                        }
+                    },
+                    shape = RoundedCornerShape(18.dp),
+                    colors = ButtonDefaults.buttonColors(color)
+                ) {
+                    Text("🔊"); Spacer(Modifier.width(6.dp)); Text("نطق العدد بالإنجليزية", fontSize = 12.sp)
                 }
-                Spacer(Modifier.height(10.dp))
-                Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ProLessonButton(modifier = Modifier.weight(1f), enabled = number > 1, onClick = { number-- }, shape = RoundedCornerShape(18.dp)) { Text("السابق") }
-                    ProLessonButton(modifier = Modifier.weight(1f), enabled = number < 100, onClick = { number++ }, shape = RoundedCornerShape(18.dp)) { Text("التالي") }
-                }
-                Spacer(Modifier.height(5.dp))
-                Text("العدد ${arabicDigits(number)} من ١٠٠", fontWeight = FontWeight.Bold, color = color)
             }
         }
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            ProLessonButton(
+                modifier = Modifier.weight(1f),
+                enabled = number > 1,
+                onClick = { number-- },
+                shape = RoundedCornerShape(18.dp)
+            ) { Text("السابق") }
+            ProLessonButton(
+                modifier = Modifier.weight(1f),
+                enabled = number < 100,
+                onClick = { number++ },
+                shape = RoundedCornerShape(18.dp)
+            ) { Text("التالي") }
+        }
+
+        Text(
+            "العدد ${arabicDigits(number)} من ١٠٠",
+            Modifier.padding(top = 3.dp),
+            fontWeight = FontWeight.Bold,
+            color = color,
+            fontSize = 13.sp
+        )
     }
 }
