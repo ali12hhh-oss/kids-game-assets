@@ -118,7 +118,7 @@ fun ArabicLevelOneMathPage(onBack: () -> Unit) {
     }
 }
 
-@Composable private fun PlaceValueColumn(title: String, value: String, color: Color) {
+@Composable private fun RowScope.PlaceValueColumn(title: String, value: String, color: Color) {
     Card(Modifier.weight(1f), shape = RoundedCornerShape(15.dp), colors = CardDefaults.cardColors(color.copy(alpha = 0.12f))) {
         Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(title, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = color)
