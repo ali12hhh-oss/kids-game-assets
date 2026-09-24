@@ -1,5 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
+import com.ali12hhh.kidslearning.navigation.ProLessonButton
+
 import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.foundation.Canvas
@@ -138,7 +140,7 @@ fun ArabicLevelTwoReadingPage(onBack: () -> Unit) {
 
 @Composable
 private fun TabButton(modifier: Modifier, selected: Boolean, title: String, onClick: () -> Unit) {
-    Button(
+    ProLessonButton(
         onClick = onClick,
         modifier = modifier.height(54.dp),
         shape = RoundedCornerShape(18.dp),
@@ -195,7 +197,7 @@ private fun LetterFormsSection(
                     LetterFormCard("وسطي", lesson.medial, Modifier.weight(1f))
                     LetterFormCard("أخري", lesson.final, Modifier.weight(1f))
                 }
-                Button(
+                ProLessonButton(
                     onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
                     shape = RoundedCornerShape(18.dp)
                 ) { Text("🔊  سماع اسم الحرف", fontWeight = FontWeight.ExtraBold) }
@@ -355,13 +357,13 @@ private fun NavigationButtons(
     modifier: Modifier = Modifier
 ) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-        Button(
+        ProLessonButton(
             onClick = onPrevious,
             modifier = Modifier.weight(1f).height(55.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5B6B88))
         ) { Text("◀  السابق", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold) }
-        Button(
+        ProLessonButton(
             onClick = onNext,
             modifier = Modifier.weight(1f).height(55.dp),
             shape = RoundedCornerShape(18.dp),
