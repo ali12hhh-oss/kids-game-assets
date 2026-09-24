@@ -58,8 +58,6 @@ private val placeQuizzes = listOf(
 )
 
 @Composable
-
-@Composable
 fun ArabicLevelTwoMathPage(onBack: () -> Unit) {
     var tab by remember { mutableStateOf(0) }
     CompositionLocalProvider(androidx.compose.ui.platform.LocalLayoutDirection provides androidx.compose.ui.unit.LayoutDirection.Rtl) {
@@ -153,7 +151,7 @@ private fun NumberWritingSection() {
 
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("اكتب الرقم كما تراه", fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFF53647A))
-        Text(arDigits(number), fontSize = 72.sp, fontWeight = FontWeight.Black, color = numberColor(number))
+        Text(arDigits(number), fontSize = 72.sp, fontWeight = FontWeight.Black, color = mathNumberColor(number))
         Card(Modifier.fillMaxWidth().weight(1f).shadow(10.dp, RoundedCornerShape(26.dp)), shape = RoundedCornerShape(26.dp), colors = CardDefaults.cardColors(Color.White)) {
             Box(Modifier.fillMaxSize().padding(12.dp)) {
                 Text(arDigits(number), Modifier.align(Alignment.Center), fontSize = 118.sp, fontWeight = FontWeight.Black, color = Color(0xFFE9EDF6))
@@ -266,8 +264,6 @@ private val learnExamples = listOf(
 )
 
 @Composable
-
-@Composable
 private fun PlaceValueLearn() {
     var index by remember { mutableStateOf(0) }
     var ready by remember { mutableStateOf(false) }
@@ -294,7 +290,7 @@ private fun PlaceValueLearn() {
         Text("مثال ${index + 1} من ${learnExamples.size}", fontWeight = FontWeight.Bold, color = Color(0xFF65738A))
         Card(Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(26.dp)), shape = RoundedCornerShape(26.dp), colors = CardDefaults.cardColors(Color.White)) {
             Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(ex.first, fontSize = 76.sp, fontWeight = FontWeight.Black, color = numberColor(index + 1))
+                Text(ex.first, fontSize = 76.sp, fontWeight = FontWeight.Black, color = mathNumberColor(index + 1))
                 Text(ex.second, fontSize = 23.sp, fontWeight = FontWeight.Black, color = Color(0xFF16A085))
                 Spacer(Modifier.height(12.dp))
                 Text(ex.third, fontSize = 18.sp, lineHeight = 29.sp, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
@@ -333,7 +329,7 @@ private fun PlaceValueQuiz() {
     }
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("اختبار ${index + 1} / ${placeQuizzes.size}", fontWeight = FontWeight.Bold, color = Color(0xFF65738A))
-        Text("العدد ${arDigits(quiz.number)}", fontSize = 48.sp, fontWeight = FontWeight.Black, color = numberColor(index + 1))
+        Text("العدد ${arDigits(quiz.number)}", fontSize = 48.sp, fontWeight = FontWeight.Black, color = mathNumberColor(index + 1))
         Text(quiz.asked, Modifier.fillMaxWidth(), fontSize = 19.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
         OutlinedButton(onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(quiz.asked, TextToSpeech.QUEUE_FLUSH, null, "question_${index}") }) { Text("🔊 صوت السؤال") }
         quiz.options.forEach { option ->
@@ -389,7 +385,9 @@ private fun PlaceValueQuiz() {
             ) { Text("التالي ▶", fontWeight = FontWeight.ExtraBold) }
         }
     }
-private fun numberColor(number: Int) = listOf(Color(0xFF315CFF), Color(0xFFE64A6B), Color(0xFF16A085), Color(0xFFE67E22), Color(0xFF7A4DCE), Color(0xFF008C95))[(number - 1) % 6]
+}
+
+private fun mathNumberColor(number: Int) = listOf(Color(0xFF315CFF), Color(0xFFE64A6B), Color(0xFF16A085), Color(0xFFE67E22), Color(0xFF7A4DCE), Color(0xFF008C95))[(number - 1) % 6]
 
 
 @Composable
