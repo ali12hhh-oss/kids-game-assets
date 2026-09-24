@@ -77,6 +77,7 @@ fun BreakGamePage(onBack: () -> Unit) {
     var dodged by remember { mutableIntStateOf(0) }
     var perfects by remember { mutableIntStateOf(0) }
     var goldCollected by remember { mutableIntStateOf(0) }
+    var trapHits by remember { mutableIntStateOf(0) }
     var countdown by remember { mutableIntStateOf(3) }
     var roundId by remember { mutableIntStateOf(0) }
     val items = remember { mutableStateListOf<BreakItem>() }
@@ -96,6 +97,7 @@ fun BreakGamePage(onBack: () -> Unit) {
         dodged = 0
         perfects = 0
         goldCollected = 0
+        trapHits = 0
         countdown = 3
         roundId++
         tick++
@@ -141,7 +143,9 @@ fun BreakGamePage(onBack: () -> Unit) {
                         } else if (!jumping) {
                             misses += 1
                             combo = 0
-                            score = (score - 4).coerceAtLeast(0)
+                            trapHits += 1
+                            collected = (collected - 2).coerceAtLeast(0)
+                            score = (score - 14).coerceAtLeast(0)
                         } else {
                             dodged += 1
                             combo += 1
@@ -160,7 +164,7 @@ fun BreakGamePage(onBack: () -> Unit) {
                 val lane = Random.nextInt(0, 3)
                 val type = when {
                     spawnCounter % 7 == 0 -> GOLD_STAR
-                    spawnCounter % 4 == 0 -> BARRIER
+                    spawnCounter % 3 == 0 -> BARRIER
                     else -> STAR
                 }
                 items += BreakItem(spawnCounter, lane, type, -0.08f)
@@ -191,7 +195,7 @@ fun BreakGamePage(onBack: () -> Unit) {
     val modelLoader = rememberModelLoader(engine)
     val model = remember { runCatching { modelLoader.createModelInstance("Mannequin_Medium.glb") }.getOrNull() }
     val cameraNode = rememberCameraNode(engine) {
-        position = Position(x = 0f, y = 0.35f, z = 5.8f)
+        position = Position(x = 0f, y = 0.45f, z = 7.4f)
     }
     val animationFrame = tick
     val playerX = (playerLane - 1) * 0.78f
@@ -200,25 +204,17 @@ fun BreakGamePage(onBack: () -> Unit) {
         model?.let { instance ->
             ModelNode(
                 modelInstance = instance,
-                autoAnimate = false,
-                scaleToUnits = 2.15f,
-                centerOrigin = Position(x = 0f, y = -1f, z = 0f)
+                autoAnimate = true,
+                scaleToUnits = 0.95f,
+                centerOrigin = Position(x = 0f, y = -0.85f, z = 0f)
             )
         }
     }
 
-    LaunchedEffect(characterNode, running, jumping, fastMode, playerLane) {
+    LaunchedEffect(characterNode, running, jumping, fastMode) {
         val node = characterNode ?: return@LaunchedEffect
-        runCatching { node.stopAnimation(0) }
-        runCatching { node.stopAnimation(6) }
-        runCatching { node.stopAnimation(9) }
-        runCatching { node.stopAnimation(10) }
-        if (jumping) {
-            runCatching { node.playAnimation(9, 1f, false) }
-        } else if (running) {
-            runCatching { node.playAnimation(10, if (fastMode) 1.35f else 1.05f, true) }
-        } else {
-            runCatching { node.playAnimation(0, 1f, true) }
+        if (running && !jumping) {
+            runCatching { node.playAnimation(0, if (fastMode) 1.25f else 1f, true) }
         }
     }
 
@@ -278,14 +274,18 @@ fun BreakGamePage(onBack: () -> Unit) {
                         drawLine(Color.White.copy(alpha = 0.82f), Offset(x - 16f, y), Offset(x + 16f, y), strokeWidth = 4f)
                         drawLine(Color.White.copy(alpha = 0.82f), Offset(x, y - 16f), Offset(x, y + 16f), strokeWidth = 4f)
                     } else {
-                        val half = 25f
-                        drawRoundRect(
-                            Color(0xFFE85D5D),
-                            topLeft = Offset(x - half, y - half),
-                            size = androidx.compose.ui.geometry.Size(half * 2f, half * 2f),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(10f, 10f)
-                        )
-                        drawLine(Color.White.copy(alpha = 0.8f), Offset(x - 12f, y - 12f), Offset(x + 12f, y + 12f), strokeWidth = 5f)
+                        val path = Path().apply {
+                            moveTo(x - 34f, y + 24f)
+                            lineTo(x - 24f, y - 22f)
+                            lineTo(x - 12f, y + 24f)
+                            lineTo(x, y - 22f)
+                            lineTo(x + 12f, y + 24f)
+                            lineTo(x + 24f, y - 22f)
+                            lineTo(x + 34f, y + 24f)
+                            close()
+                        }
+                        drawPath(path, Color(0xFFE34B4B))
+                        drawLine(Color.White.copy(alpha = 0.9f), Offset(x - 28f, y + 20f), Offset(x + 28f, y + 20f), strokeWidth = 5f)
                     }
                 }
             }
@@ -314,7 +314,7 @@ fun BreakGamePage(onBack: () -> Unit) {
                 }
                 Spacer(Modifier.height(8.dp))
                 Text("مغامرة ريبو", modifier = Modifier.fillMaxWidth(), color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
-                Text("انطلق، اجمع النجوم وتجاوز الحواجز", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.88f), fontSize = 13.sp, textAlign = TextAlign.Center)
+                Text("انطلق، اجمع النجوم وتجنب الفخاخ", modifier = Modifier.fillMaxWidth(), color = Color.White.copy(alpha = 0.88f), fontSize = 13.sp, textAlign = TextAlign.Center)
                 if (combo > 1) Text("🔥 سلسلة $combo", modifier = Modifier.fillMaxWidth(), color = Color(0xFFFFD54F), fontSize = 13.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(5.dp))
                 Box(Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.18f))) {
@@ -413,8 +413,8 @@ fun BreakGamePage(onBack: () -> Unit) {
                             Text("جمعت $collected نجمة", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                             Text("النقاط  $score", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                             Text("تجاوزت $dodged حاجزًا بنجاح", fontSize = 14.sp, color = Color.Gray)
-                            Text("اصطدمت بـ $misses حاجز", fontSize = 14.sp, color = Color.Gray)
-                            Text("⭐ نجوم ذهبية: $goldCollected   🔥 أفضل سلسلة: $bestCombo", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            Text("اصطدمت بـ $misses حاجزًا وخسرت نجومًا", fontSize = 14.sp, color = Color.Gray)
+                            Text("⭐ نجوم ذهبية: $goldCollected   🪤 فخاخ: $trapHits   🔥 أفضل سلسلة: $bestCombo", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                             Text("حصلت على ⭐ " + (collected / 2).coerceIn(0, 12) + " من نجوم التطبيق", textAlign = TextAlign.Center)
                             Spacer(Modifier.height(4.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
