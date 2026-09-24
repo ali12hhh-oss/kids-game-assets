@@ -83,11 +83,9 @@ fun ArabicReadingPage(onBack: () -> Unit) {
                 Text("هَيَّا نَتَعَلَّمُ الحُرُوفَ!", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF52647D))
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Card(Modifier.weight(0.78f).height(180.dp), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6A7)), elevation = CardDefaults.cardElevation(8.dp)) {
-                        Column(Modifier.fillMaxSize().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                            Text("🧸", fontSize = 70.sp)
-                            Text("دبدوب", fontWeight = FontWeight.ExtraBold, color = Color(0xFF8C5527))
-                            Text("أنا أساعدك!", fontSize = 12.sp, color = Color(0xFF8C5527))
+                    Card(Modifier.weight(0.78f).height(180.dp), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE6A7)), elevation = CardDefaults.cardElevation(10.dp)) {
+                        Box(Modifier.fillMaxSize().padding(4.dp), contentAlignment = Alignment.Center) {
+                            LessonCharacter3D(modifier = Modifier.fillMaxSize(), dancing = true)
                         }
                     }
                     Card(Modifier.weight(1.65f).height(220.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFF174B3D)), elevation = CardDefaults.cardElevation(12.dp)) {
