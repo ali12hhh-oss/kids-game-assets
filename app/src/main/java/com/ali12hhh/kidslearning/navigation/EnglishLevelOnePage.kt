@@ -1,5 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
+import com.ali12hhh.kidslearning.navigation.ProLessonButton
+
 import android.speech.tts.TextToSpeech
 import com.ali12hhh.kidslearning.navigation.LessonSpeech
 import androidx.compose.animation.AnimatedContent
@@ -164,11 +166,11 @@ private fun EnglishLettersSection() {
                 Text("الصوت التدريبي: ${lesson.soundHint}", fontSize = 14.sp, color = activeColor)
                 Spacer(Modifier.height(10.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
+                    ProLessonButton(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.name, TextToSpeech.QUEUE_FLUSH, null, "letter_name") },
                         colors = ButtonDefaults.buttonColors(Color(0xFF5B4BCE))) {
                         Text("🔊"); Spacer(Modifier.width(5.dp)); Text("اسم الحرف")
                     }
-                    Button(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.soundHint, TextToSpeech.QUEUE_FLUSH, null, "letter_sound") },
+                    ProLessonButton(modifier = Modifier.weight(1f), onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.soundHint, TextToSpeech.QUEUE_FLUSH, null, "letter_sound") },
                         colors = ButtonDefaults.buttonColors(activeColor)) {
                         Text("🔉"); Spacer(Modifier.width(5.dp)); Text("صوت الحرف")
                     }
@@ -177,9 +179,9 @@ private fun EnglishLettersSection() {
                 TextButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(lesson.example, TextToSpeech.QUEUE_FLUSH, null, "example") }) {
                     Text("🔊 اسمع الكلمة: ${lesson.example}")
                 }
-                Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Button(modifier = Modifier.weight(1f), enabled = index > 0, onClick = { index-- }, shape = RoundedCornerShape(18.dp)) { Text("السابق") }
-                    Button(modifier = Modifier.weight(1f), enabled = index < englishLetters.lastIndex, onClick = { index++ }, shape = RoundedCornerShape(18.dp)) { Text("التالي") }
+                Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ProLessonButton(modifier = Modifier.weight(1f), enabled = index > 0, onClick = { index-- }, shape = RoundedCornerShape(18.dp)) { Text("السابق") }
+                    ProLessonButton(modifier = Modifier.weight(1f), enabled = index < englishLetters.lastIndex, onClick = { index++ }, shape = RoundedCornerShape(18.dp)) { Text("التالي") }
                 }
                 Spacer(Modifier.height(5.dp))
                 Text("${index + 1} / ${englishLetters.size}", fontWeight = FontWeight.Bold, color = activeColor)
@@ -222,14 +224,14 @@ private fun EnglishNumbersSection() {
                 Text("هذا هو العدد رقم ${arabicDigits(number)}. نتعلم شكله واسمه ونطقه باللغة الإنجليزية.",
                     Modifier.fillMaxWidth(), textAlign = TextAlign.Center, fontSize = 15.sp, color = Color(0xFF53647A))
                 Spacer(Modifier.height(10.dp))
-                Button(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(english, TextToSpeech.QUEUE_FLUSH, null, "number") },
+                ProLessonButton(onClick = { if (AppSettings.isSpeechEnabled(context)) tts?.speak(english, TextToSpeech.QUEUE_FLUSH, null, "number") },
                     shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(color)) {
                     Text("🔊"); Spacer(Modifier.width(6.dp)); Text("نطق العدد بالإنجليزية")
                 }
                 Spacer(Modifier.height(10.dp))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Button(modifier = Modifier.weight(1f), enabled = number > 1, onClick = { number-- }, shape = RoundedCornerShape(18.dp)) { Text("السابق") }
-                    Button(modifier = Modifier.weight(1f), enabled = number < 100, onClick = { number++ }, shape = RoundedCornerShape(18.dp)) { Text("التالي") }
+                Row(Modifier.fillMaxWidth().navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ProLessonButton(modifier = Modifier.weight(1f), enabled = number > 1, onClick = { number-- }, shape = RoundedCornerShape(18.dp)) { Text("السابق") }
+                    ProLessonButton(modifier = Modifier.weight(1f), enabled = number < 100, onClick = { number++ }, shape = RoundedCornerShape(18.dp)) { Text("التالي") }
                 }
                 Spacer(Modifier.height(5.dp))
                 Text("العدد ${arabicDigits(number)} من ١٠٠", fontWeight = FontWeight.Bold, color = color)
