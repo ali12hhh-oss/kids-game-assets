@@ -139,7 +139,7 @@ private fun EnglishLettersSection() {
 
     LaunchedEffect(index, ttsReady) {
         if (ttsReady && AppSettings.isSpeechEnabled(context)) {
-            LetterSpeech.speakEnglish(tts, lesson.lower, "letter_auto")
+            PhonicsSpeech.speakEnglish(context, tts, lesson.lower, "letter_auto")
         }
     }
 
@@ -234,7 +234,7 @@ private fun EnglishLettersSection() {
                         modifier = Modifier.weight(1f),
                         onClick = {
                             if (AppSettings.isSpeechEnabled(context)) {
-                                LetterSpeech.speakEnglish(tts, lesson.lower, "letter_sound")
+                                PhonicsSpeech.speakEnglish(context, tts, lesson.lower, "letter_sound")
                             }
                         },
                         colors = ButtonDefaults.buttonColors(activeColor)
