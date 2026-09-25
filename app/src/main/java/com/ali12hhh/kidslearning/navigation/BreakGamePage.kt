@@ -352,7 +352,8 @@ fun BreakGamePage(onBack: () -> Unit) {
                         }
                         Column(horizontalAlignment = Alignment.End) {
                             Text("⭐ $score", color = Color(0xFFFFD54F), fontSize = 18.sp, fontWeight = FontWeight.Black)
-                            Text("💰 \${AppSettings.gameStars(context)}", color = Color(0xFFFFC857), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("💰 ${AppSettings.gameStars(context)}", color = Color(0xFFFFC857), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("⏱ $remaining ث", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
