@@ -1,0 +1,64 @@
+name: Import licensed KayKit assets
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-assets:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download selected CC0 KayKit assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/main/addons/kaykit_character_pack_adventures/Assets/gltf"
+          dest="app/src/main/assets/characters/KayKit/Accessories"
+          mkdir -p "$dest"
+
+          for asset in             sword_1handed             sword_2handed             axe_1handed             axe_2handed             dagger             crossbow_1handed             staff             wand             arrow             arrow_bundle; do
+            curl -fsSL "$base/$asset.gltf" -o "$dest/$asset.gltf"
+            curl -fsSL "$base/$asset.bin" -o "$dest/$asset.bin"
+          done
+
+          curl -fsSL "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/main/LICENSE.txt"             -o "$dest/LICENSE.txt"
+
+      - name: Record provenance
+        shell: bash
+        run: |
+          cat > app/src/main/assets/characters/KayKit/Accessories/SOURCES.md <<'EOF'
+          # KayKit accessories
+
+          Source: KayKit - Character Pack : Adventurers 1.0
+          Creator: Kay Lousberg / KayKit
+          License: CC0 1.0 Universal
+          Official source: https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0
+          Original asset page: https://kaylousberg.itch.io/kaykit-adventurers
+
+          Imported free-tier accessory models:
+          sword_1handed, sword_2handed, axe_1handed, axe_2handed,
+          dagger, crossbow_1handed, staff, wand, arrow, arrow_bundle.
+
+          These files are intentionally limited to a small mobile-friendly subset.
+          EOF
+
+      - name: Commit imported assets
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/assets/characters/KayKit/Accessories
+          if git diff --cached --quiet; then
+            echo "No asset changes."
+            exit 0
+          fi
+          git commit -m "إضافة إكسسوارات وأسلحة KayKit المرخصة CC0"
+          git push
