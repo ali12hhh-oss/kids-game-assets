@@ -454,7 +454,7 @@ private fun XoBoard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(86.dp),
+                        .aspectRatio(3f),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     repeat(3) { col ->
