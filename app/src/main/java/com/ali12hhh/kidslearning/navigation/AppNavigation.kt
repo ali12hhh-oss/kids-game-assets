@@ -268,7 +268,7 @@ private fun HomePage(
     val background = if (darkMode) {
         Brush.verticalGradient(listOf(Color(0xFF172033), Color(0xFF253552)))
     } else {
-        Brush.verticalGradient(listOf(Color(0xFFF7FBFF), Color(0xFFE8F3FF)))
+        Brush.verticalGradient(listOf(Color(0xFF4FC3F7), Color(0xFF1565C0)))
     }
     val textColor = if (darkMode) Color.White else Color(0xFF24324A)
     val cardColor = if (darkMode) Color(0xFF2E3E5C) else Color.White.copy(alpha = 0.95f)
@@ -578,7 +578,7 @@ private fun RealCharacterHero(
             ModelNode(
                 modelInstance = instance,
                 autoAnimate = false,
-                scaleToUnits = 2.05f,
+                scaleToUnits = 1.85f,
                 centerOrigin = Position(x = 0f, y = 0f, z = 0f)
             ).also { it.position = Position(x = 0f, y = 0f, z = 0f) }
         }
