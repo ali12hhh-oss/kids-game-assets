@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -361,10 +362,11 @@ fun BreakGamePage(onBack: () -> Unit) {
                         ModelNode(
                             modelInstance = instance,
                             autoAnimate = false,
-                            scaleToUnits = 0.34f,
-                            position = Position(x = playerX + 0.28f, y = playerY + 0.48f, z = 0.02f),
+                            scaleToUnits = 0.34f
+                        ).apply {
+                            position = Position(x = playerX + 0.28f, y = playerY + 0.48f, z = 0.02f)
                             rotation = Rotation(y = 180f)
-                        )
+                        }
                     }
                 )
             )
@@ -692,9 +694,11 @@ private fun BreakGameStore(
         ownedOutfits = AppSettings.gameOwnedOutfits(context)
     }
 
+    val storeScrollState = rememberScrollState()
+
     Box(Modifier.fillMaxSize().background(Color(0xD9000810)), contentAlignment = Alignment.Center) {
         Card(Modifier.fillMaxWidth(0.94f).padding(8.dp), shape = RoundedCornerShape(30.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FBFF))) {
-            Column(Modifier.padding(20.dp).verticalScroll(remember { androidx.compose.foundation.rememberScrollState() }), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.padding(20.dp).verticalScroll(storeScrollState), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column {
                         Text("متجر مغامرة ريبو", color = Color(0xFF102B3E), fontSize = 23.sp, fontWeight = FontWeight.Black)
