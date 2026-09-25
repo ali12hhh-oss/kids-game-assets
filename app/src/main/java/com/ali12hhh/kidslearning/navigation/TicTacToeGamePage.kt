@@ -331,8 +331,13 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
                             instance?.let {
                                 val row = index / 3
                                 val col = index % 3
-                                val c = if (value == 'X') selectedColor.color else Color(0xFFFF4F72)
-                                it.materialInstances.forEach { m -> m.setParameter("baseColorFactor", c.red, c.green, c.blue, 1f) }
+                                val c = if (value == 'X') selectedColor.color else Color(0xFF00E5FF)
+                                it.materialInstances.forEach { m ->
+                                    m.setParameter("baseColorFactor", c.red, c.green, c.blue, 1f)
+                                    m.setParameter("emissiveFactor", c.red * 0.55f, c.green * 0.55f, c.blue * 0.55f)
+                                    m.setParameter("metallicFactor", 0.05f)
+                                    m.setParameter("roughnessFactor", 0.28f)
+                                }
                                 add(ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = .72f).apply {
                                     position = Position(x = (col - 1) * 1.0f, y = if (index in winningCells) .70f else .52f, z = (row - 1) * 1.0f)
                                     rotation = Rotation(x = 90f)
