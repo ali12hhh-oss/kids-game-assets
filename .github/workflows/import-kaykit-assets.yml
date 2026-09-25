@@ -24,12 +24,21 @@ jobs:
           dest="app/src/main/assets/characters/KayKit/Accessories"
           mkdir -p "$dest"
 
-          for asset in             sword_1handed             sword_2handed             axe_1handed             axe_2handed             dagger             crossbow_1handed             staff             wand             arrow             arrow_bundle; do
+          for asset in \
+            sword_1handed sword_2handed sword_2handed_color \
+            axe_1handed axe_2handed dagger \
+            crossbow_1handed crossbow_2handed \
+            staff wand arrow arrow_bundle quiver \
+            shield_badge shield_badge_color shield_round shield_round_barbarian \
+            shield_round_color shield_spikes shield_spikes_color \
+            shield_square shield_square_color \
+            smokebomb spellbook_closed spellbook_open; do
             curl -fsSL "$base/$asset.gltf" -o "$dest/$asset.gltf"
             curl -fsSL "$base/$asset.bin" -o "$dest/$asset.bin"
           done
 
-          curl -fsSL "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/main/LICENSE.txt"             -o "$dest/LICENSE.txt"
+          curl -fsSL "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/main/LICENSE.txt" \
+            -o "$dest/LICENSE.txt"
 
       - name: Record provenance
         shell: bash
@@ -43,11 +52,12 @@ jobs:
           Official source: https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0
           Original asset page: https://kaylousberg.itch.io/kaykit-adventurers
 
-          Imported free-tier accessory models:
-          sword_1handed, sword_2handed, axe_1handed, axe_2handed,
-          dagger, crossbow_1handed, staff, wand, arrow, arrow_bundle.
+          Imported mobile-friendly accessory/equipment models:
+          swords, axes, dagger, crossbows, staff, wand, arrows, quiver,
+          shields, smokebomb, and spellbook variants.
 
-          These files are intentionally limited to a small mobile-friendly subset.
+          These files are intentionally limited to a lightweight subset.
+          They do not replace Reebo's existing character or animation rig.
           EOF
 
       - name: Commit imported assets
@@ -60,5 +70,5 @@ jobs:
             echo "No asset changes."
             exit 0
           fi
-          git commit -m "إضافة إكسسوارات وأسلحة KayKit المرخصة CC0"
+          git commit -m "توسيع مجموعة إكسسوارات وأسلحة KayKit المرخصة CC0"
           git push
