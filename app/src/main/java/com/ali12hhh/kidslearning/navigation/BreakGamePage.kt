@@ -1,5 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -55,11 +57,13 @@ import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.random.Random
 
-private data class BreakItem(val id: Int, val lane: Int, val type: Int, var progress: Float)
+private data class BreakItem(val id: Int, var lane: Int, val type: Int, var progress: Float)
 private const val GAME_SECONDS = 45
 private const val STAR = 0
 private const val BARRIER = 1
 private const val GOLD_STAR = 2
+private const val MOVING_TRAP = 3
+private const val WIDE_TRAP = 4
 
 @Composable
 fun BreakGamePage(onBack: () -> Unit) {
@@ -84,6 +88,11 @@ fun BreakGamePage(onBack: () -> Unit) {
     var roundId by remember { mutableIntStateOf(0) }
     var stage by remember { mutableIntStateOf(1) }
     var showStore by remember { mutableStateOf(false) }
+    var roundReward by remember { mutableIntStateOf(0) }
+    var missionReward by remember { mutableIntStateOf(0) }
+    var feedbackText by remember { mutableStateOf("") }
+    var feedbackTick by remember { mutableIntStateOf(0) }
+    var feedbackKind by remember { mutableIntStateOf(0) }
     var storeRefresh by remember { mutableIntStateOf(0) }
     var equippedGameItem by remember { mutableStateOf(AppSettings.equippedGameItem(context)) }
     val items = remember { mutableStateListOf<BreakItem>() }
@@ -107,6 +116,11 @@ fun BreakGamePage(onBack: () -> Unit) {
         dodged = 0
         goldCollected = 0
         trapHits = 0
+        roundReward = 0
+        missionReward = 0
+        feedbackText = ""
+        feedbackKind = 0
+        feedbackTick++
         countdown = 3
         stage = 1
         roundId++
@@ -149,7 +163,16 @@ fun BreakGamePage(onBack: () -> Unit) {
             }
             val speedBonus = if (equippedGameItem == "speed_badge") 1.12f else 1f
             val speed = (if (fastMode) 0.0018f else 0.0012f) * difficulty * speedBonus
-            items.forEach { it.progress += speed * 50f }
+            items.forEach {
+                it.progress += speed * 50f
+                if (it.type == MOVING_TRAP && it.progress > 0.18f && it.progress < 0.78f && tick % 18 == 0) {
+                    it.lane = when (it.lane) {
+                        0 -> 1
+                        1 -> if (Random.nextBoolean()) 0 else 2
+                        else -> 1
+                    }
+                }
+            }
 
             val removeIds = mutableSetOf<Int>()
             items.forEach { item ->
@@ -161,6 +184,9 @@ fun BreakGamePage(onBack: () -> Unit) {
                             bestCombo = maxOf(bestCombo, combo)
                             score += (if (item.type == GOLD_STAR) 25 else 10) + (combo.coerceAtMost(8) - 1) * 2
                             if (item.type == GOLD_STAR) goldCollected++
+                            feedbackText = if (item.type == GOLD_STAR) "نجم ذهبي! +25" else "نجمة! +10"
+                            feedbackKind = if (item.type == GOLD_STAR) 2 else 1
+                            feedbackTick = tick
                         } else if (!jumping) {
                             misses++
                             trapHits++
@@ -169,11 +195,17 @@ fun BreakGamePage(onBack: () -> Unit) {
                             score = (score - 14).coerceAtLeast(0)
                             // Hitting a trap also costs 2 of the game's separate shop currency.
                             AppSettings.addGameStars(context, -2)
+                            feedbackText = "فخ! -2 💰"
+                            feedbackKind = 3
+                            feedbackTick = tick
                         } else {
                             dodged++
                             combo++
                             bestCombo = maxOf(bestCombo, combo)
                             score += 8 + combo.coerceAtMost(5)
+                            feedbackText = "مراوغة ممتازة! +8"
+                            feedbackKind = 4
+                            feedbackTick = tick
                         }
                     }
                     removeIds += item.id
@@ -187,7 +219,9 @@ fun BreakGamePage(onBack: () -> Unit) {
                 spawnCounter++
                 val lane = Random.nextInt(0, 3)
                 val type = when {
-                    stage >= 3 && spawnCounter % 7 == 0 -> GOLD_STAR
+                    stage >= 3 && spawnCounter % 11 == 0 -> GOLD_STAR
+                    stage >= 3 && spawnCounter % 7 == 0 -> MOVING_TRAP
+                    stage >= 2 && spawnCounter % 5 == 0 -> WIDE_TRAP
                     stage >= 2 && spawnCounter % 3 == 0 -> BARRIER
                     else -> STAR
                 }
@@ -209,9 +243,29 @@ fun BreakGamePage(onBack: () -> Unit) {
             running = false
             finished = true
             val rewardMultiplier = if (equippedGameItem == "gold_badge") 1.5f else 1f
-            val reward = ((collected / 2) * rewardMultiplier).toInt().coerceIn(0, 18)
-            if (reward > 0) AppSettings.addGameStars(context, reward)
+            val baseReward = (collected / 2).coerceIn(0, 12)
+            roundReward = (baseReward * rewardMultiplier).toInt().coerceIn(0, 18)
+            val missionType = roundId % 3
+            val missionDone = when (missionType) {
+                0 -> collected >= 12
+                1 -> dodged >= 4
+                else -> goldCollected >= 2
+            }
+            missionReward = if (missionDone) 3 else 0
+            val totalReward = (roundReward + missionReward).coerceAtMost(21)
+            if (totalReward > 0) AppSettings.addGameStars(context, totalReward)
         }
+    }
+
+    LaunchedEffect(feedbackTick) {
+        if (feedbackTick == 0) return@LaunchedEffect
+        delay(850)
+        if (feedbackTick == tick) feedbackText = ""
+    }
+
+    val smoothPlayerX = remember { Animatable(0f) }
+    LaunchedEffect(playerLane) {
+        smoothPlayerX.animateTo((playerLane - 1) * 0.78f, tween(150))
     }
 
     LaunchedEffect(jumping) {
@@ -240,7 +294,7 @@ fun BreakGamePage(onBack: () -> Unit) {
             }
         }
     }
-    val playerX = (playerLane - 1) * 0.78f
+    val playerX = smoothPlayerX.value
     val playerY = if (jumping) (if (equippedGameItem == "jump_badge") 0.84f else 0.72f) else 0f
     LaunchedEffect(characterNode, running, finished, countdown, jumping, fastMode) {
         val node = characterNode ?: return@LaunchedEffect
@@ -532,7 +586,14 @@ fun BreakGamePage(onBack: () -> Unit) {
                             Text("تجاوزت $dodged فخًا  |  اصطدامات: $misses", color = Color(0xFF547083), fontSize = 13.sp)
                             Text("المرحلة الأخيرة: $stage/3   •   النجوم الذهبية: $goldCollected   •   خسائر الفخاخ: $trapHits", color = Color(0xFF547083), fontSize = 12.sp)
                             Text("أفضل سلسلة: $bestCombo", color = Color(0xFFB77900), fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                            Text("مكافأتك: 💰 ${(collected / 2).coerceIn(0, 12)} نجمة للمتجر داخل اللعبة", color = Color(0xFF163D56), fontSize = 14.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                            val missionType = roundId % 3
+                            val missionText = when (missionType) {
+                                0 -> "مهمة الجولة: اجمع 12 نجمة"
+                                1 -> "مهمة الجولة: تفادَ 4 فخاخ"
+                                else -> "مهمة الجولة: اجمع نجمتين ذهبيتين"
+                            }
+                            Text("$missionText ${if (missionReward > 0) "✓ +3 💰" else ""}", color = if (missionReward > 0) Color(0xFF16806B) else Color(0xFF547083), fontSize = 12.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                            Text("مكافأة الجولة: 💰 $roundReward   •   مكافأة المهمة: 💰 $missionReward", color = Color(0xFF163D56), fontSize = 14.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                             Spacer(Modifier.height(3.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Button(onClick = { resetGame() }) { Text("العب مجددًا") }
