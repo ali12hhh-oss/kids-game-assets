@@ -122,6 +122,7 @@ fun BreakGamePage(onBack: () -> Unit) {
             onInventory = { refreshGameBalance(); screen = BreakGameScreen.INVENTORY },
             onOpenXo = { screen = BreakGameScreen.XO },
             onOpenXoShop = { screen = BreakGameScreen.XO_SHOP },
+            onOpenXoInventory = { screen = BreakGameScreen.XO_INVENTORY },
             onBack = onBack
         )
         BreakGameScreen.STORE -> BreakGameStore(
@@ -136,12 +137,26 @@ fun BreakGamePage(onBack: () -> Unit) {
             onClose = { screen = BreakGameScreen.HOME }
         )
         BreakGameScreen.GAME -> BreakGamePlayPage(onBack = { refreshGameBalance(); screen = BreakGameScreen.HOME })
-        BreakGameScreen.XO -> TicTacToeGamePage(onBack = { screen = BreakGameScreen.HOME })
-        BreakGameScreen.XO_SHOP -> TicTacToeGamePage(onBack = { screen = BreakGameScreen.HOME }, startInShop = true)
+        BreakGameScreen.XO -> TicTacToeGamePage(
+            onBack = { screen = BreakGameScreen.HOME },
+            startInShop = false,
+            onShopBack = { screen = BreakGameScreen.XO }
+        )
+        BreakGameScreen.XO_SHOP -> TicTacToeGamePage(
+            onBack = { screen = BreakGameScreen.HOME },
+            startInShop = true,
+            onShopBack = { screen = BreakGameScreen.HOME }
+        )
+        BreakGameScreen.XO_INVENTORY -> TicTacToeGamePage(
+            onBack = { screen = BreakGameScreen.HOME },
+            startInShop = false,
+            startInInventory = true,
+            onShopBack = { screen = BreakGameScreen.XO }
+        )
     }
 }
 
-private enum class BreakGameScreen { HOME, GAME, STORE, INVENTORY, XO, XO_SHOP }
+private enum class BreakGameScreen { HOME, GAME, STORE, INVENTORY, XO, XO_SHOP, XO_INVENTORY }
 
 @Composable
 private fun BreakGameHome(
@@ -152,6 +167,7 @@ private fun BreakGameHome(
     onInventory: () -> Unit,
     onOpenXo: () -> Unit,
     onOpenXoShop: () -> Unit,
+    onOpenXoInventory: () -> Unit,
     onBack: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF071421)) {
@@ -170,7 +186,6 @@ private fun BreakGameHome(
                 Text("استراحة ممتعة! اختر ما تريد قبل أن تبدأ.", color = Color(0xFFD7F2F0), fontSize = 15.sp, textAlign = TextAlign.Center)
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color(0xE610211E))) {
                     Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("💰 $gameBalance عملة المغامرة", color = Color(0xFFFFD54F), fontSize = 17.sp, fontWeight = FontWeight.Black)
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             BreakMenuCard(Modifier.weight(1f), "⚔️", "مغامرات ريبو", Color(0xFFE85D3F), onStart)
                             BreakMenuCard(Modifier.weight(1f), "🛍️", "متجر المغامرة", Color(0xFFFFA000), onStore)
@@ -179,7 +194,10 @@ private fun BreakGameHome(
                             BreakMenuCard(Modifier.weight(1f), "×O", "لعبة XO", Color(0xFF36A9E1), onOpenXo)
                             BreakMenuCard(Modifier.weight(1f), "🎨", "متجر XO", Color(0xFF8E5DE7), onOpenXoShop)
                         }
-                        BreakMenuWideButton("🎒", "مقتنياتي", Color(0xFF20A77A), onInventory)
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            BreakMenuCard(Modifier.weight(1f), "🎒", "مقتنيات ريبو", Color(0xFF20A77A), onInventory)
+                            BreakMenuCard(Modifier.weight(1f), "🎒", "مقتنيات XO", Color(0xFF7057C8), onOpenXoInventory)
+                        }
                         BreakMenuWideButton("↩", "خروج", Color(0xFF607D8B), onBack)
                     }
                 }
