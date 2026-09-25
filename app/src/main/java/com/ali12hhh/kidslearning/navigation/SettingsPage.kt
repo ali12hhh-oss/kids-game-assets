@@ -1,6 +1,8 @@
 package com.ali12hhh.kidslearning.navigation
 
-import android.content.Context\nimport android.content.Intent\nimport android.net.Uri
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,7 +37,10 @@ fun SettingsPage(onBack: () -> Unit) {
         SettingsScreen.DATA -> DataProgressPage(context) { screen = SettingsScreen.MAIN }
         SettingsScreen.TERMS -> SimpleInfoPage("📜 شروط الاستخدام", "استخدام التطبيق مخصص للتعلّم والترفيه للأطفال تحت إشراف ولي الأمر.") { screen = SettingsScreen.MAIN }
         SettingsScreen.PRIVACY_POLICY -> PrivacyPolicyPage { screen = SettingsScreen.MAIN }
-        SettingsScreen.ABOUT -> SimpleInfoPage("ℹ️ عن التطبيق", "تعلّم مع دبدوب\nتطبيق تعليمي وترفيهي للأطفال.\n\nالإعدادات الظاهرة هنا مرتبطة بوظائف حقيقية داخل التطبيق.") { screen = SettingsScreen.MAIN }
+        SettingsScreen.ABOUT -> SimpleInfoPage("ℹ️ عن التطبيق", "تعلّم مع دبدوب
+تطبيق تعليمي وترفيهي للأطفال.
+
+الإعدادات الظاهرة هنا مرتبطة بوظائف حقيقية داخل التطبيق.") { screen = SettingsScreen.MAIN }
     }
 }
 
@@ -162,7 +167,21 @@ private fun MainSettings(context: Context, onBack: () -> Unit, onOpen: (Settings
     )
 }
 
-@Composable\nprivate fun PrivacyPolicyPage(onBack: () -> Unit) {\n    val context = LocalContext.current\n    DetailScaffold("🔐 سياسة الخصوصية", onBack) {\n        Text("تطبيق تعلم مع ريبو يحفظ اسم الطفل وصورته وإعدادات التطبيق والتقدّم والنجوم والمقتنيات محليًا على الجهاز فقط. لا توجد حاليًا إعلانات أو حسابات أو خوادم أو تحليلات أو مشاركة لهذه البيانات مع أطراف أخرى.", fontSize = 16.sp, lineHeight = 25.sp)\n        Text("الصورة يختارها ولي الأمر من منتقي الملفات في النظام، ولا يرسلها التطبيق إلى الإنترنت. النطق الصوتي يستخدم محرك تحويل النص إلى كلام الموجود على الجهاز.", fontSize = 16.sp, lineHeight = 25.sp)\n        Text("يمكن لولي الأمر حذف بيانات التطبيق من صفحة البيانات والتقدّم أو من إعدادات Android. لا يحتفظ التطبيق بحسابات مستخدمين.", fontSize = 16.sp, lineHeight = 25.sp)\n        Text("المطور: Ali12hhh-oss. للتواصل وطلبات الخصوصية: مستودع المشروع العام على GitHub.", fontSize = 16.sp, lineHeight = 25.sp)\n        Button(onClick = {\n            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/ali12hhh-oss/kids-game-assets")))\n        }, modifier = Modifier.fillMaxWidth()) { Text("فتح صفحة الخصوصية العامة") }\n    }\n}\n\n@Composable private fun PrivacyPage(onBack: () -> Unit) = SimpleInfoPage("🛡️ الخصوصية وحماية الطفل", "الإعدادات وملف الطفل والتقدّم الحالي تُحفظ محليًا على الجهاز. أي صلاحية جديدة مستقبلًا يجب أن تكون مرتبطة بميزة واضحة ويُشرح سبب استخدامها للوالدين.", onBack)
+@Composable
+private fun PrivacyPolicyPage(onBack: () -> Unit) {
+    val context = LocalContext.current
+    DetailScaffold("🔐 سياسة الخصوصية", onBack) {
+        Text("تطبيق تعلم مع ريبو يحفظ اسم الطفل وصورته وإعدادات التطبيق والتقدّم والنجوم والمقتنيات محليًا على الجهاز فقط. لا توجد حاليًا إعلانات أو حسابات أو خوادم أو تحليلات أو مشاركة لهذه البيانات مع أطراف أخرى.", fontSize = 16.sp, lineHeight = 25.sp)
+        Text("الصورة يختارها ولي الأمر من منتقي الملفات في النظام، ولا يرسلها التطبيق إلى الإنترنت. النطق الصوتي يستخدم محرك تحويل النص إلى كلام الموجود على الجهاز.", fontSize = 16.sp, lineHeight = 25.sp)
+        Text("يمكن لولي الأمر حذف بيانات التطبيق من صفحة البيانات والتقدّم أو من إعدادات Android. لا يحتفظ التطبيق بحسابات مستخدمين.", fontSize = 16.sp, lineHeight = 25.sp)
+        Text("المطور: Ali12hhh-oss. للتواصل وطلبات الخصوصية: مستودع المشروع العام على GitHub.", fontSize = 16.sp, lineHeight = 25.sp)
+        Button(onClick = {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/ali12hhh-oss/kids-game-assets")))
+        }, modifier = Modifier.fillMaxWidth()) { Text("فتح صفحة الخصوصية العامة") }
+    }
+}
+
+@Composable private fun PrivacyPage(onBack: () -> Unit) = SimpleInfoPage("🛡️ الخصوصية وحماية الطفل", "الإعدادات وملف الطفل والتقدّم الحالي تُحفظ محليًا على الجهاز. أي صلاحية جديدة مستقبلًا يجب أن تكون مرتبطة بميزة واضحة ويُشرح سبب استخدامها للوالدين.", onBack)
 @Composable private fun SimpleInfoPage(title: String, body: String, onBack: () -> Unit) = DetailScaffold(title, onBack) { Text(body, fontSize = 16.sp, lineHeight = 25.sp) }
 @Composable private fun DetailScaffold(title: String, onBack: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     Scaffold(containerColor = Color(0xFFF4F8FF)) { padding ->
