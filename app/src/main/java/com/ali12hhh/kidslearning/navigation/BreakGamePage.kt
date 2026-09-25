@@ -84,7 +84,12 @@ fun BreakGamePage(onBack: () -> Unit) {
     var roundId by remember { mutableIntStateOf(0) }
     var showStore by remember { mutableStateOf(false) }
     var storeRefresh by remember { mutableIntStateOf(0) }
+    var equippedGameItem by remember { mutableStateOf(AppSettings.equippedGameItem(context)) }
     val items = remember { mutableStateListOf<BreakItem>() }
+
+    fun refreshEquippedItem() {
+        equippedGameItem = AppSettings.equippedGameItem(context)
+    }
 
     fun resetGame() {
         items.clear()
@@ -126,7 +131,8 @@ fun BreakGamePage(onBack: () -> Unit) {
             elapsedMs += 50
             spawnMs += 50
             val difficulty = 1f + ((GAME_SECONDS - remaining).toFloat() / GAME_SECONDS) * 0.7f
-            val speed = (if (fastMode) 0.0018f else 0.0012f) * difficulty
+            val speedBonus = if (equippedGameItem == "speed_badge") 1.12f else 1f
+            val speed = (if (fastMode) 0.0018f else 0.0012f) * difficulty * speedBonus
             items.forEach { it.progress += speed * 50f }
 
             val removeIds = mutableSetOf<Int>()
@@ -157,7 +163,8 @@ fun BreakGamePage(onBack: () -> Unit) {
             }
             items.removeAll { it.id in removeIds }
 
-            if (spawnMs >= (if (fastMode) 610L else 820L) / difficulty) {
+            val spawnBonus = if (equippedGameItem == "speed_badge") 0.90f else 1f
+            if (spawnMs >= ((if (fastMode) 610L else 820L) * spawnBonus) / difficulty) {
                 spawnMs = 0L
                 spawnCounter++
                 val lane = Random.nextInt(0, 3)
@@ -176,14 +183,15 @@ fun BreakGamePage(onBack: () -> Unit) {
         if (remaining <= 0) {
             running = false
             finished = true
-            val reward = (collected / 2).coerceIn(0, 12)
+            val rewardMultiplier = if (equippedGameItem == "gold_badge") 1.5f else 1f
+            val reward = ((collected / 2) * rewardMultiplier).toInt().coerceIn(0, 18)
             if (reward > 0) AppSettings.addGameStars(context, reward)
         }
     }
 
     LaunchedEffect(jumping) {
         if (jumping) {
-            delay(680)
+            delay(if (equippedGameItem == "jump_badge") 520 else 680)
             jumping = false
         }
     }
@@ -208,7 +216,7 @@ fun BreakGamePage(onBack: () -> Unit) {
         }
     }
     val playerX = (playerLane - 1) * 0.78f
-    val playerY = if (jumping) 0.72f else 0f
+    val playerY = if (jumping) (if (equippedGameItem == "jump_badge") 0.84f else 0.72f) else 0f
     LaunchedEffect(characterNode, running, finished, countdown, jumping, fastMode) {
         val node = characterNode ?: return@LaunchedEffect
         if (running && !finished && countdown == 0) {
@@ -401,7 +409,10 @@ fun BreakGamePage(onBack: () -> Unit) {
                 BreakGameStore(
                     context = context,
                     refreshKey = storeRefresh,
-                    onPurchased = { storeRefresh++ },
+                    onPurchased = {
+                        storeRefresh++
+                        refreshEquippedItem()
+                    },
                     onClose = { showStore = false }
                 )
             }
@@ -501,7 +512,16 @@ private fun BreakGameStore(
                         ) {
                             Column(Modifier.weight(1f)) {
                                 Text(name, color = Color(0xFF17384D), fontSize = 16.sp, fontWeight = FontWeight.Black)
-                                Text("عنصر تجميلي للعبة — $price 💰", color = Color(0xFF5A7484), fontSize = 11.sp)
+                                Text(
+                                    when (id) {
+                                        "speed_badge" -> "يزيد سرعة الحركة وتواتر ظهور العناصر"
+                                        "jump_badge" -> "قفزة أعلى وعودة أسرع من القفز"
+                                        "gold_badge" -> "يرفع مكافأة نجوم المتجر عند نهاية الجولة"
+                                        else -> "ترقية خاصة باللعبة"
+                                    },
+                                    color = Color(0xFF5A7484),
+                                    fontSize = 11.sp
+                                )
                             }
                             Button(onClick = {
                                 if (!isOwned && AppSettings.buyGameItem(context, id, price)) {
@@ -517,7 +537,7 @@ private fun BreakGameStore(
                     }
                 }
                 Text(
-                    "سنربط عناصر الملابس الفعلية بالشخصية بعد التأكد من الأصول المتاحة داخل المشروع.",
+                    "الترقيات الحالية تعمل داخل اللعب مباشرة، وسنضيف الملابس عندما تتوفر أصول مرخّصة مناسبة.",
                     color = Color(0xFF547083),
                     fontSize = 11.sp,
                     textAlign = TextAlign.Center,
