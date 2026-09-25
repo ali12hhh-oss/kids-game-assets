@@ -188,7 +188,7 @@ fun BreakGamePage(onBack: () -> Unit) {
 
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    val model = remember { runCatching { modelLoader.createModelInstance("Mannequin_Medium.glb") }.getOrNull() }
+    val model = remember { runCatching { modelLoader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull() }
     val cameraNode = rememberCameraNode(engine) {
         position = Position(x = 0f, y = 0.35f, z = 6.5f)
     }
@@ -196,7 +196,7 @@ fun BreakGamePage(onBack: () -> Unit) {
         model?.let { instance ->
             ModelNode(
                 modelInstance = instance,
-                autoAnimate = true,
+                autoAnimate = false,
                 scaleToUnits = 1.08f,
                 centerOrigin = Position(x = 0f, y = -0.88f, z = 0f)
             )
@@ -207,11 +207,25 @@ fun BreakGamePage(onBack: () -> Unit) {
     }
     val playerX = (playerLane - 1) * 0.78f
     val playerY = if (jumping) 0.72f else 0f
-    val animationFrame = tick
-
-    LaunchedEffect(characterNode, running, jumping, fastMode) {
+    LaunchedEffect(characterNode, running, finished, countdown, jumping, fastMode) {
         val node = characterNode ?: return@LaunchedEffect
-        if (running && !jumping) runCatching { node.playAnimation(1, if (fastMode) 1.35f else 1.05f, true) }
+        if (running && !finished && countdown == 0) {
+            val animation = when {
+                jumping -> "Jump_Full_Short"
+                fastMode -> "Running_A"
+                else -> "Walking_A"
+            }
+            val speed = when {
+                jumping -> 1.0f
+                fastMode -> 1.05f
+                else -> 0.95f
+            }
+            runCatching { node.playAnimation(animation, speed, true) }
+        } else {
+            runCatching { node.stopAnimation("Walking_A") }
+            runCatching { node.stopAnimation("Running_A") }
+            runCatching { node.stopAnimation("Jump_Full_Short") }
+        }
     }
 
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF071421)) {
