@@ -97,11 +97,13 @@ fun BreakGamePage(onBack: () -> Unit) {
     var storeRefresh by remember { mutableIntStateOf(0) }
     var equippedGameItem by remember { mutableStateOf(AppSettings.equippedGameItem(context)) }
     var equippedGameOutfit by remember { mutableStateOf(AppSettings.equippedGameOutfit(context)) }
+    var equippedGameEquipment by remember { mutableStateOf(AppSettings.equippedGameEquipment(context)) }
     val items = remember { mutableStateListOf<BreakItem>() }
 
     fun refreshEquippedItem() {
         equippedGameItem = AppSettings.equippedGameItem(context)
         equippedGameOutfit = AppSettings.equippedGameOutfit(context)
+        equippedGameEquipment = AppSettings.equippedGameEquipment(context)
     }
 
     fun resetGame() {
@@ -289,6 +291,18 @@ fun BreakGamePage(onBack: () -> Unit) {
     val model = remember(characterAsset) {
         runCatching { modelLoader.createModelInstance(characterAsset) }.getOrNull()
     }
+    val equipmentAsset = when (equippedGameEquipment) {
+        "sword_1handed" -> "characters/KayKit/Accessories/sword_1handed.gltf"
+        "sword_2handed" -> "characters/KayKit/Accessories/sword_2handed.gltf"
+        "axe_1handed" -> "characters/KayKit/Accessories/axe_1handed.gltf"
+        "dagger" -> "characters/KayKit/Accessories/dagger.gltf"
+        "shield_round" -> "characters/KayKit/Accessories/shield_round.gltf"
+        "shield_spikes" -> "characters/KayKit/Accessories/shield_spikes.gltf"
+        else -> null
+    }
+    val equipmentModel = remember(equipmentAsset) {
+        equipmentAsset?.let { runCatching { modelLoader.createModelInstance(it) }.getOrNull() }
+    }
     val cameraNode = rememberCameraNode(engine) {
         position = Position(x = 0f, y = 0.35f, z = 6.5f)
     }
@@ -341,7 +355,18 @@ fun BreakGamePage(onBack: () -> Unit) {
                 cameraNode = cameraNode,
                 cameraManipulator = null,
                 isOpaque = false,
-                childNodes = listOfNotNull(characterNode?.also { it.position = Position(x = playerX, y = playerY, z = 0f) })
+                childNodes = listOfNotNull(
+                    characterNode?.also { it.position = Position(x = playerX, y = playerY, z = 0f) },
+                    equipmentModel?.let { instance ->
+                        ModelNode(
+                            modelInstance = instance,
+                            autoAnimate = false,
+                            scaleToUnits = 0.34f,
+                            position = Position(x = playerX + 0.28f, y = playerY + 0.48f, z = 0.02f),
+                            rotation = Rotation(y = 180f)
+                        )
+                    }
+                )
             )
 
             Canvas(modifier = Modifier.fillMaxSize().padding(top = 102.dp, bottom = 178.dp)) {
@@ -723,6 +748,38 @@ private fun BreakGameStore(
                                 }
                             }) {
                                 Text(if (isOwned && equippedOutfit == id) "مجهّز" else if (isOwned) "ارتداء" else "$price 💰")
+                            }
+                        }
+                    }
+                }
+                Text("الأسلحة والدروع", color = Color(0xFF17384D), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                val equipment = listOf(
+                    "sword_1handed" to ("سيف خفيف" to 800),
+                    "sword_2handed" to ("سيف ثقيل" to 900),
+                    "axe_1handed" to ("فأس قتالي" to 1000),
+                    "dagger" to ("خنجر" to 1100),
+                    "shield_round" to ("درع دائري" to 1200),
+                    "shield_spikes" to ("درع الأشواك" to 1300)
+                )
+                val ownedEquipment = AppSettings.gameOwnedEquipment(context)
+                val equippedEquipment = AppSettings.equippedGameEquipment(context)
+                equipment.forEach { (id, data) ->
+                    val (name, price) = data
+                    val isOwned = id in ownedEquipment
+                    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF3F7))) {
+                        Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(name, color = Color(0xFF17384D), fontSize = 16.sp, fontWeight = FontWeight.Black)
+                                Text("معدات KayKit CC0 — تُحفظ في مقتنياتك وتظهر مع ريبو عند تجهيزها.", color = Color(0xFF5A7484), fontSize = 11.sp)
+                            }
+                            Button(onClick = {
+                                if (!isOwned) {
+                                    if (AppSettings.buyGameEquipment(context, id, price)) { refreshOwnership(); onPurchased() }
+                                } else {
+                                    AppSettings.equipGameEquipment(context, id); onPurchased()
+                                }
+                            }) {
+                                Text(if (isOwned && equippedEquipment == id) "مجهّز" else if (isOwned) "تجهيز" else "$price 💰")
                             }
                         }
                     }
