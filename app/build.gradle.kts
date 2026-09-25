@@ -77,6 +77,10 @@ android {
         }
     }
 
+    androidResources {
+        noCompress += "ogg"
+    }
+
     buildFeatures { compose = true }
     lint {
         abortOnError = true
