@@ -52,6 +52,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import io.github.sceneview.Scene
+import io.github.sceneview.math.Position
+import io.github.sceneview.math.Rotation
+import io.github.sceneview.rememberCameraNode
+import io.github.sceneview.rememberEngine
+import io.github.sceneview.rememberModelLoader
+import io.github.sceneview.node.ModelNode
 import kotlin.math.max
 import kotlin.math.min
 
@@ -66,39 +73,59 @@ private const val XO_FLOOR = "floor"
 private const val XO_OWNED_COLORS = "owned_colors"
 private const val XO_OWNED_EFFECTS = "owned_effects"
 private const val XO_OWNED_FLOORS = "owned_floors"
+private const val XO_FRAME = "frame"
+private const val XO_OWNED_FRAMES = "owned_frames"
 
 private data class XoColorItem(val id: String, val name: String, val color: Color, val price: Int)
 private data class XoEffectItem(val id: String, val name: String, val price: Int)
 private data class XoFloorItem(val id: String, val name: String, val top: Color, val bottom: Color, val price: Int)
+private data class XoFrameItem(val id: String, val name: String, val color: Color, val price: Int)
 
 private val xoColors = listOf(
-    XoColorItem("gold", "ذهبي", Color(0xFFFFC107), 0),
-    XoColorItem("ruby", "ياقوتي", Color(0xFFFF4D67), 20),
-    XoColorItem("ocean", "محيطي", Color(0xFF29B6F6), 25),
-    XoColorItem("violet", "بنفسجي", Color(0xFF9C6BFF), 30),
-    XoColorItem("mint", "نعناعي", Color(0xFF22D3A6), 35),
-    XoColorItem("orange", "برتقالي", Color(0xFFFF8A3D), 40),
-    XoColorItem("pink", "وردي", Color(0xFFFF5CB8), 45)
+    XoColorItem("gold", "ذهبي ملكي", Color(0xFFFFC107), 0),
+    XoColorItem("ruby", "ياقوتي", Color(0xFFFF365F), 20),
+    XoColorItem("ocean", "أزرق محيطي", Color(0xFF20BFFF), 25),
+    XoColorItem("violet", "بنفسجي ملكي", Color(0xFFA56BFF), 30),
+    XoColorItem("mint", "نعناعي", Color(0xFF20D9A6), 35),
+    XoColorItem("orange", "برتقالي ناري", Color(0xFFFF8A35), 40),
+    XoColorItem("pink", "وردي لامع", Color(0xFFFF4FAF), 45),
+    XoColorItem("ice", "جليدي", Color(0xFFB8F2FF), 55),
+    XoColorItem("emerald", "زمردي", Color(0xFF31D17C), 65),
+    XoColorItem("cosmic", "كوني", Color(0xFF8C7CFF), 80)
 )
 
 private val xoEffects = listOf(
-    XoEffectItem("none", "كلاسيكي", 0),
-    XoEffectItem("pulse", "نبضة مضيئة", 35),
-    XoEffectItem("spark", "شرارات", 50),
-    XoEffectItem("flame", "وهج ناري", 65),
-    XoEffectItem("rainbow", "قوس قزح", 80)
+    XoEffectItem("none", "كلاسيكي نظيف", 0),
+    XoEffectItem("pulse", "نبضة طاقة", 35),
+    XoEffectItem("spark", "شرارات ذهبية", 50),
+    XoEffectItem("fire", "لهب ناري", 65),
+    XoEffectItem("rainbow", "طيف قوس قزح", 80),
+    XoEffectItem("electric", "كهرباء زرقاء", 95),
+    XoEffectItem("orbit", "مدار نجمي", 110),
+    XoEffectItem("starburst", "انفجار نجمي", 125)
 )
 
 private val xoFloors = listOf(
-    XoFloorItem("classic", "كريستال أزرق", Color(0xFF102A43), Color(0xFF1E5A82), 0),
-    XoFloorItem("neon", "نيون", Color(0xFF160B2E), Color(0xFF3A145F), 55),
-    XoFloorItem("candy", "حلوى", Color(0xFF5C164E), Color(0xFFD94F8A), 65),
-    XoFloorItem("space", "فضاء", Color(0xFF070B25), Color(0xFF1D2B64), 75),
-    XoFloorItem("ocean", "محيط", Color(0xFF063B45), Color(0xFF087F8C), 85),
-    XoFloorItem("sunset", "غروب", Color(0xFF4A1738), Color(0xFFE06B3C), 95)
+    XoFloorItem("classic", "كريستال أزرق", Color(0xFF071A2B), Color(0xFF1D5C83), 0),
+    XoFloorItem("neon", "نيون بنفسجي", Color(0xFF13052A), Color(0xFF5A1887), 55),
+    XoFloorItem("candy", "حلوى وردية", Color(0xFF54103F), Color(0xFFD94F8A), 65),
+    XoFloorItem("space", "فضاء عميق", Color(0xFF02051A), Color(0xFF1E2F70), 75),
+    XoFloorItem("ocean", "محيط مضيء", Color(0xFF023A46), Color(0xFF0799A5), 85),
+    XoFloorItem("sunset", "غروب ناري", Color(0xFF3D102D), Color(0xFFE46C3C), 95),
+    XoFloorItem("forest", "غابة زمردية", Color(0xFF071F18), Color(0xFF147A58), 110),
+    XoFloorItem("royal", "ملكي داكن", Color(0xFF120A27), Color(0xFF49308A), 130)
 )
 
-private fun xoPrefs(context: Context) =
+private val xoFrames = listOf(
+    XoFrameItem("steel", "فولاذ", Color(0xFFB9C8D6), 0),
+    XoFrameItem("gold", "ذهب فاخر", Color(0xFFFFC107), 45),
+    XoFrameItem("ruby", "ياقوت", Color(0xFFFF416C), 60),
+    XoFrameItem("ice", "جليد", Color(0xFF9DEBFF), 70),
+    XoFrameItem("emerald", "زمرد", Color(0xFF29D391), 85),
+    XoFrameItem("carbon", "كربون", Color(0xFF384A5A), 100)
+)
+
+private fun xoPrefsprivate fun xoPrefs(context: Context) =
     context.getSharedPreferences(XO_PREFS, Context.MODE_PRIVATE)
 
 private fun ownedSet(context: Context, key: String, default: Set<String>) =
@@ -133,12 +160,14 @@ private fun initialXoInventory(context: Context) {
         putStringSet(XO_OWNED_COLORS, ownedSet(context, XO_OWNED_COLORS, emptySet()) + "gold")
         putStringSet(XO_OWNED_EFFECTS, ownedSet(context, XO_OWNED_EFFECTS, emptySet()) + "none")
         putStringSet(XO_OWNED_FLOORS, ownedSet(context, XO_OWNED_FLOORS, emptySet()) + "classic")
+        .putStringSet(XO_OWNED_FRAMES, ownedSet(context, XO_OWNED_FRAMES, emptySet()) + "steel")
     }
 }
 
 private fun xoSelectedColor(context: Context) = xoPrefs(context).getString(XO_X_COLOR, "gold") ?: "gold"
 private fun xoSelectedEffect(context: Context) = xoPrefs(context).getString(XO_EFFECT, "none") ?: "none"
 private fun xoSelectedFloor(context: Context) = xoPrefs(context).getString(XO_FLOOR, "classic") ?: "classic"
+private fun xoSelectedFrame(context: Context) = xoPrefs(context).getString(XO_FRAME, "steel") ?: "steel"
 
 private fun chooseXo(context: Context, key: String, id: String) {
     xoPrefs(context).edit { putString(key, id) }
@@ -216,22 +245,26 @@ fun TicTacToeGamePage(onBack: () -> Unit) {
 }
 
 @Composable
-private fun XoGame(
-    context: Context,
-    refreshKey: Int,
-    onShop: () -> Unit,
-    onInventory: () -> Unit,
-    onBack: () -> Unit
-) {
+private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInventory: () -> Unit, onBack: () -> Unit) {
     val selectedColor = xoColors.firstOrNull { it.id == xoSelectedColor(context) } ?: xoColors.first()
     val selectedEffect = xoSelectedEffect(context)
     val selectedFloor = xoFloors.firstOrNull { it.id == xoSelectedFloor(context) } ?: xoFloors.first()
+    val selectedFrame = xoFrames.firstOrNull { it.id == xoSelectedFrame(context) } ?: xoFrames.first()
     var board by remember(refreshKey) { mutableStateOf(List(9) { ' ' }) }
     var turn by remember(refreshKey) { mutableStateOf('X') }
     var result by remember(refreshKey) { mutableStateOf<Char?>(null) }
     var thinking by remember(refreshKey) { mutableStateOf(false) }
     var winningCells by remember(refreshKey) { mutableStateOf(emptySet<Int>()) }
-
+    val engine = rememberEngine()
+    val modelLoader = rememberModelLoader(engine)
+    val cameraNode = rememberCameraNode(engine) {
+        position = Position(x = 0f, y = 4.7f, z = 6.9f)
+        lookAt(Position(x = 0f, y = 0f, z = 0f))
+    }
+    val boardModel = remember { runCatching { modelLoader.createModelInstance("xo/xo_board.gltf") }.getOrNull() }
+    LaunchedEffect(boardModel, selectedFrame.color) {
+        boardModel?.materialInstances?.forEach { it.setParameter("baseColorFactor", selectedFrame.color.red, selectedFrame.color.green, selectedFrame.color.blue, 1f) }
+    }
     fun finishIfNeeded(next: List<Char>): Boolean {
         val win = winner(next)
         if (win != null) {
@@ -240,31 +273,24 @@ private fun XoGame(
             val p = xoPrefs(context)
             if (win == 'X') {
                 addXoCoins(context, 10)
-                p.edit { putInt(XO_WINS, p.getInt(XO_WINS, 0) + 1) }
-            } else {
-                p.edit { putInt(XO_LOSSES, p.getInt(XO_LOSSES, 0) + 1) }
-            }
+                p.edit().putInt(XO_WINS, p.getInt(XO_WINS, 0) + 1).apply()
+            } else p.edit().putInt(XO_LOSSES, p.getInt(XO_LOSSES, 0) + 1).apply()
             return true
         }
         if (boardFull(next)) {
             result = 'D'
             val p = xoPrefs(context)
-            p.edit { putInt(XO_DRAWS, p.getInt(XO_DRAWS, 0) + 1) }
+            p.edit().putInt(XO_DRAWS, p.getInt(XO_DRAWS, 0) + 1).apply()
             return true
         }
         return false
     }
-
     fun playerMove(index: Int) {
         if (turn != 'X' || result != null || thinking || board[index] != ' ') return
         val next = board.toMutableList().also { it[index] = 'X' }
         board = next
-        if (!finishIfNeeded(next)) {
-            turn = 'O'
-            thinking = true
-        }
+        if (!finishIfNeeded(next)) { turn = 'O'; thinking = true }
     }
-
     LaunchedEffect(board, turn, thinking, result) {
         if (turn == 'O' && thinking && result == null) {
             delay(420)
@@ -277,75 +303,89 @@ private fun XoGame(
             }
         }
     }
-
     val status = when (result) {
         'X' -> "أحسنت! فزت +10 💰"
         'O' -> "ريبو فاز هذه الجولة"
         'D' -> "تعادل رائع! 🤝"
-        else -> if (thinking) "ريبو يفكر..." else "دورك الآن — اختر مربعًا"
+        else -> if (thinking) "ريبو يفكر..." else "دورك — اختر مكانك"
     }
     val wins = xoPrefs(context).getInt(XO_WINS, 0)
     val draws = xoPrefs(context).getInt(XO_DRAWS, 0)
     val losses = xoPrefs(context).getInt(XO_LOSSES, 0)
-
-    Surface(Modifier.fillMaxSize(), color = Color(0xFF081321)) {
+    Surface(Modifier.fillMaxSize(), color = selectedFloor.top) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(selectedFloor.top, selectedFloor.bottom)))) {
             XoAmbientEffect(selectedEffect, selectedColor.color)
-            Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onBack) { Text("‹", color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Black) }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("× O", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black)
-                        Text("تحدي ريبو", color = Color.White.copy(alpha = .78f), fontSize = 12.sp)
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("💰 ${xoCoins(context)}", color = Color(0xFFFFD54F), fontSize = 16.sp, fontWeight = FontWeight.Black)
-                        Text("ذهب XO", color = Color.White.copy(alpha = .7f), fontSize = 9.sp)
-                    }
-                }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    XoScoreCard("أنت", "×", wins, selectedColor.color, Modifier.weight(1f))
-                    XoScoreCard("تعادل", "•", draws, Color.White, Modifier.weight(1f))
-                    XoScoreCard("ريبو", "O", losses, Color(0xFFFF6B8A), Modifier.weight(1f))
-                }
-                Spacer(Modifier.height(10.dp))
-                Text(status, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(8.dp))
-                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = .10f))) {
-                    Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        repeat(3) { row ->
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                repeat(3) { col ->
-                                    val index = row * 3 + col
-                                    XoCell(
-                                        value = board[index],
-                                        xColor = selectedColor.color,
-                                        isWinning = index in winningCells,
-                                        effect = selectedEffect,
-                                        modifier = Modifier.weight(1f),
-                                        onClick = { playerMove(index) }
-                                    )
-                                }
+            Scene(
+                modifier = Modifier.fillMaxSize().padding(top = 92.dp, bottom = 128.dp),
+                engine = engine, modelLoader = modelLoader, cameraNode = cameraNode,
+                cameraManipulator = null, isOpaque = false,
+                childNodes = buildList {
+                    boardModel?.let { add(ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = 1f)) }
+                    board.forEachIndexed { index, value ->
+                        if (value != ' ') {
+                            val instance = runCatching { modelLoader.createModelInstance(if (value == 'X') "xo/xo_x.gltf" else "xo/xo_o.gltf") }.getOrNull()
+                            instance?.let {
+                                val row = index / 3
+                                val col = index % 3
+                                val c = if (value == 'X') selectedColor.color else Color(0xFFFF4F72)
+                                it.materialInstances.forEach { m -> m.setParameter("baseColorFactor", c.red, c.green, c.blue, 1f) }
+                                add(ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = .72f).apply {
+                                    position = Position(x = (col - 1) * 1.0f, y = .52f, z = (row - 1) * 1.0f)
+                                    rotation = Rotation(x = 90f)
+                                })
                             }
                         }
                     }
                 }
-                Spacer(Modifier.height(10.dp))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = {
-                        board = List(9) { ' ' }
-                        turn = 'X'
-                        result = null
-                        thinking = false
-                        winningCells = emptySet()
-                    }, modifier = Modifier.weight(1f)) { Text("↻ جولة جديدة", fontWeight = FontWeight.Black) }
+            )
+            Xo3dTouchGrid(board, result, thinking, Modifier.fillMaxSize().padding(top = 108.dp, bottom = 138.dp), ::playerMove)
+            Column(Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 10.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBack) { Text("‹", color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Black) }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("× O  3D", color = Color.White, fontSize = 29.sp, fontWeight = FontWeight.Black)
+                        Text("ساحة ريبو ثلاثية الأبعاد", color = Color.White.copy(alpha = .78f), fontSize = 11.sp)
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("💰 " + xoCoins(context), color = Color(0xFFFFD54F), fontSize = 16.sp, fontWeight = FontWeight.Black)
+                        Text("ذهب XO", color = Color.White.copy(alpha = .72f), fontSize = 9.sp)
+                    }
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                    XoScoreCard("أنت", "×", wins, selectedColor.color, Modifier.weight(1f))
+                    XoScoreCard("تعادل", "•", draws, Color.White, Modifier.weight(1f))
+                    XoScoreCard("ريبو", "O", losses, Color(0xFFFF6B8A), Modifier.weight(1f))
+                }
+                Spacer(Modifier.weight(1f))
+                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color(0xD90A1826))) {
+                    Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(status, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Black)
+                        Text("لوحة 3D • " + selectedFrame.name + " • " + selectedFloor.name, color = Color.White.copy(alpha = .68f), fontSize = 10.sp)
+                    }
+                }
+                Spacer(Modifier.height(7.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                    Button(onClick = { board = List(9) { ' ' }; turn = 'X'; result = null; thinking = false; winningCells = emptySet() }, modifier = Modifier.weight(1f)) { Text("↻ جولة جديدة", fontWeight = FontWeight.Black) }
                     OutlinedButton(onClick = onShop, modifier = Modifier.weight(1f)) { Text("🛍 متجر XO") }
                 }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                     OutlinedButton(onClick = onInventory, modifier = Modifier.weight(1f)) { Text("🎒 مقتنياتي") }
                     OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) { Text("رجوع") }
                 }
-                Text("أنت ×  •  ريبو O  •  كل فوز يمنحك 10 عملات ذهبية", color = Color.White.copy(alpha = .68f), fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp), textAlign = TextAlign.Center)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Xo3dTouchGrid(board: List<Char>, result: Char?, thinking: Boolean, modifier: Modifier, onMove: (Int) -> Unit) {
+    Column(modifier, verticalArrangement = Arrangement.SpaceEvenly) {
+        repeat(3) { row ->
+            Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.SpaceEvenly) {
+                repeat(3) { col ->
+                    val index = row * 3 + col
+                    Box(Modifier.weight(1f).fillMaxSize().clickable(enabled = board[index] == ' ' && result == null && !thinking) { onMove(index) })
+                }
             }
         }
     }
@@ -393,13 +433,16 @@ private fun XoCell(value: Char, xColor: Color, isWinning: Boolean, effect: Strin
 @Composable
 private fun XoAmbientEffect(effect: String, color: Color) {
     if (effect == "none") return
-    val transition = rememberInfiniteTransition(label = "ambient")
-    val alpha by transition.animateFloat(.06f, .18f, infiniteRepeatable(tween(1100), RepeatMode.Reverse), label = "ambientAlpha")
+    val transition = rememberInfiniteTransition(label = "xoEffect")
+    val alpha by transition.animateFloat(.05f, .20f, infiniteRepeatable(tween(900), RepeatMode.Reverse), label = "alpha")
     Canvas(Modifier.fillMaxSize()) {
-        drawCircle(color.copy(alpha = alpha), radius = size.minDimension * .34f, center = Offset(size.width * .5f, size.height * .35f))
-        if (effect == "spark" || effect == "rainbow") {
-            drawCircle(Color(0xFFFFD54F).copy(alpha = alpha), 18f, Offset(size.width * .16f, size.height * .22f))
-            drawCircle(Color(0xFFFF6B8A).copy(alpha = alpha), 12f, Offset(size.width * .84f, size.height * .28f))
+        drawCircle(color.copy(alpha = alpha), size.minDimension * .34f, center = androidx.compose.ui.geometry.Offset(size.width*.5f, size.height*.40f))
+        when (effect) {
+            "spark", "starburst" -> repeat(10) { i -> drawCircle(Color(0xFFFFD54F).copy(alpha=alpha), 4f, androidx.compose.ui.geometry.Offset(size.width*(.1f+i*.08f), size.height*(.2f+(i%4)*.13f))) }
+            "fire" -> repeat(8) { i -> drawCircle(Color(0xFFFF6A2A).copy(alpha=alpha), 8f, androidx.compose.ui.geometry.Offset(size.width*(.25f+i*.07f), size.height*(.72f-(i%3)*.04f))) }
+            "rainbow" -> { drawCircle(Color(0xFFFF4F72).copy(alpha=alpha),26f,androidx.compose.ui.geometry.Offset(size.width*.18f,size.height*.25f)); drawCircle(Color(0xFF20BFFF).copy(alpha=alpha),20f,androidx.compose.ui.geometry.Offset(size.width*.82f,size.height*.30f)); drawCircle(Color(0xFF20D9A6).copy(alpha=alpha),14f,androidx.compose.ui.geometry.Offset(size.width*.5f,size.height*.18f)) }
+            "electric" -> repeat(7) { i -> drawCircle(Color(0xFF55C7FF).copy(alpha=alpha),4f,androidx.compose.ui.geometry.Offset(size.width*(.08f+i*.14f),size.height*(.22f+(i%2)*.12f))) }
+            "orbit" -> { drawCircle(Color(0xFFFFD54F).copy(alpha=alpha),7f,androidx.compose.ui.geometry.Offset(size.width*.25f,size.height*.34f)); drawCircle(Color(0xFFA56BFF).copy(alpha=alpha),5f,androidx.compose.ui.geometry.Offset(size.width*.75f,size.height*.46f)) }
         }
     }
 }
@@ -410,49 +453,33 @@ private fun XoShop(context: Context, refreshKey: Int, onChanged: () -> Unit, onB
     val ownedColors = ownedSet(context, XO_OWNED_COLORS, setOf("gold"))
     val ownedEffects = ownedSet(context, XO_OWNED_EFFECTS, setOf("none"))
     val ownedFloors = ownedSet(context, XO_OWNED_FLOORS, setOf("classic"))
+    val ownedFrames = ownedSet(context, XO_OWNED_FRAMES, setOf("steel"))
     var tab by remember(refreshKey) { mutableIntStateOf(0) }
-
-    Box(Modifier.fillMaxSize().background(Color(0xFF081321)), contentAlignment = Alignment.Center) {
-        Card(Modifier.fillMaxWidth().fillMaxSize(.94f), shape = RoundedCornerShape(30.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FBFF))) {
-            Column(Modifier.fillMaxSize().padding(18.dp)) {
+    Box(Modifier.fillMaxSize().background(Color(0xFF06111F)), contentAlignment = Alignment.Center) {
+        Card(Modifier.fillMaxWidth(.95f).fillMaxSize(.96f), shape = RoundedCornerShape(32.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF5FAFE))) {
+            Column(Modifier.fillMaxSize().padding(17.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column {
-                        Text("متجر XO", color = Color(0xFF102B3E), fontSize = 27.sp, fontWeight = FontWeight.Black)
-                        Text("💰 ${coins} عملة ذهبية", color = Color(0xFFB77900), fontSize = 14.sp, fontWeight = FontWeight.Black)
+                        Text("متجر XO 3D", color = Color(0xFF102B3E), fontSize = 28.sp, fontWeight = FontWeight.Black)
+                        Text("💰 " + coins + " • كل فوز = +10", color = Color(0xFFB77900), fontSize = 13.sp, fontWeight = FontWeight.Black)
                     }
                     IconButton(onClick = onBack) { Text("✕", fontSize = 24.sp, color = Color(0xFF17384D)) }
                 }
-                Text("كل ما تشتريه هنا خاص بلعبة ×O ويُطبّق مباشرة داخلها.", color = Color(0xFF5A7484), fontSize = 12.sp)
-                Spacer(Modifier.height(8.dp))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    listOf("× ألوان", "✨ تأثيرات", "▦ أرضيات").forEachIndexed { index, title ->
-                        Button(onClick = { tab = index }, modifier = Modifier.weight(1f)) { Text(title, fontSize = 11.sp) }
+                Text("الألوان والتأثيرات والأرضيات والإطارات مرتبطة فعليًا بالساحة ثلاثية الأبعاد.", color = Color(0xFF5A7484), fontSize = 12.sp)
+                Spacer(Modifier.height(7.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    listOf("× ألوان","✨ تأثيرات","▦ أرضيات","⬡ إطارات").forEachIndexed { index,title -> Button(onClick={tab=index},modifier=Modifier.weight(1f)){Text(title,fontSize=10.sp)} }
+                }
+                Spacer(Modifier.height(7.dp))
+                Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()), verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                    when(tab) {
+                        0 -> xoColors.forEach { item -> XoShopItem(item.name,"لون × 3D",item.price,item.id in ownedColors,item.id==xoSelectedColor(context),item.color) { if(item.id !in ownedColors && !buyXoItem(context,XO_OWNED_COLORS,item.id,item.price)) return@XoShopItem; chooseXo(context,XO_X_COLOR,item.id); onChanged() } }
+                        1 -> xoEffects.forEach { item -> XoShopItem(item.name,"تأثير 3D",item.price,item.id in ownedEffects,item.id==xoSelectedEffect(context),Color(0xFF8D70FF)) { if(item.id !in ownedEffects && !buyXoItem(context,XO_OWNED_EFFECTS,item.id,item.price)) return@XoShopItem; chooseXo(context,XO_EFFECT,item.id); onChanged() } }
+                        2 -> xoFloors.forEach { item -> XoShopItem(item.name,"أرضية 3D",item.price,item.id in ownedFloors,item.id==xoSelectedFloor(context),item.top) { if(item.id !in ownedFloors && !buyXoItem(context,XO_OWNED_FLOORS,item.id,item.price)) return@XoShopItem; chooseXo(context,XO_FLOOR,item.id); onChanged() } }
+                        else -> xoFrames.forEach { item -> XoShopItem(item.name,"إطار 3D",item.price,item.id in ownedFrames,item.id==xoSelectedFrame(context),item.color) { if(item.id !in ownedFrames && !buyXoItem(context,XO_OWNED_FRAMES,item.id,item.price)) return@XoShopItem; chooseXo(context,XO_FRAME,item.id); onChanged() } }
                     }
                 }
-                Spacer(Modifier.height(8.dp))
-                Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                    when (tab) {
-                        0 -> xoColors.forEach { item ->
-                            XoShopItem(item.name, "لون ×", item.price, item.id in ownedColors, item.id == xoSelectedColor(context), item.color) {
-                                if (item.id !in ownedColors && !buyXoItem(context, XO_OWNED_COLORS, item.id, item.price)) return@XoShopItem
-                                chooseXo(context, XO_X_COLOR, item.id); onChanged()
-                            }
-                        }
-                        1 -> xoEffects.forEach { item ->
-                            XoShopItem(item.name, "تأثير بصري", item.price, item.id in ownedEffects, item.id == xoSelectedEffect(context), Color(0xFF9C6BFF)) {
-                                if (item.id !in ownedEffects && !buyXoItem(context, XO_OWNED_EFFECTS, item.id, item.price)) return@XoShopItem
-                                chooseXo(context, XO_EFFECT, item.id); onChanged()
-                            }
-                        }
-                        else -> xoFloors.forEach { item ->
-                            XoShopItem(item.name, "أرضية لوحة اللعب", item.price, item.id in ownedFloors, item.id == xoSelectedFloor(context), item.top) {
-                                if (item.id !in ownedFloors && !buyXoItem(context, XO_OWNED_FLOORS, item.id, item.price)) return@XoShopItem
-                                chooseXo(context, XO_FLOOR, item.id); onChanged()
-                            }
-                        }
-                    }
-                }
-                Text("🎒 كل العناصر المملوكة تظهر في قسم مقتنياتي.", color = Color(0xFF16806B), fontSize = 12.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                Text("🎒 العناصر المملوكة محفوظة وتُطبّق فورًا داخل اللعبة.",color=Color(0xFF16806B),fontSize=12.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center,modifier=Modifier.fillMaxWidth())
             }
         }
     }
@@ -476,23 +503,23 @@ private fun XoShopItem(name: String, kind: String, price: Int, owned: Boolean, s
 
 @Composable
 private fun XoInventory(context: Context, refreshKey: Int, onChanged: () -> Unit, onBack: () -> Unit) {
-    val ownedColors = ownedSet(context, XO_OWNED_COLORS, setOf("gold"))
-    val ownedEffects = ownedSet(context, XO_OWNED_EFFECTS, setOf("none"))
-    val ownedFloors = ownedSet(context, XO_OWNED_FLOORS, setOf("classic"))
-    Box(Modifier.fillMaxSize().background(Color(0xFF081321)), contentAlignment = Alignment.Center) {
-        Card(Modifier.fillMaxWidth().fillMaxSize(.94f), shape = RoundedCornerShape(30.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FBFF))) {
-            Column(Modifier.fillMaxSize().padding(18.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Column {
-                        Text("🎒 مقتنياتي", color = Color(0xFF102B3E), fontSize = 27.sp, fontWeight = FontWeight.Black)
-                        Text("💰 ${xoCoins(context)} عملة ذهبية", color = Color(0xFFB77900), fontWeight = FontWeight.Black)
-                    }
-                    IconButton(onClick = onBack) { Text("✕", fontSize = 24.sp) }
+    val ownedColors=ownedSet(context,XO_OWNED_COLORS,setOf("gold"))
+    val ownedEffects=ownedSet(context,XO_OWNED_EFFECTS,setOf("none"))
+    val ownedFloors=ownedSet(context,XO_OWNED_FLOORS,setOf("classic"))
+    val ownedFrames=ownedSet(context,XO_OWNED_FRAMES,setOf("steel"))
+    Box(Modifier.fillMaxSize().background(Color(0xFF06111F)),contentAlignment=Alignment.Center) {
+        Card(Modifier.fillMaxWidth(.95f).fillMaxSize(.96f),shape=RoundedCornerShape(32.dp),colors=CardDefaults.cardColors(containerColor=Color(0xFFF5FAFE))) {
+            Column(Modifier.fillMaxSize().padding(17.dp).verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(10.dp)) {
+                Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically) {
+                    Column { Text("🎒 مقتنياتي 3D",color=Color(0xFF102B3E),fontSize=28.sp,fontWeight=FontWeight.Black); Text("💰 "+xoCoins(context)+" عملة ذهبية",color=Color(0xFFB77900),fontWeight=FontWeight.Black) }
+                    IconButton(onClick=onBack){Text("✕",fontSize=24.sp)}
                 }
-                Text("ما تملكه يبقى محفوظًا، ويمكنك تبديل العنصر المطبق في أي وقت.", color = Color(0xFF5A7484), fontSize = 12.sp)
-                InventorySection("ألوان ×", ownedColors, xoColors.map { it.id to it.name }) { id -> chooseXo(context, XO_X_COLOR, id); onChanged() }
-                InventorySection("التأثيرات", ownedEffects, xoEffects.map { it.id to it.name }) { id -> chooseXo(context, XO_EFFECT, id); onChanged() }
-                InventorySection("أرضيات اللعب", ownedFloors, xoFloors.map { it.id to it.name }) { id -> chooseXo(context, XO_FLOOR, id); onChanged() }
+                Text("كل ما تملكه يبقى محفوظًا. اضغط أي عنصر لتطبيقه فورًا.",color=Color(0xFF5A7484),fontSize=12.sp)
+                InventorySection("ألوان ×",ownedColors,xoColors.map{it.id to it.name}){id->chooseXo(context,XO_X_COLOR,id);onChanged()}
+                InventorySection("التأثيرات",ownedEffects,xoEffects.map{it.id to it.name}){id->chooseXo(context,XO_EFFECT,id);onChanged()}
+                InventorySection("أرضيات 3D",ownedFloors,xoFloors.map{it.id to it.name}){id->chooseXo(context,XO_FLOOR,id);onChanged()}
+                InventorySection("إطارات 3D",ownedFrames,xoFrames.map{it.id to it.name}){id->chooseXo(context,XO_FRAME,id);onChanged()}
+                Text("المجموع: "+(ownedColors.size+ownedEffects.size+ownedFloors.size+ownedFrames.size)+" مقتنى",color=Color(0xFF16806B),fontWeight=FontWeight.Black,textAlign=TextAlign.Center,modifier=Modifier.fillMaxWidth())
             }
         }
     }
