@@ -82,6 +82,7 @@ fun BreakGamePage(onBack: () -> Unit) {
     var trapHits by remember { mutableIntStateOf(0) }
     var countdown by remember { mutableIntStateOf(3) }
     var roundId by remember { mutableIntStateOf(0) }
+    var stage by remember { mutableIntStateOf(1) }
     var showStore by remember { mutableStateOf(false) }
     var storeRefresh by remember { mutableIntStateOf(0) }
     var equippedGameItem by remember { mutableStateOf(AppSettings.equippedGameItem(context)) }
@@ -107,6 +108,7 @@ fun BreakGamePage(onBack: () -> Unit) {
         goldCollected = 0
         trapHits = 0
         countdown = 3
+        stage = 1
         roundId++
         tick++
         finished = false
@@ -130,7 +132,21 @@ fun BreakGamePage(onBack: () -> Unit) {
             tick++
             elapsedMs += 50
             spawnMs += 50
-            val difficulty = 1f + ((GAME_SECONDS - remaining).toFloat() / GAME_SECONDS) * 0.7f
+            stage = when {
+                remaining > 30 -> 1
+                remaining > 15 -> 2
+                else -> 3
+            }
+            val stageProgress = when (stage) {
+                1 -> (GAME_SECONDS - remaining) / 15f
+                2 -> (30 - remaining) / 15f
+                else -> (15 - remaining).coerceAtLeast(0) / 15f
+            }.coerceIn(0f, 1f)
+            val difficulty = when (stage) {
+                1 -> 1.0f + stageProgress * 0.10f
+                2 -> 1.18f + stageProgress * 0.18f
+                else -> 1.42f + stageProgress * 0.28f
+            }
             val speedBonus = if (equippedGameItem == "speed_badge") 1.12f else 1f
             val speed = (if (fastMode) 0.0018f else 0.0012f) * difficulty * speedBonus
             items.forEach { it.progress += speed * 50f }
@@ -171,11 +187,18 @@ fun BreakGamePage(onBack: () -> Unit) {
                 spawnCounter++
                 val lane = Random.nextInt(0, 3)
                 val type = when {
-                    spawnCounter % 8 == 0 -> GOLD_STAR
-                    spawnCounter % 3 == 0 -> BARRIER
+                    stage >= 3 && spawnCounter % 7 == 0 -> GOLD_STAR
+                    stage >= 2 && spawnCounter % 3 == 0 -> BARRIER
                     else -> STAR
                 }
                 items += BreakItem(spawnCounter, lane, type, -0.10f)
+
+                // Later stages can create a second lane target without external assets.
+                if (stage >= 2 && spawnCounter % 5 == 0) {
+                    val secondLane = (lane + if (Random.nextBoolean()) 1 else 2) % 3
+                    val secondType = if (stage >= 3 && spawnCounter % 10 == 0) GOLD_STAR else STAR
+                    items += BreakItem(spawnCounter + 100000, secondLane, secondType, -0.22f)
+                }
             }
             if (elapsedMs >= 1000L) {
                 elapsedMs -= 1000L
@@ -358,7 +381,13 @@ fun BreakGamePage(onBack: () -> Unit) {
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("مغامرة ريبو", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Black)
-                            Text(if (fastMode) "وضع الاندفاع" else "اجمع النجوم وتفادَ الفخاخ", color = Color(0xFFB9D9E7), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                            Text(
+                                if (fastMode) "وضع الاندفاع • المرحلة $stage/3"
+                                else "المرحلة $stage/3 • اجمع النجوم وتفادَ الفخاخ",
+                                color = Color(0xFFB9D9E7),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
                         Column(horizontalAlignment = Alignment.End) {
                             Text("⭐ $score", color = Color(0xFFFFD54F), fontSize = 18.sp, fontWeight = FontWeight.Black)
@@ -370,7 +399,10 @@ fun BreakGamePage(onBack: () -> Unit) {
                         Box(Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(8.dp)).background(Color.White.copy(alpha = 0.13f))) {
                             Box(Modifier.fillMaxWidth((remaining.toFloat() / GAME_SECONDS).coerceIn(0f, 1f)).fillMaxSize().background(Brush.horizontalGradient(listOf(Color(0xFF37D6C0), Color(0xFFFFD54F)))))
                         }
-                        Text("🔥 $combo", color = Color(0xFFFFD54F), fontSize = 12.sp, fontWeight = FontWeight.Black)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Text("المستوى $stage/3", color = Color(0xFF7FE6D9), fontSize = 11.sp, fontWeight = FontWeight.Black)
+                                Text("🔥 $combo", color = Color(0xFFFFD54F), fontSize = 12.sp, fontWeight = FontWeight.Black)
+                            }
                     }
                 }
             }
@@ -451,7 +483,7 @@ fun BreakGamePage(onBack: () -> Unit) {
                             Text("انتهت مغامرة ريبو", color = Color(0xFF547083), fontSize = 14.sp)
                             Text("⭐ $collected نجمة    •    النقاط $score", color = Color(0xFF163D56), fontSize = 18.sp, fontWeight = FontWeight.Black)
                             Text("تجاوزت $dodged فخًا  |  اصطدامات: $misses", color = Color(0xFF547083), fontSize = 13.sp)
-                            Text("النجوم الذهبية: $goldCollected   •   خسائر الفخاخ: $trapHits", color = Color(0xFF547083), fontSize = 12.sp)
+                            Text("المرحلة الأخيرة: $stage/3   •   النجوم الذهبية: $goldCollected   •   خسائر الفخاخ: $trapHits", color = Color(0xFF547083), fontSize = 12.sp)
                             Text("أفضل سلسلة: $bestCombo", color = Color(0xFFB77900), fontSize = 15.sp, fontWeight = FontWeight.Bold)
                             Text("مكافأتك: 💰 ${(collected / 2).coerceIn(0, 12)} نجمة للمتجر داخل اللعبة", color = Color(0xFF163D56), fontSize = 14.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                             Spacer(Modifier.height(3.dp))
