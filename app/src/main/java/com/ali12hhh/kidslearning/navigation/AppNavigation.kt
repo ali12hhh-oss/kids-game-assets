@@ -578,7 +578,7 @@ private fun RealCharacterHero(
             ModelNode(
                 modelInstance = instance,
                 autoAnimate = false,
-                scaleToUnits = 2.2f,
+                scaleToUnits = 2.05f,
                 centerOrigin = Position(x = 0f, y = 0f, z = 0f)
             ).also { it.position = Position(x = 0f, y = 0f, z = 0f) }
         }
