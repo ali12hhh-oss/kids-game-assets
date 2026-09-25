@@ -104,8 +104,8 @@ private fun SplashCharacter(modifier: Modifier) {
             ModelNode(
                 modelInstance = instance,
                 autoAnimate = false,
-                // Deliberately smaller than the home character: balanced for a splash screen.
-                scaleToUnits = 5.0f,
+                // Reduced model size while keeping the 440dp viewport unchanged.
+                scaleToUnits = 4.0f,
                 centerOrigin = Position(x = 0f, y = -0.02f, z = 0f)
             ).also {
                 it.position = Position(x = 0f, y = -0.08f, z = 0f)
