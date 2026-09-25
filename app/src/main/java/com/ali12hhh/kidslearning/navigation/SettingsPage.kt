@@ -69,17 +69,17 @@ private fun MainSettings(context: Context, onBack: () -> Unit, onOpen: (Settings
             item { Header("🔒", "الخصوصية وحماية الطفل", secondary) }
             item { CardBox(card) {
                 RowItem("🛡️", "الخصوصية", "البيانات المحلية وحماية الطفل", text) { onOpen(SettingsScreen.PRIVACY) }
-                Divider()
+                HorizontalDivider()
                 RowItem("👨‍👩‍👧", "رقابة الوالدين", "حماية الإعدادات الحساسة برمز PIN", text) { onOpen(SettingsScreen.PARENT) }
-                Divider()
+                HorizontalDivider()
                 RowItem("📊", "البيانات والتقدّم", "عرض وإدارة التقدّم المحلي", text) { onOpen(SettingsScreen.DATA) }
             } }
             item { Header("📄", "المعلومات", secondary) }
             item { CardBox(card) {
                 RowItem("📜", "شروط الاستخدام", "معلومات الاستخدام", text) { onOpen(SettingsScreen.TERMS) }
-                Divider()
+                HorizontalDivider()
                 RowItem("🔐", "سياسة الخصوصية", "معلومات الخصوصية", text) { onOpen(SettingsScreen.PRIVACY_POLICY) }
-                Divider()
+                HorizontalDivider()
                 RowItem("ℹ️", "عن التطبيق", "معلومات التطبيق", text) { onOpen(SettingsScreen.ABOUT) }
             } }
         }
