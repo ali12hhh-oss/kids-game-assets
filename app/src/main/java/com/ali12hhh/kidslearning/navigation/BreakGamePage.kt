@@ -102,6 +102,7 @@ private const val WIDE_TRAP = 4
 fun BreakGamePage(onBack: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var screen by remember { mutableStateOf(BreakGameScreen.HOME) }
+    var storeRefresh by remember { mutableIntStateOf(0) }
     when (screen) {
         BreakGameScreen.HOME -> BreakGameHome(
             context = context,
@@ -112,8 +113,8 @@ fun BreakGamePage(onBack: () -> Unit) {
         )
         BreakGameScreen.STORE -> BreakGameStore(
             context = context,
-            refreshKey = 0,
-            onPurchased = {},
+            refreshKey = storeRefresh,
+            onPurchased = { storeRefresh++ },
             onClose = { screen = BreakGameScreen.HOME }
         )
         BreakGameScreen.INVENTORY -> BreakGameInventory(
