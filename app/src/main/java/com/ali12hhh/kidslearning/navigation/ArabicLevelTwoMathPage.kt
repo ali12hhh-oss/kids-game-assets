@@ -187,7 +187,6 @@ private fun NumberWritingSection() {
                             drawPath(path, Color(0xFF315CFF), style = Stroke(width = 30f, cap = StrokeCap.Round))
                         } else if (line.points.isNotEmpty()) drawCircle(Color(0xFF315CFF), 15f, line.points.first())
                     }
-                    // The active stroke is rendered on every Canvas redraw while the finger is down.
                     activeStroke?.let { line ->
                         if (line.points.size > 1) {
                             val path = Path().apply {
@@ -195,9 +194,7 @@ private fun NumberWritingSection() {
                                 line.points.drop(1).forEach { lineTo(it.x, it.y) }
                             }
                             drawPath(path, Color(0xFF315CFF), style = Stroke(width = 30f, cap = StrokeCap.Round))
-                        } else if (line.points.isNotEmpty()) {
-                            drawCircle(Color(0xFF315CFF), 15f, line.points.first())
-                        }
+                        } else if (line.points.isNotEmpty()) drawCircle(Color(0xFF315CFF), 15f, line.points.first())
                     }
                 }
             }
@@ -316,6 +313,7 @@ private fun PlaceValueQuiz() {
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
     var ready by remember { mutableStateOf(false) }
     val quiz = placeQuizzes[index]
+
     DisposableEffect(Unit) {
         lateinit var e: TextToSpeech
         e = TextToSpeech(context) { s ->
@@ -327,71 +325,123 @@ private fun PlaceValueQuiz() {
         tts = e
         onDispose { e.stop(); e.shutdown() }
     }
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("اختبار ${index + 1} / ${placeQuizzes.size}", fontWeight = FontWeight.Bold, color = Color(0xFF65738A))
-        Text("العدد ${arDigits(quiz.number)}", fontSize = 48.sp, fontWeight = FontWeight.Black, color = mathNumberColor(index + 1))
-        Text(quiz.asked, Modifier.fillMaxWidth(), fontSize = 19.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
-        OutlinedButton(onClick = { if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak(quiz.asked, TextToSpeech.QUEUE_FLUSH, null, "question_${index}") }) { Text("🔊 صوت السؤال") }
-        quiz.options.forEach { option ->
-            val color = when {
-                selected == option && option == quiz.correct -> Color(0xFF2EAD67)
-                selected == option && option != quiz.correct -> Color(0xFFE05A5A)
-                else -> Color.White
-            }
-            ProLessonButton(onClick = {
-                if (selected == null) {
-                    selected = option
-                    if (option == quiz.correct) {
-                        AppSettings.awardCorrectAnswer(context)
-                        score++
-                        reaction = 1
-                        if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak("أحسنت! إجابة صحيحة", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
-                    } else {
-                        reaction = -1
-                        if (ready) if (AppSettings.isSpeechEnabled(context)) tts?.speak("حاول مرة أخرى", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
+
+    Box(Modifier.fillMaxSize()) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(bottom = 74.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("اختبار ${index + 1} / ${placeQuizzes.size}", fontWeight = FontWeight.Bold, color = Color(0xFF65738A))
+            Text("العدد ${arDigits(quiz.number)}", fontSize = 48.sp, fontWeight = FontWeight.Black, color = mathNumberColor(index + 1))
+            Text(
+                quiz.asked,
+                Modifier.fillMaxWidth(),
+                fontSize = 19.sp,
+                fontWeight = FontWeight.Black,
+                textAlign = TextAlign.Center
+            )
+            OutlinedButton(
+                onClick = {
+                    if (ready && AppSettings.isSpeechEnabled(context)) {
+                        tts?.speak(quiz.asked, TextToSpeech.QUEUE_FLUSH, null, "question_${index}")
                     }
-                    scope.launch {
-                        delay(900)
-                        if (index < placeQuizzes.lastIndex) {
-                            index++
-                            selected = null
-                            reaction = 0
+                }
+            ) { Text("🔊 صوت السؤال") }
+
+            quiz.options.forEach { option ->
+                val color = when {
+                    selected == option && option == quiz.correct -> Color(0xFF2EAD67)
+                    selected == option && option != quiz.correct -> Color(0xFFE05A5A)
+                    else -> Color.White
+                }
+                ProLessonButton(
+                    onClick = {
+                        if (selected == null) {
+                            selected = option
+                            if (option == quiz.correct) {
+                                AppSettings.awardCorrectAnswer(context)
+                                score++
+                                reaction = 1
+                                if (ready && AppSettings.isSpeechEnabled(context)) {
+                                    tts?.speak("أحسنت! إجابة صحيحة", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
+                                }
+                            } else {
+                                reaction = -1
+                                if (ready && AppSettings.isSpeechEnabled(context)) {
+                                    tts?.speak("حاول مرة أخرى", TextToSpeech.QUEUE_FLUSH, null, "answer_${index}")
+                                }
+                            }
+                            scope.launch {
+                                delay(900)
+                                if (index < placeQuizzes.lastIndex) {
+                                    index++
+                                    selected = null
+                                    reaction = 0
+                                }
+                            }
                         }
+                    },
+                    Modifier.fillMaxWidth().height(48.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = color,
+                        contentColor = if (selected != null) Color.White else Color(0xFF24324A)
+                    )
+                ) {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(arDigits(option), fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
                     }
                 }
-            }, Modifier.fillMaxWidth().height(48.dp), colors = ButtonDefaults.buttonColors(containerColor = color, contentColor = if (selected != null) Color.White else Color(0xFF24324A))) {
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text(arDigits(option), fontSize = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
-                }
             }
+
+            Spacer(Modifier.height(3.dp))
+            CharacterReaction(reaction)
+            Spacer(Modifier.height(2.dp))
+            Text("النتيجة: " + arDigits(score), fontWeight = FontWeight.ExtraBold, color = Color(0xFF315CFF))
         }
-        Spacer(Modifier.height(3.dp))
-        CharacterReaction(reaction)
-        Spacer(Modifier.height(2.dp))
-        Text("النتيجة: " + arDigits(score), fontWeight = FontWeight.ExtraBold, color = Color(0xFF315CFF))
-        Spacer(Modifier.height(2.dp))
+
+        // أزرار تنقّل جديدة تماماً: ثابتة داخل مساحة الاختبار، مرتفعة عن أسفل الشاشة ولا تعتمد على ارتفاع المحتوى.
         Row(
-            Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 28.dp).height(52.dp),
+            Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(start = 4.dp, end = 4.dp, bottom = 10.dp)
+                .height(54.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             ProLessonButton(
-                onClick = { if (index > 0) { index--; selected = null; reaction = 0 } },
-                modifier = Modifier.weight(1f).height(52.dp),
+                onClick = {
+                    if (index > 0) {
+                        index--
+                        selected = null
+                        reaction = 0
+                    }
+                },
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (index > 0) Color(0xFF5B6B88) else Color(0xFFD9DFEA),
                     contentColor = if (index > 0) Color.White else Color(0xFF8A94A6)
                 ),
                 shape = RoundedCornerShape(16.dp)
-            ) { Text("‹  السابق", fontWeight = FontWeight.ExtraBold) }
+            ) { Text("‹  السابق", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp) }
+
             ProLessonButton(
-                onClick = { if (index < placeQuizzes.lastIndex) { index++; selected = null; reaction = 0 } },
-                modifier = Modifier.weight(1f).height(52.dp),
+                onClick = {
+                    if (index < placeQuizzes.lastIndex) {
+                        index++
+                        selected = null
+                        reaction = 0
+                    }
+                },
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (index < placeQuizzes.lastIndex) Color(0xFF315CFF) else Color(0xFFD9DFEA),
                     contentColor = if (index < placeQuizzes.lastIndex) Color.White else Color(0xFF8A94A6)
                 ),
                 shape = RoundedCornerShape(16.dp)
-            ) { Text("التالي  ›", fontWeight = FontWeight.ExtraBold) }
+            ) { Text("التالي  ›", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp) }
         }
     }
 }
@@ -441,5 +491,6 @@ private fun CharacterReaction(reaction: Int) {
                 isOpaque = false,
                 childNodes = listOfNotNull(node)
             )
-        }    }
+        }
+    }
 }
