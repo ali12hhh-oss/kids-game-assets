@@ -3,6 +3,7 @@ package com.ali12hhh.kidslearning.navigation
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import java.util.Locale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -119,7 +120,7 @@ private fun MainSettings(context: Context, onBack: () -> Unit, onOpen: (Settings
 @Composable private fun SpeechSettings(context: Context, onBack: () -> Unit) {
     var rate by remember { mutableFloatStateOf(AppSettings.speechRate(context)) }
     DetailScaffold("🎙️ إعدادات النطق", onBack) {
-        Text("سرعة النطق: " + String.format("%.2f", rate), fontWeight = FontWeight.Bold)
+        Text("سرعة النطق: " + String.format(Locale.ROOT, "%.2f", rate), fontWeight = FontWeight.Bold)
         Slider(rate, { rate = it }, valueRange = .5f..1.5f)
         Text("يُحفظ هذا الإعداد ويُستخدم في التحية الصوتية القادمة.", color = Color(0xFF68788F))
         Button({ AppSettings.setSpeechRate(context, rate) }, Modifier.fillMaxWidth()) { Text("حفظ سرعة النطق") }
@@ -168,7 +169,7 @@ private fun MainSettings(context: Context, onBack: () -> Unit, onOpen: (Settings
 private fun PrivacyPolicyPage(onBack: () -> Unit) {
     val context = LocalContext.current
     DetailScaffold("🔐 سياسة الخصوصية", onBack) {
-        Text("تطبيق تعلم مع ريبو يحفظ اسم الطفل وصورته وإعدادات التطبيق والتقدّم والنجوم والمقتنيات محليًا على الجهاز فقط. لا توجد حاليًا إعلانات أو حسابات أو خوادم أو تحليلات أو مشاركة لهذه البيانات مع أطراف أخرى.", fontSize = 16.sp, lineHeight = 25.sp)
+        Text("تطبيق تعلم مع ريبو يحفظ اسم الطفل وصورته وإعدادات التطبيق والتقدّم والنجوم والمقتنيات محليًا على الجهاز. قد تتضمن النسخة المنشورة إعلانات عبر مزود إعلانات متوافق مع متطلبات Google Play لتطبيقات الأطفال؛ ولا تُستخدم بيانات ملف الطفل المحلية لتخصيص الإعلانات أو إعادة الاستهداف.", fontSize = 16.sp, lineHeight = 25.sp)
         Text("الصورة يختارها ولي الأمر من منتقي الملفات في النظام، ولا يرسلها التطبيق إلى الإنترنت. النطق الصوتي يستخدم محرك تحويل النص إلى كلام الموجود على الجهاز.", fontSize = 16.sp, lineHeight = 25.sp)
         Text("يمكن لولي الأمر حذف بيانات التطبيق من صفحة البيانات والتقدّم أو من إعدادات Android. لا يحتفظ التطبيق بحسابات مستخدمين.", fontSize = 16.sp, lineHeight = 25.sp)
         Text("المطور: Ali12hhh-oss. للتواصل وطلبات الخصوصية: مستودع المشروع العام على GitHub.", fontSize = 16.sp, lineHeight = 25.sp)
