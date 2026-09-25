@@ -1,5 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
+import android.annotation.SuppressLint
+
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -71,6 +73,7 @@ private fun equippedGameTitle(context: android.content.Context): String? =
     context.getSharedPreferences("kids_learning_settings", android.content.Context.MODE_PRIVATE)
         .getString(BREAK_TITLE_EQUIPPED, null)
 
+@SuppressLint("UseKtx")
 private fun buyGameTitle(context: android.content.Context, titleId: String, price: Int): Boolean {
     val prefs = context.getSharedPreferences("kids_learning_settings", android.content.Context.MODE_PRIVATE)
     val owned = gameOwnedTitles(context)
