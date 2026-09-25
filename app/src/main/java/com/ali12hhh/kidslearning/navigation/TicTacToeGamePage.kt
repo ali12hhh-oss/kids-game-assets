@@ -299,7 +299,7 @@ private fun XoGame(
                         Text("تحدي ريبو", color = Color.White.copy(alpha = .78f), fontSize = 12.sp)
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("💰 @@{xoCoins(context)}", color = Color(0xFFFFD54F), fontSize = 16.sp, fontWeight = FontWeight.Black)
+                        Text("💰 ${xoCoins(context)}", color = Color(0xFFFFD54F), fontSize = 16.sp, fontWeight = FontWeight.Black)
                         Text("ذهب XO", color = Color.White.copy(alpha = .7f), fontSize = 9.sp)
                     }
                 }
@@ -418,7 +418,7 @@ private fun XoShop(context: Context, refreshKey: Int, onChanged: () -> Unit, onB
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column {
                         Text("متجر XO", color = Color(0xFF102B3E), fontSize = 27.sp, fontWeight = FontWeight.Black)
-                        Text("💰 @@{coins} عملة ذهبية", color = Color(0xFFB77900), fontSize = 14.sp, fontWeight = FontWeight.Black)
+                        Text("💰 ${coins} عملة ذهبية", color = Color(0xFFB77900), fontSize = 14.sp, fontWeight = FontWeight.Black)
                     }
                     IconButton(onClick = onBack) { Text("✕", fontSize = 24.sp, color = Color(0xFF17384D)) }
                 }
@@ -485,7 +485,7 @@ private fun XoInventory(context: Context, refreshKey: Int, onChanged: () -> Unit
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column {
                         Text("🎒 مقتنياتي", color = Color(0xFF102B3E), fontSize = 27.sp, fontWeight = FontWeight.Black)
-                        Text("💰 @@{xoCoins(context)} عملة ذهبية", color = Color(0xFFB77900), fontWeight = FontWeight.Black)
+                        Text("💰 ${xoCoins(context)} عملة ذهبية", color = Color(0xFFB77900), fontWeight = FontWeight.Black)
                     }
                     IconButton(onClick = onBack) { Text("✕", fontSize = 24.sp) }
                 }
