@@ -2,6 +2,7 @@ package com.ali12hhh.kidslearning.navigation
 
 import android.content.Context
 import androidx.compose.animation.core.Animatable
+import androidx.core.content.edit
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -107,14 +108,14 @@ private fun xoCoins(context: Context) = xoPrefs(context).getInt(XO_COINS, 0)
 
 private fun addXoCoins(context: Context, amount: Int) {
     val prefs = xoPrefs(context)
-    prefs.edit().putInt(XO_COINS, max(0, prefs.getInt(XO_COINS, 0) + amount)).apply()
+    prefs.edit { putInt(XO_COINS, max(0, prefs.getInt(XO_COINS, 0) + amount)) }
 }
 
 private fun spendXoCoins(context: Context, price: Int): Boolean {
     val prefs = xoPrefs(context)
     val coins = prefs.getInt(XO_COINS, 0)
     if (coins < price) return false
-    prefs.edit().putInt(XO_COINS, coins - price).apply()
+    prefs.edit { putInt(XO_COINS, coins - price) }
     return true
 }
 
@@ -122,17 +123,17 @@ private fun buyXoItem(context: Context, key: String, id: String, price: Int): Bo
     val owned = ownedSet(context, key, emptySet())
     if (id in owned) return true
     if (price > 0 && !spendXoCoins(context, price)) return false
-    xoPrefs(context).edit().putStringSet(key, owned + id).apply()
+    xoPrefs(context).edit { putStringSet(key, owned + id) }
     return true
 }
 
 private fun initialXoInventory(context: Context) {
     val prefs = xoPrefs(context)
-    prefs.edit()
-        .putStringSet(XO_OWNED_COLORS, ownedSet(context, XO_OWNED_COLORS, emptySet()) + "gold")
-        .putStringSet(XO_OWNED_EFFECTS, ownedSet(context, XO_OWNED_EFFECTS, emptySet()) + "none")
-        .putStringSet(XO_OWNED_FLOORS, ownedSet(context, XO_OWNED_FLOORS, emptySet()) + "classic")
-        .apply()
+    prefs.edit {
+        putStringSet(XO_OWNED_COLORS, ownedSet(context, XO_OWNED_COLORS, emptySet()) + "gold")
+        putStringSet(XO_OWNED_EFFECTS, ownedSet(context, XO_OWNED_EFFECTS, emptySet()) + "none")
+        putStringSet(XO_OWNED_FLOORS, ownedSet(context, XO_OWNED_FLOORS, emptySet()) + "classic")
+    }
 }
 
 private fun xoSelectedColor(context: Context) = xoPrefs(context).getString(XO_X_COLOR, "gold") ?: "gold"
@@ -140,7 +141,7 @@ private fun xoSelectedEffect(context: Context) = xoPrefs(context).getString(XO_E
 private fun xoSelectedFloor(context: Context) = xoPrefs(context).getString(XO_FLOOR, "classic") ?: "classic"
 
 private fun chooseXo(context: Context, key: String, id: String) {
-    xoPrefs(context).edit().putString(key, id).apply()
+    xoPrefs(context).edit { putString(key, id) }
 }
 
 private val winningLines = listOf(
@@ -239,16 +240,16 @@ private fun XoGame(
             val p = xoPrefs(context)
             if (win == 'X') {
                 addXoCoins(context, 10)
-                p.edit().putInt(XO_WINS, p.getInt(XO_WINS, 0) + 1).apply()
+                p.edit { putInt(XO_WINS, p.getInt(XO_WINS, 0) + 1) }
             } else {
-                p.edit().putInt(XO_LOSSES, p.getInt(XO_LOSSES, 0) + 1).apply()
+                p.edit { putInt(XO_LOSSES, p.getInt(XO_LOSSES, 0) + 1) }
             }
             return true
         }
         if (boardFull(next)) {
             result = 'D'
             val p = xoPrefs(context)
-            p.edit().putInt(XO_DRAWS, p.getInt(XO_DRAWS, 0) + 1).apply()
+            p.edit { putInt(XO_DRAWS, p.getInt(XO_DRAWS, 0) + 1) }
             return true
         }
         return false
