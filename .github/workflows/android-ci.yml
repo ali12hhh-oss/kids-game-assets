@@ -78,8 +78,14 @@ jobs:
       - name: Check Gradle configuration
         run: gradle tasks --no-daemon
 
+      - name: Run Android lint with warnings treated as errors
+        run: gradle :app:lintDebug --no-daemon
+
       - name: Assemble debug APK
         run: gradle :app:assembleDebug --no-daemon
+
+      - name: Assemble release AAB
+        run: gradle :app:bundleRelease --no-daemon
 
       - name: Run unit tests
         run: gradle :app:testDebugUnitTest --no-daemon
