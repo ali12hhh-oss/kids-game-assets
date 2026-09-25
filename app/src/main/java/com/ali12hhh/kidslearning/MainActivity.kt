@@ -7,6 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.ali12hhh.kidslearning.navigation.AppNavigation
 import com.ali12hhh.kidslearning.navigation.AppSettings
@@ -16,9 +18,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         AppSettings.awardSessionStars(this, UUID.randomUUID().toString())
         setContent {
+            val showSplash = remember { mutableStateOf(true) }
+
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    AppNavigation()
+                    if (showSplash.value) {
+                        ReboSplashScreen(
+                            onFinished = { showSplash.value = false }
+                        )
+                    } else {
+                        AppNavigation()
+                    }
                 }
             }
         }
