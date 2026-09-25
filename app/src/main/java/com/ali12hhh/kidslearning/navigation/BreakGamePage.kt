@@ -95,10 +95,12 @@ fun BreakGamePage(onBack: () -> Unit) {
     var feedbackKind by remember { mutableIntStateOf(0) }
     var storeRefresh by remember { mutableIntStateOf(0) }
     var equippedGameItem by remember { mutableStateOf(AppSettings.equippedGameItem(context)) }
+    var equippedGameOutfit by remember { mutableStateOf(AppSettings.equippedGameOutfit(context)) }
     val items = remember { mutableStateListOf<BreakItem>() }
 
     fun refreshEquippedItem() {
         equippedGameItem = AppSettings.equippedGameItem(context)
+        equippedGameOutfit = AppSettings.equippedGameOutfit(context)
     }
 
     fun resetGame() {
@@ -277,7 +279,15 @@ fun BreakGamePage(onBack: () -> Unit) {
 
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
-    val model = remember { runCatching { modelLoader.createModelInstance("Mannequin_Medium_Anim.glb") }.getOrNull() }
+    val characterAsset = when (equippedGameOutfit) {
+        "knight_outfit" -> "characters/KayKit/Outfits/Knight.glb"
+        "rogue_outfit" -> "characters/KayKit/Outfits/Rogue.glb"
+        "mage_outfit" -> "characters/KayKit/Outfits/Mage.glb"
+        else -> "Mannequin_Medium_Anim.glb"
+    }
+    val model = remember(characterAsset) {
+        runCatching { modelLoader.createModelInstance(characterAsset) }.getOrNull()
+    }
     val cameraNode = rememberCameraNode(engine) {
         position = Position(x = 0f, y = 0.35f, z = 6.5f)
     }
@@ -637,64 +647,56 @@ private fun BreakGameStore(
     onPurchased: () -> Unit,
     onClose: () -> Unit
 ) {
-    val items = listOf(
-        "speed_badge" to ("شارة الاندفاع" to 12),
-        "jump_badge" to ("شارة القفز" to 10),
-        "gold_badge" to ("شارة النجم الذهبي" to 18)
+    val upgrades = listOf(
+        "speed_badge" to ("شارة الاندفاع" to 200),
+        "jump_badge" to ("شارة القفز" to 300),
+        "gold_badge" to ("شارة النجم الذهبي" to 400)
+    )
+    val outfits = listOf(
+        "knight_outfit" to ("زي الفارس" to 500),
+        "rogue_outfit" to ("زي المغامر" to 600),
+        "mage_outfit" to ("زي الساحر" to 700)
     )
     var owned by remember(refreshKey) { mutableStateOf(AppSettings.gameOwnedItems(context)) }
+    var ownedOutfits by remember(refreshKey) { mutableStateOf(AppSettings.gameOwnedOutfits(context)) }
+    val equippedOutfit = AppSettings.equippedGameOutfit(context)
+
+    fun refreshOwnership() {
+        owned = AppSettings.gameOwnedItems(context)
+        ownedOutfits = AppSettings.gameOwnedOutfits(context)
+    }
+
     Box(Modifier.fillMaxSize().background(Color(0xD9000810)), contentAlignment = Alignment.Center) {
-        Card(
-            Modifier.fillMaxWidth(0.92f).padding(8.dp),
-            shape = RoundedCornerShape(30.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FBFF))
-        ) {
+        Card(Modifier.fillMaxWidth(0.94f).padding(8.dp), shape = RoundedCornerShape(30.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FBFF))) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column {
                         Text("متجر مغامرة ريبو", color = Color(0xFF102B3E), fontSize = 23.sp, fontWeight = FontWeight.Black)
-                        Text("💰 ${AppSettings.gameStars(context)} نجمة خاصة باللعبة", color = Color(0xFFB77900), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        Text("💰 ${AppSettings.gameStars(context)} عملة اللعبة", color = Color(0xFFB77900), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                     IconButton(onClick = onClose) { Text("✕", fontSize = 22.sp) }
                 }
-                Text("هذه النجوم منفصلة تمامًا عن نجوم التطبيق التعليمية.", color = Color(0xFF547083), fontSize = 12.sp)
-                items.forEach { (id, data) ->
+                Text("العملات هنا منفصلة تمامًا عن نجوم التعليم. الشراء يجعل العنصر ملكك ويبقى في مقتنياتك.", color = Color(0xFF547083), fontSize = 12.sp)
+                Text("الترقيات", color = Color(0xFF17384D), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                upgrades.forEach { (id, data) ->
                     val (name, price) = data
                     val isOwned = id in owned
-                    Card(
-                        Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(18.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF3F7))
-                    ) {
-                        Row(
-                            Modifier.fillMaxWidth().padding(12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF3F7))) {
+                        Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
                                 Text(name, color = Color(0xFF17384D), fontSize = 16.sp, fontWeight = FontWeight.Black)
-                                Text(
-                                    when (id) {
-                                        "speed_badge" -> "يزيد سرعة الحركة وتواتر ظهور العناصر"
-                                        "jump_badge" -> "قفزة أعلى وعودة أسرع من القفز"
-                                        "gold_badge" -> "يرفع مكافأة نجوم المتجر عند نهاية الجولة"
-                                        else -> "ترقية خاصة باللعبة"
-                                    },
-                                    color = Color(0xFF5A7484),
-                                    fontSize = 11.sp
-                                )
+                                Text(when (id) {
+                                    "speed_badge" -> "يزيد سرعة الحركة وتواتر ظهور العناصر"
+                                    "jump_badge" -> "قفزة أعلى وعودة أسرع من القفز"
+                                    "gold_badge" -> "يرفع مكافأة الجولة"
+                                    else -> "ترقية خاصة باللعبة"
+                                }, color = Color(0xFF5A7484), fontSize = 11.sp)
                             }
                             Button(onClick = {
                                 if (!isOwned && AppSettings.buyGameItem(context, id, price)) {
-                                    owned = AppSettings.gameOwnedItems(context)
-                                    onPurchased()
+                                    refreshOwnership(); onPurchased()
                                 } else if (isOwned) {
-                                    AppSettings.equipGameItem(context, id)
-                                    onPurchased()
+                                    AppSettings.equipGameItem(context, id); onPurchased()
                                 }
                             }) {
                                 Text(if (isOwned && AppSettings.equippedGameItem(context) == id) "مجهّز" else if (isOwned) "تجهيز" else "$price 💰")
@@ -702,18 +704,33 @@ private fun BreakGameStore(
                         }
                     }
                 }
-                Text(
-                    "الترقيات الحالية تعمل داخل اللعب مباشرة، وسنضيف الملابس عندما تتوفر أصول مرخّصة مناسبة.",
-                    color = Color(0xFF547083),
-                    fontSize = 11.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Text("الأزياء", color = Color(0xFF17384D), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                outfits.forEach { (id, data) ->
+                    val (name, price) = data
+                    val isOwned = id in ownedOutfits
+                    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF3F7))) {
+                        Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(name, color = Color(0xFF17384D), fontSize = 16.sp, fontWeight = FontWeight.Black)
+                                Text("زي KayKit ثلاثي الأبعاد — الشراء يجهزه مباشرة، والزي السابق يبقى في مقتنياتك.", color = Color(0xFF5A7484), fontSize = 11.sp)
+                            }
+                            Button(onClick = {
+                                if (!isOwned) {
+                                    if (AppSettings.buyGameOutfit(context, id, price)) { refreshOwnership(); onPurchased() }
+                                } else {
+                                    AppSettings.equipGameOutfit(context, id); onPurchased()
+                                }
+                            }) {
+                                Text(if (isOwned && equippedOutfit == id) "مجهّز" else if (isOwned) "ارتداء" else "$price 💰")
+                            }
+                        }
+                    }
+                }
+                Text("مقتنياتي: ${ownedOutfits.size} أزياء محفوظة • عند ارتداء زي آخر لا يُحذف الزي السابق.", color = Color(0xFF16806B), fontSize = 12.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             }
         }
     }
 }
-
 @Composable
 private fun LaneJoystick(lane: Int, onLaneChange: (Int) -> Unit) {
     var dragStartX by remember { mutableStateOf<Float?>(null) }
