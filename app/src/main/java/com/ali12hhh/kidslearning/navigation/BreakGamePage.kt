@@ -120,6 +120,7 @@ fun BreakGamePage(onBack: () -> Unit) {
             onStart = { refreshGameBalance(); screen = BreakGameScreen.GAME },
             onStore = { refreshGameBalance(); screen = BreakGameScreen.STORE },
             onInventory = { refreshGameBalance(); screen = BreakGameScreen.INVENTORY },
+            onOpenXo = { screen = BreakGameScreen.XO },
             onBack = onBack
         )
         BreakGameScreen.STORE -> BreakGameStore(
@@ -134,10 +135,11 @@ fun BreakGamePage(onBack: () -> Unit) {
             onClose = { screen = BreakGameScreen.HOME }
         )
         BreakGameScreen.GAME -> BreakGamePlayPage(onBack = { refreshGameBalance(); screen = BreakGameScreen.HOME })
+        BreakGameScreen.XO -> TicTacToeGamePage(onBack = { screen = BreakGameScreen.HOME })
     }
 }
 
-private enum class BreakGameScreen { HOME, GAME, STORE, INVENTORY }
+private enum class BreakGameScreen { HOME, GAME, STORE, INVENTORY, XO }
 
 @Composable
 private fun BreakGameHome(
@@ -146,6 +148,7 @@ private fun BreakGameHome(
     onStart: () -> Unit,
     onStore: () -> Unit,
     onInventory: () -> Unit,
+    onOpenXo: () -> Unit,
     onBack: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF071421)) {
@@ -166,6 +169,7 @@ private fun BreakGameHome(
                     Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text("💰 $gameBalance عملة المغامرة", color = Color(0xFFFFD54F), fontSize = 17.sp, fontWeight = FontWeight.Black)
                         Button(onClick = onStart, modifier = Modifier.fillMaxWidth()) { Text("▶ ابدأ المغامرة", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
+                        OutlinedButton(onClick = { onOpenXo() }, modifier = Modifier.fillMaxWidth()) { Text("×O  تحدي XO", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
                         OutlinedButton(onClick = onStore, modifier = Modifier.fillMaxWidth()) { Text("🛍 المتجر", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
                         OutlinedButton(onClick = onInventory, modifier = Modifier.fillMaxWidth()) { Text("🎒 مقتنياتي", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
                         OutlinedButton(onClick = onBack) { Text("خروج") }
