@@ -12,8 +12,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -85,7 +85,7 @@ fun EnglishLevelThreePage(onBack: () -> Unit, initialSection: Int = 0) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
                 Column(Modifier.weight(1f)) {
                     Text("English — Level 3", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
@@ -95,7 +95,7 @@ fun EnglishLevelThreePage(onBack: () -> Unit, initialSection: Int = 0) {
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).background(Color(0xFFEAF3FF))) {
-            TabRow(selectedTabIndex = section, containerColor = Color.White) {
+            PrimaryTabRow(selectedTabIndex = section, containerColor = Color.White) {
                 Tab(section == 0, { section = 0 }) { Text("🎨 Colors", Modifier.padding(12.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold) }
                 Tab(section == 1, { section = 1 }) { Text("🔷 Shapes", Modifier.padding(12.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold) }
                 Tab(section == 2, { section = 2 }) { Text("📚 Words", Modifier.padding(12.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold) }
