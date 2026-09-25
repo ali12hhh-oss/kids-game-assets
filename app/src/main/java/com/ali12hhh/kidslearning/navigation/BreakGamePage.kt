@@ -95,7 +95,7 @@ private fun equipGameTitle(context: android.content.Context, titleId: String) {
     }
 }
 
-private const val GAME_SECONDS = 45
+private const val GAME_SECONDS = 60
 private const val STAR = 0
 private const val BARRIER = 1
 private const val GOLD_STAR = 2
@@ -486,7 +486,7 @@ private fun BreakGamePlayPage(onBack: () -> Unit) {
         equipmentAsset?.let { runCatching { modelLoader.createModelInstance(it) }.getOrNull() }
     }
     val cameraNode = rememberCameraNode(engine) {
-        position = Position(x = 0f, y = 0.35f, z = 8.0f)
+        position = Position(x = 0f, y = 0.45f, z = 10.5f)
     }
     val characterNode = remember(model) {
         model?.let { instance ->
