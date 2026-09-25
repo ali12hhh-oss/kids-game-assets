@@ -168,16 +168,43 @@ private fun BreakGameHome(
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color(0xE610211E))) {
                     Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text("💰 $gameBalance عملة المغامرة", color = Color(0xFFFFD54F), fontSize = 17.sp, fontWeight = FontWeight.Black)
-                        Button(onClick = onStart, modifier = Modifier.fillMaxWidth()) { Text("▶ ابدأ المغامرة", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
-                        OutlinedButton(onClick = { onOpenXo() }, modifier = Modifier.fillMaxWidth()) { Text("×O  تحدي XO", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
-                        OutlinedButton(onClick = onStore, modifier = Modifier.fillMaxWidth()) { Text("🛍 المتجر", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
-                        OutlinedButton(onClick = onInventory, modifier = Modifier.fillMaxWidth()) { Text("🎒 مقتنياتي", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
-                        OutlinedButton(onClick = onBack) { Text("خروج") }
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            BreakMenuCard(Modifier.weight(1f), "⚔️", "مغامرات ريبو", Color(0xFFE85D3F), onStart)
+                            BreakMenuCard(Modifier.weight(1f), "🛍️", "متجر المغامرة", Color(0xFFFFA000), onStore)
+                        }
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            BreakMenuCard(Modifier.weight(1f), "×O", "لعبة XO", Color(0xFF36A9E1), onOpenXo)
+                            BreakMenuCard(Modifier.weight(1f), "🎨", "متجر XO", Color(0xFF8E5DE7), onOpenXo)
+                        }
+                        BreakMenuWideButton("🎒", "مقتنياتي", Color(0xFF20A77A), onInventory)
+                        BreakMenuWideButton("↩", "خروج", Color(0xFF607D8B), onBack)
                     }
                 }
                 Text("العملات والمقتنيات هنا خاصة بمغامرة ريبو ولا تدخل في رصيد نجوم التعليم.", color = Color.White.copy(alpha = 0.8f), fontSize = 11.sp, textAlign = TextAlign.Center)
             }
         }
+    }
+}
+
+@Composable
+private fun BreakMenuCard(modifier: Modifier, icon: String, title: String, color: Color, onClick: () -> Unit) {
+    Card(onClick = onClick, modifier = modifier.height(108.dp), shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = color, contentColor = Color.White)) {
+        Column(Modifier.fillMaxSize().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {
+            Text(icon, fontSize = 30.sp, fontWeight = FontWeight.Black)
+            Spacer(Modifier.height(4.dp))
+            Text(title, fontSize = 13.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center)
+        }
+    }
+}
+
+@Composable
+private fun BreakMenuWideButton(icon: String, title: String, color: Color, onClick: () -> Unit) {
+    Button(onClick = onClick, modifier = Modifier.fillMaxWidth().height(52.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = color, contentColor = Color.White)) {
+        Text("$icon  $title", fontSize = 15.sp, fontWeight = FontWeight.Black)
     }
 }
 
