@@ -101,6 +101,109 @@ private const val WIDE_TRAP = 4
 @Composable
 fun BreakGamePage(onBack: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
+    var screen by remember { mutableStateOf(BreakGameScreen.HOME) }
+    when (screen) {
+        BreakGameScreen.HOME -> BreakGameHome(
+            context = context,
+            onStart = { screen = BreakGameScreen.GAME },
+            onStore = { screen = BreakGameScreen.STORE },
+            onInventory = { screen = BreakGameScreen.INVENTORY },
+            onBack = onBack
+        )
+        BreakGameScreen.STORE -> BreakGameStore(
+            context = context,
+            refreshKey = 0,
+            onPurchased = {},
+            onClose = { screen = BreakGameScreen.HOME }
+        )
+        BreakGameScreen.INVENTORY -> BreakGameInventory(
+            context = context,
+            onClose = { screen = BreakGameScreen.HOME }
+        )
+        BreakGameScreen.GAME -> BreakGamePlayPage(onBack = { screen = BreakGameScreen.HOME })
+    }
+}
+
+private enum class BreakGameScreen { HOME, GAME, STORE, INVENTORY }
+
+@Composable
+private fun BreakGameHome(
+    context: android.content.Context,
+    onStart: () -> Unit,
+    onStore: () -> Unit,
+    onInventory: () -> Unit,
+    onBack: () -> Unit
+) {
+    Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF071421)) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(
+                Brush.verticalGradient(listOf(Color(0xFF06111F), Color(0xFF102D43), Color(0xFF17606A), Color(0xFFB7D78D))
+            ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(0.9f).padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text("مغامرة ريبو", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black)
+                Text("استراحة ممتعة! اختر ما تريد قبل أن تبدأ.", color = Color(0xFFD7F2F0), fontSize = 15.sp, textAlign = TextAlign.Center)
+                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color(0xE610211E))) {
+                    Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text("💰 ${AppSettings.gameStars(context)} عملة المغامرة", color = Color(0xFFFFD54F), fontSize = 17.sp, fontWeight = FontWeight.Black)
+                        Button(onClick = onStart, modifier = Modifier.fillMaxWidth()) { Text("▶ ابدأ المغامرة", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
+                        OutlinedButton(onClick = onStore, modifier = Modifier.fillMaxWidth()) { Text("🛍 المتجر", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
+                        OutlinedButton(onClick = onInventory, modifier = Modifier.fillMaxWidth()) { Text("🎒 مقتنياتي", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
+                        OutlinedButton(onClick = onBack) { Text("خروج") }
+                    }
+                }
+                Text("العملات والمقتنيات هنا خاصة بمغامرة ريبو ولا تدخل في رصيد نجوم التعليم.", color = Color.White.copy(alpha = 0.8f), fontSize = 11.sp, textAlign = TextAlign.Center)
+            }
+        }
+    }
+}
+
+@Composable
+private fun BreakGameInventory(context: android.content.Context, onClose: () -> Unit) {
+    val ownedItems = AppSettings.gameOwnedItems(context)
+    val ownedOutfits = AppSettings.gameOwnedOutfits(context)
+    val ownedEquipment = AppSettings.gameOwnedEquipment(context)
+    val ownedTitles = gameOwnedTitles(context)
+    val equippedItem = AppSettings.equippedGameItem(context)
+    val equippedOutfit = AppSettings.equippedGameOutfit(context)
+    val equippedEquipment = AppSettings.equippedGameEquipment(context)
+    val equippedTitle = equippedGameTitle(context)
+    val itemNames = mapOf("speed_badge" to "شارة الاندفاع", "jump_badge" to "شارة القفز", "gold_badge" to "شارة النجم الذهبي")
+    val outfitNames = mapOf("knight_outfit" to "زي الفارس", "rogue_outfit" to "زي المغامر", "mage_outfit" to "زي الساحر")
+    val equipmentNames = mapOf("sword_1handed" to "سيف خفيف", "sword_2handed" to "سيف ثقيل", "axe_1handed" to "فأس قتالي", "dagger" to "خنجر", "shield_round" to "درع دائري", "shield_spikes" to "درع الأشواك")
+    val titleNames = mapOf("title_reebo_star" to "نجم ريبو", "title_brave_hero" to "البطل الشجاع", "title_smart_explorer" to "المستكشف الذكي", "title_dodge_master" to "سيد المراوغة", "title_speed_champion" to "بطل السرعة", "title_reebo_friend" to "صديق ريبو", "title_challenge_hero" to "بطل التحدي", "title_shining_star" to "النجم اللامع", "title_trap_breaker" to "قاهر الفخاخ", "title_adventure_legend" to "أسطورة المغامرة")
+    Box(Modifier.fillMaxSize().background(Color(0xFFF3F8FB)), contentAlignment = Alignment.Center) {
+        Card(Modifier.fillMaxWidth(0.94f).fillMaxSize(0.9f), shape = RoundedCornerShape(30.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+            Column(Modifier.padding(20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text("🎒 مقتنياتي", color = Color(0xFF102B3E), fontSize = 25.sp, fontWeight = FontWeight.Black)
+                    IconButton(onClick = onClose) { Text("✕", fontSize = 22.sp) }
+                }
+                Text("💰 ${AppSettings.gameStars(context)} عملة المغامرة", color = Color(0xFFB77900), fontWeight = FontWeight.Bold)
+                Text("الترقيات: ${ownedItems.size}", fontWeight = FontWeight.Black, color = Color(0xFF17384D))
+                ownedItems.forEach { id -> Text("• ${itemNames[id] ?: id}${if (id == equippedItem) "  ✓ مجهّز" else ""}") }
+                Text("الأزياء: ${ownedOutfits.size}", fontWeight = FontWeight.Black, color = Color(0xFF17384D))
+                ownedOutfits.forEach { id -> Text("• ${outfitNames[id] ?: id}${if (id == equippedOutfit) "  ✓ مجهّز" else ""}") }
+                Text("الأسلحة والدروع: ${ownedEquipment.size}", fontWeight = FontWeight.Black, color = Color(0xFF17384D))
+                ownedEquipment.forEach { id -> Text("• ${equipmentNames[id] ?: id}${if (id == equippedEquipment) "  ✓ مجهّز" else ""}") }
+                Text("الألقاب: ${ownedTitles.size}", fontWeight = FontWeight.Black, color = Color(0xFF17384D))
+                ownedTitles.forEach { id -> Text("• ${titleNames[id] ?: id}${if (id == equippedTitle) "  ✓ مجهّز" else ""}") }
+                if (ownedItems.isEmpty() && ownedOutfits.isEmpty() && ownedEquipment.isEmpty() && ownedTitles.isEmpty()) {
+                    Text("لا توجد مقتنيات بعد. افتح المتجر واشترِ أول عنصر لك!", color = Color(0xFF547083), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BreakGamePlayPage(onBack: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     var running by remember { mutableStateOf(true) }
     var finished by remember { mutableStateOf(false) }
     var playerLane by remember { mutableIntStateOf(1) }
@@ -120,7 +223,6 @@ fun BreakGamePage(onBack: () -> Unit) {
     var countdown by remember { mutableIntStateOf(3) }
     var roundId by remember { mutableIntStateOf(0) }
     var stage by remember { mutableIntStateOf(1) }
-    var showStore by remember { mutableStateOf(false) }
     var roundReward by remember { mutableIntStateOf(0) }
     var missionReward by remember { mutableIntStateOf(0) }
     var feedbackText by remember { mutableStateOf("") }
@@ -618,30 +720,6 @@ fun BreakGamePage(onBack: () -> Unit) {
                         fontWeight = FontWeight.Black
                     )
                 }
-            }
-
-            if (!finished) {
-                Card(
-                    modifier = Modifier.align(Alignment.TopEnd).padding(top = 112.dp, end = 12.dp),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xE610211E))
-                ) {
-                    IconButton(onClick = { showStore = true }) {
-                        Text("🛍", fontSize = 25.sp)
-                    }
-                }
-            }
-
-            if (showStore) {
-                BreakGameStore(
-                    context = context,
-                    refreshKey = storeRefresh,
-                    onPurchased = {
-                        storeRefresh++
-                        refreshEquippedItem()
-                    },
-                    onClose = { showStore = false }
-                )
             }
 
             if (countdown > 0 && !finished) {
