@@ -262,16 +262,29 @@ private fun bestDeviceMove(board: List<Char>): Int {
 private enum class XoScreen { GAME, SHOP, INVENTORY }
 
 @Composable
-fun TicTacToeGamePage(onBack: () -> Unit, startInShop: Boolean = false) {
+fun TicTacToeGamePage(
+    onBack: () -> Unit,
+    startInShop: Boolean = false,
+    startInInventory: Boolean = false,
+    onShopBack: () -> Unit = onBack
+) {
     val context = androidx.compose.ui.platform.LocalContext.current
     LaunchedEffect(Unit) { initialXoInventory(context) }
-    var screen by remember { mutableStateOf(if (startInShop) XoScreen.SHOP else XoScreen.GAME) }
+    var screen by remember {
+        mutableStateOf(
+            when {
+                startInShop -> XoScreen.SHOP
+                startInInventory -> XoScreen.INVENTORY
+                else -> XoScreen.GAME
+            }
+        )
+    }
     var refresh by remember { mutableIntStateOf(0) }
 
     when (screen) {
         XoScreen.GAME -> XoGame(context, refresh, { screen = XoScreen.SHOP }, { screen = XoScreen.INVENTORY }, onBack)
-        XoScreen.SHOP -> XoShop(context, refresh, { refresh++ }) { screen = XoScreen.GAME }
-        XoScreen.INVENTORY -> XoInventory(context, refresh, { refresh++ }) { screen = XoScreen.GAME }
+        XoScreen.SHOP -> XoShop(context, refresh, { refresh++ }) { onShopBack() }
+        XoScreen.INVENTORY -> XoInventory(context, refresh, { refresh++ }) { onShopBack() }
     }
 }
 
@@ -357,9 +370,17 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
                         Text("× O  3D", color = Color.White, fontSize = 29.sp, fontWeight = FontWeight.Black)
                         Text("ساحة ريبو ثلاثية الأبعاد", color = Color.White.copy(alpha = .78f), fontSize = 11.sp)
                     }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("💰 " + xoCoins(context), color = Color(0xFFFFD54F), fontSize = 16.sp, fontWeight = FontWeight.Black)
-                        Text("ذهب XO", color = Color.White.copy(alpha = .72f), fontSize = 9.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("💰 " + xoCoins(context), color = Color(0xFFFFD54F), fontSize = 16.sp, fontWeight = FontWeight.Black)
+                            Text("ذهب XO", color = Color.White.copy(alpha = .72f), fontSize = 9.sp)
+                        }
+                        IconButton(onClick = onInventory) {
+                            Text("🎒", fontSize = 20.sp)
+                        }
+                        IconButton(onClick = onShop) {
+                            Text("🛍️", fontSize = 20.sp)
+                        }
                     }
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
@@ -544,8 +565,30 @@ private fun XoShop(context: Context, refreshKey: Int, onChanged: () -> Unit, onB
                 }
                 Text("الألوان والتأثيرات والأرضيات والإطارات مرتبطة فعليًا بالساحة ثلاثية الأبعاد.", color = Color(0xFF5A7484), fontSize = 12.sp)
                 Spacer(Modifier.height(7.dp))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    listOf("× ألوان","✨ تأثيرات","▦ أرضيات","⬡ إطارات").forEachIndexed { index,title -> Button(onClick={tab=index},modifier=Modifier.weight(1f)){Text(title,fontSize=10.sp)} }
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    listOf("× ألوان", "✨ تأثيرات", "▦ أرضيات", "⬡ إطارات").forEachIndexed { index, title ->
+                        Button(
+                            onClick = { tab = index },
+                            modifier = Modifier.weight(1f).height(44.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 2.dp, vertical = 0.dp),
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = if (tab == index) Color(0xFF4D72E8) else Color(0xFFE7EFF6),
+                                contentColor = if (tab == index) Color.White else Color(0xFF17384D)
+                            )
+                        ) {
+                            Text(
+                                title,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Black,
+                                maxLines = 1,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                 }
                 Spacer(Modifier.height(7.dp))
                 Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()), verticalArrangement=Arrangement.spacedBy(8.dp)) {
