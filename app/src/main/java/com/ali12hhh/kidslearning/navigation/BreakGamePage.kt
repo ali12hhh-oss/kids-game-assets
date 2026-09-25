@@ -151,6 +151,8 @@ fun BreakGamePage(onBack: () -> Unit) {
                             combo = 0
                             collected = (collected - 2).coerceAtLeast(0)
                             score = (score - 14).coerceAtLeast(0)
+                            // Hitting a trap also costs 2 of the game's separate shop currency.
+                            AppSettings.addGameStars(context, -2)
                         } else {
                             dodged++
                             combo++
