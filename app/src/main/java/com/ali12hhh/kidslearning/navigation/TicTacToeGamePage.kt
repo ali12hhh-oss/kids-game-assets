@@ -259,6 +259,29 @@ private fun bestDeviceMove(board: List<Char>): Int {
     return if (bestMove >= 0) bestMove else board.indexOfFirst { it == ' ' }
 }
 
+private fun mediumDeviceMove(board: List<Char>): Int {
+    val available = board.indices.filter { board[it] == ' ' }
+    if (available.isEmpty()) return -1
+
+    // Medium difficulty: win when possible, block immediate threats,
+    // then make a less predictable strategic or random move.
+    available.firstOrNull { index ->
+        winner(board.toMutableList().also { it[index] = 'O' }) == 'O'
+    }?.let { return it }
+
+    available.firstOrNull { index ->
+        winner(board.toMutableList().also { it[index] = 'X' }) == 'X'
+    }?.let { return it }
+
+    if (4 in available && kotlin.random.Random.nextFloat() < 0.70f) return 4
+    val corners = listOf(0, 2, 6, 8).filter { it in available }
+    if (corners.isNotEmpty() && kotlin.random.Random.nextFloat() < 0.60f) {
+        return corners.random()
+    }
+    if (kotlin.random.Random.nextFloat() < 0.35f) return bestDeviceMove(board)
+    return available.random()
+}
+
 private enum class XoScreen { GAME, SHOP, INVENTORY }
 
 @Composable
@@ -297,10 +320,20 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
     val oColor = Color(0xFF00E5FF)
     val displayFloor = effectiveXoFloor(selectedFloor, selectedColor.color, oColor)
     var board by remember(refreshKey) { mutableStateOf(List(9) { ' ' }) }
+    var startingPlayer by remember(refreshKey) { mutableStateOf('X') }
     var turn by remember(refreshKey) { mutableStateOf('X') }
     var result by remember(refreshKey) { mutableStateOf<Char?>(null) }
     var thinking by remember(refreshKey) { mutableStateOf(false) }
     var winningCells by remember(refreshKey) { mutableStateOf(emptySet<Int>()) }
+
+    fun startRound(player: Char) {
+        board = List(9) { ' ' }
+        startingPlayer = player
+        turn = player
+        result = null
+        winningCells = emptySet()
+        thinking = player == 'O'
+    }
     fun finishIfNeeded(next: List<Char>): Boolean {
         val win = winner(next)
         if (win != null) {
@@ -330,7 +363,7 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
     LaunchedEffect(board, turn, thinking, result) {
         if (turn == 'O' && thinking && result == null) {
             delay(420)
-            val move = bestDeviceMove(board)
+            val move = mediumDeviceMove(board)
             if (move >= 0) {
                 val next = board.toMutableList().also { it[move] = 'O' }
                 board = next
@@ -367,7 +400,7 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("لعبة XO", color = Color.White, fontSize = 29.sp, fontWeight = FontWeight.Black)
-                        Text("× أنت  •  O ريبو", color = Color.White.copy(alpha = .82f), fontSize = 11.sp)
+                        Text("× أنت  •  O ريبو  •  مستوى متوسط", color = Color.White.copy(alpha = .82f), fontSize = 11.sp)
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("💰 " + xoCoins(context), color = Color(0xFFFFD54F), fontSize = 16.sp, fontWeight = FontWeight.Black)
@@ -402,13 +435,18 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
                 ) {
                     Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(status, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Black)
-                        Text("× أنت  مقابل  O ريبو", color = Color.White.copy(alpha = .68f), fontSize = 10.sp)
+                        Text(
+                            if (startingPlayer == 'X') "بدأت أنت هذه الجولة • الجولة التالية يبدأ ريبو"
+                            else "بدأ ريبو هذه الجولة • الجولة التالية تبدأ أنت",
+                            color = Color.White.copy(alpha = .68f),
+                            fontSize = 10.sp
+                        )
                     }
                 }
                 Spacer(Modifier.height(8.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(
-                        onClick = { board = List(9) { ' ' }; turn = 'X'; result = null; thinking = false; winningCells = emptySet() },
+                        onClick = { startRound(if (startingPlayer == 'X') 'O' else 'X') },
                         modifier = Modifier.weight(1f),
                         colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF1FA774), contentColor = Color.White)
                     ) {
