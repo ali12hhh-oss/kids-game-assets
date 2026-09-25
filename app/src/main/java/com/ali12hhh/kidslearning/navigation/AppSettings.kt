@@ -106,7 +106,7 @@ object AppSettings {
         prefs(context).getString(GAME_EQUIPPED_OUTFIT, null)
 
     fun equipGameOutfit(context: Context, outfitId: String) {
-        if (itemId in gameOwnedOutfits(context)) {
+        if (outfitId in gameOwnedOutfits(context)) {
             prefs(context).edit().putString(GAME_EQUIPPED_OUTFIT, outfitId).apply()
         }
     }
