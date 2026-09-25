@@ -138,7 +138,7 @@ private fun BreakGameHome(
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF071421)) {
         Box(
             modifier = Modifier.fillMaxSize().background(
-                Brush.verticalGradient(listOf(Color(0xFF06111F), Color(0xFF102D43), Color(0xFF17606A), Color(0xFFB7D78D))
+                Brush.verticalGradient(listOf(Color(0xFF06111F), Color(0xFF102D43), Color(0xFF17606A), Color(0xFFB7D78D)))
             ),
             contentAlignment = Alignment.Center
         ) {
