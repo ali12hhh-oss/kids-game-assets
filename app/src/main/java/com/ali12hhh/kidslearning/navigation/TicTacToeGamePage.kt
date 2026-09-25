@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.foundation.border
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -50,13 +51,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import io.github.sceneview.Scene
-import io.github.sceneview.math.Position
-import io.github.sceneview.math.Rotation
-import io.github.sceneview.rememberCameraNode
-import io.github.sceneview.rememberEngine
-import io.github.sceneview.rememberModelLoader
-import io.github.sceneview.node.ModelNode
 import kotlin.math.max
 import kotlin.math.min
 
@@ -294,21 +288,6 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
     var result by remember(refreshKey) { mutableStateOf<Char?>(null) }
     var thinking by remember(refreshKey) { mutableStateOf(false) }
     var winningCells by remember(refreshKey) { mutableStateOf(emptySet<Int>()) }
-    val engine = rememberEngine()
-    val modelLoader = rememberModelLoader(engine)
-    val cameraNode = rememberCameraNode(engine) {
-        position = Position(x = 0f, y = 4.7f, z = 6.9f)
-        lookAt(Position(x = 0f, y = 0f, z = 0f))
-    }
-    val boardModel = remember { runCatching { modelLoader.createModelInstance("xo/xo_board.gltf") }.getOrNull() }
-    LaunchedEffect(boardModel, selectedFrame.color, selectedFloor.top) {
-        val boardColor = Color(
-            red = selectedFrame.color.red * .68f + selectedFloor.top.red * .32f,
-            green = selectedFrame.color.green * .68f + selectedFloor.top.green * .32f,
-            blue = selectedFrame.color.blue * .68f + selectedFloor.top.blue * .32f
-        )
-        boardModel?.materialInstances?.forEach { it.setParameter("baseColorFactor", boardColor.red, boardColor.green, boardColor.blue, 1f) }
-    }
     fun finishIfNeeded(next: List<Char>): Boolean {
         val win = winner(next)
         if (win != null) {
@@ -359,36 +338,18 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
     Surface(Modifier.fillMaxSize(), color = displayFloor.top) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(displayFloor.top, displayFloor.bottom)))) {
             XoAmbientEffect(selectedEffect, selectedColor.color)
-            XoBoardGuideGrid(selectedFrame.color, Modifier.fillMaxSize().padding(top = 150.dp, bottom = 185.dp))
-            Scene(
-                modifier = Modifier.fillMaxSize().padding(top = 92.dp, bottom = 128.dp),
-                engine = engine, modelLoader = modelLoader, cameraNode = cameraNode,
-                cameraManipulator = null, isOpaque = false,
-                childNodes = buildList {
-                    boardModel?.let { add(ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = 1f)) }
-                    board.forEachIndexed { index, value ->
-                        if (value != ' ') {
-                            val instance = runCatching { modelLoader.createModelInstance(if (value == 'X') "xo/xo_x.gltf" else "xo/xo_o.gltf") }.getOrNull()
-                            instance?.let {
-                                val row = index / 3
-                                val col = index % 3
-                                val c = if (value == 'X') selectedColor.color else oColor
-                                it.materialInstances.forEach { m ->
-                                    m.setParameter("baseColorFactor", c.red, c.green, c.blue, 1f)
-                                    m.setParameter("emissiveFactor", c.red * 0.55f, c.green * 0.55f, c.blue * 0.55f)
-                                    m.setParameter("metallicFactor", 0.05f)
-                                    m.setParameter("roughnessFactor", 0.28f)
-                                }
-                                add(ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = .72f).apply {
-                                    position = Position(x = (col - 1) * 1.0f, y = if (index in winningCells) .70f else .52f, z = (row - 1) * 1.0f)
-                                    rotation = Rotation(x = 90f)
-                                })
-                            }
-                        }
-                    }
-                }
+            XoBoard(
+                board = board,
+                xColor = selectedColor.color,
+                oColor = oColor,
+                frameColor = selectedFrame.color,
+                winningCells = winningCells,
+                effect = selectedEffect,
+                onMove = ::playerMove,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp)
             )
-            Xo3dTouchGrid(board, result, thinking, Modifier.fillMaxSize().padding(top = 108.dp, bottom = 138.dp), ::playerMove)
             Column(Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 10.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBack) { Text("‹", color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Black) }
@@ -430,31 +391,48 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
 }
 
 @Composable
-private fun XoBoardGuideGrid(lineColor: Color, modifier: Modifier) {
-    Canvas(modifier) {
-        val left = size.width * .18f
-        val right = size.width * .82f
-        val top = size.height * .18f
-        val bottom = size.height * .82f
-        val cellW = (right - left) / 3f
-        val cellH = (bottom - top) / 3f
-        for (i in 1..2) {
-            val x = left + cellW * i
-            val y = top + cellH * i
-            drawLine(lineColor.copy(alpha = .95f), androidx.compose.ui.geometry.Offset(x, top), androidx.compose.ui.geometry.Offset(x, bottom), 6f)
-            drawLine(lineColor.copy(alpha = .95f), androidx.compose.ui.geometry.Offset(left, y), androidx.compose.ui.geometry.Offset(right, y), 6f)
-        }
-    }
-}
-
-@Composable
-private fun Xo3dTouchGrid(board: List<Char>, result: Char?, thinking: Boolean, modifier: Modifier, onMove: (Int) -> Unit) {
-    Column(modifier, verticalArrangement = Arrangement.SpaceEvenly) {
-        repeat(3) { row ->
-            Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.SpaceEvenly) {
-                repeat(3) { col ->
-                    val index = row * 3 + col
-                    Box(Modifier.weight(1f).fillMaxSize().clickable(enabled = board[index] == ' ' && result == null && !thinking) { onMove(index) })
+private fun XoBoard(
+    board: List<Char>,
+    xColor: Color,
+    oColor: Color,
+    frameColor: Color,
+    winningCells: Set<Int>,
+    effect: String,
+    onMove: (Int) -> Unit,
+    modifier: Modifier
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(30.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = .10f)),
+        border = androidx.compose.foundation.BorderStroke(2.dp, frameColor.copy(alpha = .72f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            repeat(3) { row ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(86.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    repeat(3) { col ->
+                        val index = row * 3 + col
+                        XoCell(
+                            value = board[index],
+                            xColor = xColor,
+                            oColor = oColor,
+                            frameColor = frameColor,
+                            isWinning = index in winningCells,
+                            effect = effect,
+                            modifier = Modifier.weight(1f),
+                            onClick = { onMove(index) }
+                        )
+                    }
                 }
             }
         }
@@ -473,7 +451,16 @@ private fun XoScoreCard(label: String, symbol: String, score: Int, color: Color,
 }
 
 @Composable
-private fun XoCell(value: Char, xColor: Color, isWinning: Boolean, effect: String, modifier: Modifier, onClick: () -> Unit) {
+private fun XoCell(
+    value: Char,
+    xColor: Color,
+    oColor: Color,
+    frameColor: Color,
+    isWinning: Boolean,
+    effect: String,
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
     val scale = remember { Animatable(1f) }
     LaunchedEffect(value) {
         if (value != ' ') {
@@ -482,21 +469,41 @@ private fun XoCell(value: Char, xColor: Color, isWinning: Boolean, effect: Strin
         }
     }
     val transition = rememberInfiniteTransition(label = "cellPulse")
-    val pulse by transition.animateFloat(.94f, 1.06f, infiniteRepeatable(tween(550), RepeatMode.Reverse), label = "pulse")
-    val bg = if (isWinning) Color.White.copy(alpha = .22f) else Color.White.copy(alpha = .09f)
+    val pulse by transition.animateFloat(
+        .94f, 1.06f,
+        infiniteRepeatable(tween(550), RepeatMode.Reverse),
+        label = "pulse"
+    )
+    val top = if (isWinning) Color.White.copy(alpha = .24f) else Color.White.copy(alpha = .13f)
+    val bottom = if (isWinning) Color.White.copy(alpha = .12f) else Color.White.copy(alpha = .055f)
+
     Box(
-        modifier.scale(scale.value * if (isWinning && effect == "pulse") pulse else 1f)
-            .aspectRatio(1f)
+        modifier
+            .scale(scale.value * if (isWinning && effect == "pulse") pulse else 1f)
             .clip(RoundedCornerShape(20.dp))
-            .background(bg)
+            .background(Brush.verticalGradient(listOf(top, bottom)))
+            .border(
+                width = if (isWinning) 2.5.dp else 1.5.dp,
+                color = if (isWinning) Color(0xFFFFD54F) else frameColor.copy(alpha = .58f),
+                shape = RoundedCornerShape(20.dp)
+            )
             .clickable(enabled = value == ' ', onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         when (value) {
-            'X' -> Text("×", color = xColor, fontSize = 58.sp, fontWeight = FontWeight.Black)
-            'O' -> Text("○", color = Color(0xFFFF6B8A), fontSize = 55.sp, fontWeight = FontWeight.Black)
+            'X' -> Text("×", color = xColor, fontSize = 62.sp, fontWeight = FontWeight.Black)
+            'O' -> Text("○", color = oColor, fontSize = 60.sp, fontWeight = FontWeight.Black)
         }
-        if (isWinning && effect == "spark") Text("✦", color = Color(0xFFFFD54F), fontSize = 18.sp, modifier = Modifier.align(Alignment.TopEnd).padding(7.dp))
+        if (isWinning && effect == "spark") {
+            Text(
+                "✦",
+                color = Color(0xFFFFD54F),
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(7.dp)
+            )
+        }
     }
 }
 
