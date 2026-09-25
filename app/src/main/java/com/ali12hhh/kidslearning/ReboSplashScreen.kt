@@ -105,10 +105,10 @@ private fun SplashCharacter(modifier: Modifier) {
                 modelInstance = instance,
                 autoAnimate = false,
                 // Reduced model size while keeping the 440dp viewport unchanged.
-                scaleToUnits = 4.0f,
+                scaleToUnits = 3.0f,
                 centerOrigin = Position(x = 0f, y = -0.02f, z = 0f)
             ).also {
-                it.position = Position(x = 0f, y = -0.08f, z = 0f)
+                it.position = Position(x = 0f, y = -0.22f, z = 0f)
             }
         }
     }
