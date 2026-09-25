@@ -1,6 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
 import android.content.Context
+import androidx.core.content.edit
 import androidx.compose.animation.core.Animatable
 import androidx.core.content.edit
 import androidx.compose.animation.core.RepeatMode
@@ -273,14 +274,14 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
             val p = xoPrefs(context)
             if (win == 'X') {
                 addXoCoins(context, 10)
-                p.edit().putInt(XO_WINS, p.getInt(XO_WINS, 0) + 1).apply()
-            } else p.edit().putInt(XO_LOSSES, p.getInt(XO_LOSSES, 0) + 1).apply()
+                p.edit { putInt(XO_WINS, p.getInt(XO_WINS, 0) + 1) }
+            } else p.edit { putInt(XO_LOSSES, p.getInt(XO_LOSSES, 0) + 1) }
             return true
         }
         if (boardFull(next)) {
             result = 'D'
             val p = xoPrefs(context)
-            p.edit().putInt(XO_DRAWS, p.getInt(XO_DRAWS, 0) + 1).apply()
+            p.edit { putInt(XO_DRAWS, p.getInt(XO_DRAWS, 0) + 1) }
             return true
         }
         return false
