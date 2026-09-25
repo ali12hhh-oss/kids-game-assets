@@ -528,6 +528,29 @@ fun BreakGamePage(onBack: () -> Unit) {
                 }
             }
 
+            if (feedbackText.isNotEmpty() && !finished) {
+                Card(
+                    modifier = Modifier.align(Alignment.Center).padding(top = 82.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = when (feedbackKind) {
+                            3 -> Color(0xE6B83A4A)
+                            4 -> Color(0xE61A8B79)
+                            2 -> Color(0xE6B77900)
+                            else -> Color(0xE61A4964)
+                        }
+                    )
+                ) {
+                    Text(
+                        feedbackText,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp),
+                        color = Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+            }
+
             if (!finished) {
                 Card(
                     modifier = Modifier.align(Alignment.TopEnd).padding(top = 112.dp, end = 12.dp),
