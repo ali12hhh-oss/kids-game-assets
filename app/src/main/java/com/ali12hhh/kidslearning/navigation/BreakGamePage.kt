@@ -452,7 +452,7 @@ private fun BreakGamePlayPage(onBack: () -> Unit) {
         equipmentAsset?.let { runCatching { modelLoader.createModelInstance(it) }.getOrNull() }
     }
     val cameraNode = rememberCameraNode(engine) {
-        position = Position(x = 0f, y = 0.35f, z = 6.5f)
+        position = Position(x = 0f, y = 0.35f, z = 8.0f)
     }
     val characterNode = remember(model) {
         model?.let { instance ->
