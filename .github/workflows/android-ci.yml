@@ -25,7 +25,8 @@ jobs:
       - name: Restore deleted launcher icons from previous release
         if: ${{ !hashFiles('app/src/main/res/mipmap-mdpi/ic_launcher.png') }}
         run: |
-          git checkout e91bdc75c3835a90822071b2943aa8d48f49dbdd -- app/src/main/res/mipmap-mdpi/ic_launcher.png app/src/main/res/mipmap-hdpi/ic_launcher.png app/src/main/res/mipmap-xhdpi/ic_launcher.png app/src/main/res/mipmap-xxhdpi/ic_launcher.png app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          git fetch origin e91bdc75c3835a90822071b2943aa8d48f49dbdd --depth=1
+          git checkout FETCH_HEAD -- app/src/main/res/mipmap-mdpi/ic_launcher.png app/src/main/res/mipmap-hdpi/ic_launcher.png app/src/main/res/mipmap-xhdpi/ic_launcher.png app/src/main/res/mipmap-xxhdpi/ic_launcher.png app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app/src/main/res/mipmap-*/ic_launcher.png
