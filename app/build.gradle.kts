@@ -20,7 +20,6 @@ android {
     sourceSets["main"].assets.directories.add("../assets/characters/KayKit/Mannequin Character/characters")
     sourceSets["main"].assets.directories.add("build/generated/anim-assets")
 
-    // Merge must succeed. Never permit a silent static-model fallback.
     val mergeAnimations = tasks.register<Exec>("mergeAnimations") {
         workingDir = rootProject.projectDir
         commandLine(
@@ -34,31 +33,21 @@ android {
     val verifyCharacterAssets = tasks.register("verifyCharacterAssets") {
         doLast {
             val navigationFile = file("src/main/java/com/ali12hhh/kidslearning/navigation/AppNavigation.kt")
-            check(navigationFile.isFile && navigationFile.readText().contains("Mannequin_Medium_Anim.glb")) {
-                "BUILD FAILED: AppNavigation.kt must reference the merged animated model."
-            }
-            check(!navigationFile.readText().contains("createModelInstance(\"Mannequin_Medium.glb\")")) {
-                "BUILD FAILED: Static model fallback is forbidden; it can cause an idle duplicate behind the animated character."
-            }
+            check(navigationFile.isFile && navigationFile.readText().contains("Mannequin_Medium_Anim.glb"))
+            check(!navigationFile.readText().contains("createModelInstance("Mannequin_Medium.glb")"))
 
             val generatedModel = layout.buildDirectory.file("generated/anim-assets/Mannequin_Medium_Anim.glb").get().asFile
-            check(generatedModel.isFile && generatedModel.length() > 0L) {
-                "BUILD FAILED: Merged animated character was not generated."
-            }
+            check(generatedModel.isFile && generatedModel.length() > 0L)
 
             val apk = layout.buildDirectory.file("outputs/apk/debug/app-debug.apk").get().asFile
-            check(apk.isFile && apk.length() > 0L) { "BUILD FAILED: Debug APK was not produced." }
+            check(apk.isFile && apk.length() > 0L)
             ZipFile(apk).use { zip ->
                 val entry = zip.getEntry("assets/Mannequin_Medium_Anim.glb")
-                check(entry != null && entry.size > 0L) {
-                    "BUILD FAILED: Animated character is not packaged in the APK."
-                }
+                check(entry != null && entry.size > 0L)
                 zip.getInputStream(entry).use { input ->
                     val header = ByteArray(4)
                     val read = input.read(header)
-                    check(read == 4 && header.contentEquals(byteArrayOf(0x67, 0x6C, 0x54, 0x46))) {
-                        "BUILD FAILED: Packaged animated character is not a valid GLB."
-                    }
+                    check(read == 4 && header.contentEquals(byteArrayOf(0x67, 0x6C, 0x54, 0x46)))
                 }
             }
             println("ANIMATED CHARACTER VERIFIED: merged GLB generated and packaged; static fallback is disabled.")
@@ -91,7 +80,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose:2.8.5")
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("io.coil-kt:coil-compose:2.8.0")
     implementation("io.github.sceneview:sceneview:2.3.1")
     testImplementation("junit:junit:4.13.2")
     debugImplementation("androidx.compose.ui:ui-tooling")
