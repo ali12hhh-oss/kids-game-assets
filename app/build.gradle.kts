@@ -1,3 +1,5 @@
+import java.io.FileOutputStream
+import java.net.URL
 import java.util.zip.ZipFile
 
 plugins {
@@ -19,6 +21,27 @@ android {
 
     sourceSets["main"].assets.directories.add("../assets/characters/KayKit/Mannequin Character/characters")
     sourceSets["main"].assets.directories.add("build/generated/anim-assets")
+    sourceSets["main"].assets.directories.add("build/generated/phonics-assets")
+
+    val downloadPhonicsAssets = tasks.register("downloadPhonicsAssets") {
+        doLast {
+            val outputDir = layout.buildDirectory.dir("generated/phonics-assets").get().asFile
+            outputDir.mkdirs()
+            val sources = mapOf(
+                "phonics_e.ogg" to "https://upload.wikimedia.org/wikipedia/commons/f/f4/Open-mid_front_unrounded_vowel%28%C9%9B%29.ogg",
+                "phonics_i.ogg" to "https://upload.wikimedia.org/wikipedia/commons/4/4c/Near-close_near-front_unrounded_vowel.ogg"
+            )
+            sources.forEach { (name, source) ->
+                val target = outputDir.resolve(name)
+                if (!target.isFile || target.length() == 0L) {
+                    URL(source).openStream().use { input ->
+                        FileOutputStream(target).use { output -> input.copyTo(output) }
+                    }
+                }
+                check(target.isFile && target.length() > 0L) { "Failed to download phonics asset: $name" }
+            }
+        }
+    }
 
     val mergeAnimations = tasks.register<Exec>("mergeAnimations") {
         workingDir = rootProject.projectDir
@@ -63,6 +86,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    tasks.named("preBuild") { dependsOn(downloadPhonicsAssets) }
     tasks.configureEach {
         if (name == "assembleDebug") finalizedBy(verifyCharacterAssets)
         if (name.startsWith("merge") && name.endsWith("Assets")) dependsOn(mergeAnimations)
