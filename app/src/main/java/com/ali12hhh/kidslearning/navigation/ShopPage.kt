@@ -1,6 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
 import androidx.compose.foundation.background
+import androidx.core.content.edit
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -89,7 +90,7 @@ fun ShopPage(initialCollection: Boolean = false, onBack: () -> Unit) {
         val prize = 5
         AppSettings.addStars(context, prize)
         val openedAt = System.currentTimeMillis()
-        prefs.edit().putLong("daily_reward_last_open", openedAt).apply()
+        prefs.edit { putLong("daily_reward_last_open", openedAt) }
         lastDaily = openedAt; now = openedAt
         message = "🎉 ربحت $prize نجوم من هدية اليوم!"
         refresh()
@@ -100,7 +101,7 @@ fun ShopPage(initialCollection: Boolean = false, onBack: () -> Unit) {
         val reward = premiumTitles.firstOrNull { it.id !in owned }
         if (reward == null) { message = "لقد حصلت على جميع الألقاب المميزة."; return }
         AppSettings.addStars(context, -price)
-        prefs.edit().putStringSet("owned_items", AppSettings.ownedItems(context) + reward.id).apply()
+        prefs.edit { putStringSet("owned_items", AppSettings.ownedItems(context) + reward.id) }
         message = "✨ حصلت على اللقب المميز: ${reward.name}"
         refresh()
     }
