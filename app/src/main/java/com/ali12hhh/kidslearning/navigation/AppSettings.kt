@@ -1,7 +1,9 @@
 package com.ali12hhh.kidslearning.navigation
 
+import android.annotation.SuppressLint
 import android.content.Context
 
+@SuppressLint("UseKtx")
 object AppSettings {
     private const val PREFS = "kids_learning_settings"
     private const val DARK_MODE = "dark_mode"
@@ -104,7 +106,7 @@ object AppSettings {
         prefs(context).getString(GAME_EQUIPPED_OUTFIT, null)
 
     fun equipGameOutfit(context: Context, outfitId: String) {
-        if (outfitId in gameOwnedOutfits(context)) {
+        if (itemId in gameOwnedOutfits(context)) {
             prefs(context).edit().putString(GAME_EQUIPPED_OUTFIT, outfitId).apply()
         }
     }
