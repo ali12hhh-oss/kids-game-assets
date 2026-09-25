@@ -167,6 +167,45 @@ private fun xoSelectedEffect(context: Context) = xoPrefs(context).getString(XO_E
 private fun xoSelectedFloor(context: Context) = xoPrefs(context).getString(XO_FLOOR, "classic") ?: "classic"
 private fun xoSelectedFrame(context: Context) = xoPrefs(context).getString(XO_FRAME, "steel") ?: "steel"
 
+private fun colorDistance(a: Color, b: Color): Float {
+    val dr = a.red - b.red
+    val dg = a.green - b.green
+    val db = a.blue - b.blue
+    return kotlin.math.sqrt(dr * dr + dg * dg + db * db)
+}
+
+private fun colorLuminance(color: Color): Float =
+    color.red * 0.2126f + color.green * 0.7152f + color.blue * 0.0722f
+
+private fun effectiveXoFloor(selected: XoFloorItem, xColor: Color, oColor: Color): XoFloorItem {
+    val selectedAverage = Color(
+        red = (selected.top.red + selected.bottom.red) * .5f,
+        green = (selected.top.green + selected.bottom.green) * .5f,
+        blue = (selected.top.blue + selected.bottom.blue) * .5f
+    )
+    val tooSimilarToX = colorDistance(selectedAverage, xColor) < .34f
+    val tooSimilarToO = colorDistance(selectedAverage, oColor) < .34f
+    val tooCloseInBrightness =
+        kotlin.math.abs(colorLuminance(selectedAverage) - colorLuminance(xColor)) < .12f ||
+            kotlin.math.abs(colorLuminance(selectedAverage) - colorLuminance(oColor)) < .12f
+    if (!tooSimilarToX && !tooSimilarToO && !tooCloseInBrightness) return selected
+
+    val candidates = listOf(
+        XoFloorItem("auto_dark", "تباين تلقائي", Color(0xFF050914), Color(0xFF101D3D), 0),
+        XoFloorItem("auto_gold", "تباين ذهبي", Color(0xFF171006), Color(0xFF4B2E08), 0),
+        XoFloorItem("auto_plum", "تباين بنفسجي", Color(0xFF100817), Color(0xFF35164A), 0),
+        XoFloorItem("auto_teal", "تباين فيروزي", Color(0xFF031A1C), Color(0xFF07545A), 0)
+    )
+    return candidates.maxBy { candidate ->
+        val average = Color(
+            red = (candidate.top.red + candidate.bottom.red) * .5f,
+            green = (candidate.top.green + candidate.bottom.green) * .5f,
+            blue = (candidate.top.blue + candidate.bottom.blue) * .5f
+        )
+        minOf(colorDistance(average, xColor), colorDistance(average, oColor))
+    }
+}
+
 private fun chooseXo(context: Context, key: String, id: String) {
     xoPrefs(context).edit { putString(key, id) }
 }
@@ -248,6 +287,8 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
     val selectedEffect = xoSelectedEffect(context)
     val selectedFloor = xoFloors.firstOrNull { it.id == xoSelectedFloor(context) } ?: xoFloors.first()
     val selectedFrame = xoFrames.firstOrNull { it.id == xoSelectedFrame(context) } ?: xoFrames.first()
+    val oColor = Color(0xFF00E5FF)
+    val displayFloor = effectiveXoFloor(selectedFloor, selectedColor.color, oColor)
     var board by remember(refreshKey) { mutableStateOf(List(9) { ' ' }) }
     var turn by remember(refreshKey) { mutableStateOf('X') }
     var result by remember(refreshKey) { mutableStateOf<Char?>(null) }
@@ -315,8 +356,8 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
     val wins = xoPrefs(context).getInt(XO_WINS, 0)
     val draws = xoPrefs(context).getInt(XO_DRAWS, 0)
     val losses = xoPrefs(context).getInt(XO_LOSSES, 0)
-    Surface(Modifier.fillMaxSize(), color = selectedFloor.top) {
-        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(selectedFloor.top, selectedFloor.bottom)))) {
+    Surface(Modifier.fillMaxSize(), color = displayFloor.top) {
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(displayFloor.top, displayFloor.bottom)))) {
             XoAmbientEffect(selectedEffect, selectedColor.color)
             XoBoardGuideGrid(selectedFrame.color, Modifier.fillMaxSize().padding(top = 150.dp, bottom = 185.dp))
             Scene(
@@ -331,7 +372,7 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
                             instance?.let {
                                 val row = index / 3
                                 val col = index % 3
-                                val c = if (value == 'X') selectedColor.color else Color(0xFF00E5FF)
+                                val c = if (value == 'X') selectedColor.color else oColor
                                 it.materialInstances.forEach { m ->
                                     m.setParameter("baseColorFactor", c.red, c.green, c.blue, 1f)
                                     m.setParameter("emissiveFactor", c.red * 0.55f, c.green * 0.55f, c.blue * 0.55f)
@@ -369,7 +410,7 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color(0xD90A1826))) {
                     Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(status, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Black)
-                        Text("لوحة 3D • " + selectedFrame.name + " • " + selectedFloor.name, color = Color.White.copy(alpha = .68f), fontSize = 10.sp)
+                        Text("لوحة 3D • " + selectedFrame.name + " • " + displayFloor.name, color = Color.White.copy(alpha = .68f), fontSize = 10.sp)
                     }
                 }
                 Spacer(Modifier.height(7.dp))
