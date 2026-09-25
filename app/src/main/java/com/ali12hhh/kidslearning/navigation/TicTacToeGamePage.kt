@@ -351,58 +351,74 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
     Surface(Modifier.fillMaxSize(), color = displayFloor.top) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(displayFloor.top, displayFloor.bottom)))) {
             XoAmbientEffect(selectedEffect, selectedColor.color)
-            XoBoard(
-                board = board,
-                xColor = selectedColor.color,
-                oColor = oColor,
-                frameColor = selectedFrame.color,
-                winningCells = winningCells,
-                effect = selectedEffect,
-                onMove = ::playerMove,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 14.dp)
-            )
-            Column(Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 10.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onBack) { Text("‹", color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Black) }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("× O  3D", color = Color.White, fontSize = 29.sp, fontWeight = FontWeight.Black)
-                        Text("ساحة ريبو ثلاثية الأبعاد", color = Color.White.copy(alpha = .78f), fontSize = 11.sp)
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onBack) {
+                        Text("‹", color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Black)
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("💰 " + xoCoins(context), color = Color(0xFFFFD54F), fontSize = 16.sp, fontWeight = FontWeight.Black)
-                            Text("ذهب XO", color = Color.White.copy(alpha = .72f), fontSize = 9.sp)
-                        }
-                        IconButton(onClick = onInventory) {
-                            Text("🎒", fontSize = 20.sp)
-                        }
-                        IconButton(onClick = onShop) {
-                            Text("🛍️", fontSize = 20.sp)
-                        }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("لعبة XO", color = Color.White, fontSize = 29.sp, fontWeight = FontWeight.Black)
+                        Text("× أنت  •  O ريبو", color = Color.White.copy(alpha = .82f), fontSize = 11.sp)
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("💰 " + xoCoins(context), color = Color(0xFFFFD54F), fontSize = 16.sp, fontWeight = FontWeight.Black)
+                        Text("ذهب XO", color = Color.White.copy(alpha = .72f), fontSize = 9.sp)
                     }
                 }
+                Spacer(Modifier.height(7.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                     XoScoreCard("أنت", "×", wins, selectedColor.color, Modifier.weight(1f))
                     XoScoreCard("تعادل", "•", draws, Color.White, Modifier.weight(1f))
                     XoScoreCard("ريبو", "O", losses, Color(0xFFFF6B8A), Modifier.weight(1f))
                 }
-                Spacer(Modifier.weight(1f))
-                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color(0xD90A1826))) {
+                Spacer(Modifier.height(12.dp))
+                XoBoard(
+                    board = board,
+                    xColor = selectedColor.color,
+                    oColor = oColor,
+                    frameColor = selectedFrame.color,
+                    winningCells = winningCells,
+                    effect = selectedEffect,
+                    onMove = ::playerMove,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .padding(horizontal = 2.dp)
+                )
+                Spacer(Modifier.height(10.dp))
+                Card(
+                    Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(22.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xD90A1826))
+                ) {
                     Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(status, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Black)
-                        Text("لوحة 3D • " + selectedFrame.name + " • " + displayFloor.name, color = Color.White.copy(alpha = .68f), fontSize = 10.sp)
+                        Text("× أنت  مقابل  O ريبو", color = Color.White.copy(alpha = .68f), fontSize = 10.sp)
                     }
                 }
-                Spacer(Modifier.height(7.dp))
+                Spacer(Modifier.height(8.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { board = List(9) { ' ' }; turn = 'X'; result = null; thinking = false; winningCells = emptySet() }, modifier = Modifier.weight(1f),
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF1FA774), contentColor = Color.White)) {
+                    Button(
+                        onClick = { board = List(9) { ' ' }; turn = 'X'; result = null; thinking = false; winningCells = emptySet() },
+                        modifier = Modifier.weight(1f),
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF1FA774), contentColor = Color.White)
+                    ) {
                         Text("↻ جولة جديدة", fontWeight = FontWeight.Black)
                     }
-                    Button(onClick = onBack, modifier = Modifier.weight(1f),
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFE45A4F), contentColor = Color.White)) {
+                    Button(
+                        onClick = onBack,
+                        modifier = Modifier.weight(1f),
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFE45A4F), contentColor = Color.White)
+                    ) {
                         Text("رجوع", fontWeight = FontWeight.Black)
                     }
                 }
