@@ -87,6 +87,7 @@ private fun buyGameTitle(context: android.content.Context, titleId: String, pric
     return true
 }
 
+@SuppressLint("UseKtx")
 private fun equipGameTitle(context: android.content.Context, titleId: String) {
     if (titleId in gameOwnedTitles(context)) {
         context.getSharedPreferences("kids_learning_settings", android.content.Context.MODE_PRIVATE)
