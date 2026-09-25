@@ -1,10 +1,9 @@
 package com.ali12hhh.kidslearning.navigation
 
 import android.content.Context
-import androidx.core.content.edit
 import androidx.compose.animation.core.Animatable
-import androidx.core.content.edit
 import androidx.compose.animation.core.RepeatMode
+import androidx.core.content.edit
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -126,7 +125,7 @@ private val xoFrames = listOf(
     XoFrameItem("carbon", "كربون", Color(0xFF384A5A), 100)
 )
 
-private fun xoPrefsprivate fun xoPrefs(context: Context) =
+private fun xoPrefs(context: Context) =
     context.getSharedPreferences(XO_PREFS, Context.MODE_PRIVATE)
 
 private fun ownedSet(context: Context, key: String, default: Set<String>) =
@@ -161,7 +160,7 @@ private fun initialXoInventory(context: Context) {
         putStringSet(XO_OWNED_COLORS, ownedSet(context, XO_OWNED_COLORS, emptySet()) + "gold")
         putStringSet(XO_OWNED_EFFECTS, ownedSet(context, XO_OWNED_EFFECTS, emptySet()) + "none")
         putStringSet(XO_OWNED_FLOORS, ownedSet(context, XO_OWNED_FLOORS, emptySet()) + "classic")
-        .putStringSet(XO_OWNED_FRAMES, ownedSet(context, XO_OWNED_FRAMES, emptySet()) + "steel")
+        putStringSet(XO_OWNED_FRAMES, ownedSet(context, XO_OWNED_FRAMES, emptySet()) + "steel")
     }
 }
 
