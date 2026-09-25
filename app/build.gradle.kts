@@ -1,4 +1,5 @@
 import java.io.FileOutputStream
+import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.ZipFile
 
@@ -37,8 +38,24 @@ android {
             sources.forEach { (name, source) ->
                 val target = outputDir.resolve(name)
                 if (!target.isFile || target.length() == 0L) {
-                    URL(source).openStream().use { input ->
-                        FileOutputStream(target).use { output -> input.copyTo(output) }
+                    val connection = URL(source).openConnection() as HttpURLConnection
+                    connection.setRequestProperty(
+                        "User-Agent",
+                        "KidsLearning/1.0 (https://github.com/ali12hhh-oss/kids-game-assets)"
+                    )
+                    connection.setRequestProperty("Accept", "audio/ogg,*/*;q=0.8")
+                    connection.connectTimeout = 30_000
+                    connection.readTimeout = 60_000
+                    connection.instanceFollowRedirects = true
+                    try {
+                        check(connection.responseCode in 200..299) {
+                            "Phonics download failed for $name: HTTP ${connection.responseCode}"
+                        }
+                        connection.inputStream.use { input ->
+                            FileOutputStream(target).use { output -> input.copyTo(output) }
+                        }
+                    } finally {
+                        connection.disconnect()
                     }
                 }
                 check(target.isFile && target.length() > 0L) { "Failed to download phonics asset: $name" }
