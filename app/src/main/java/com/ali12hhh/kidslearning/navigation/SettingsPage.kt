@@ -2,7 +2,6 @@ package com.ali12hhh.kidslearning.navigation
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import java.util.Locale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 
 private enum class SettingsScreen { MAIN, PROFILE, SPEECH, PRIVACY, PARENT, DATA, TERMS, PRIVACY_POLICY, ABOUT }
 
@@ -174,7 +174,7 @@ private fun PrivacyPolicyPage(onBack: () -> Unit) {
         Text("يمكن لولي الأمر حذف بيانات التطبيق من صفحة البيانات والتقدّم أو من إعدادات Android. لا يحتفظ التطبيق بحسابات مستخدمين.", fontSize = 16.sp, lineHeight = 25.sp)
         Text("المطور: Ali12hhh-oss. للتواصل وطلبات الخصوصية: مستودع المشروع العام على GitHub.", fontSize = 16.sp, lineHeight = 25.sp)
         Button(onClick = {
-            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/ali12hhh-oss/kids-game-assets/blob/main/docs/privacy-policy.html")))
+            context.startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/ali12hhh-oss/kids-game-assets/blob/main/docs/privacy-policy.html".toUri()))
         }, modifier = Modifier.fillMaxWidth()) { Text("فتح صفحة الخصوصية العامة") }
     }
 }
