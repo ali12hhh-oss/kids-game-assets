@@ -12,7 +12,7 @@ import java.util.Locale
  * voice. This makes speech consistent across the learning screens.
  */
 object LessonSpeech {
-    val ARABIC_LOCALE: Locale = Locale("ar", "SA")
+    val ARABIC_LOCALE: Locale = Locale.forLanguageTag("ar-SA")
     val ENGLISH_LOCALE: Locale = Locale.US
 
     fun configure(engine: TextToSpeech, locale: Locale) {
@@ -21,7 +21,7 @@ object LessonSpeech {
             languageResult == TextToSpeech.LANG_MISSING_DATA
         ) {
             engine.setLanguage(
-                if (locale.language == "ar") Locale("ar") else Locale.ENGLISH
+                if (locale.language == "ar") Locale.forLanguageTag("ar") else Locale.ENGLISH
             )
         }
 
