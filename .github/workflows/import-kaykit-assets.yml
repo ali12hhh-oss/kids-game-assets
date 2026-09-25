@@ -22,7 +22,8 @@ jobs:
           set -euo pipefail
           base="https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/main/addons/kaykit_character_pack_adventures/Assets/gltf"
           dest="app/src/main/assets/characters/KayKit/Accessories"
-          mkdir -p "$dest"
+          outfit_dest="app/src/main/assets/characters/KayKit/Outfits"
+          mkdir -p "$dest" "$outfit_dest"
 
           for asset in \
             sword_1handed sword_2handed sword_2handed_color \
@@ -37,8 +38,14 @@ jobs:
             curl -fsSL "$base/$asset.bin" -o "$dest/$asset.bin"
           done
 
+          character_base="https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/main/addons/kaykit_character_pack_adventures/Characters/gltf"
+          for outfit in Knight Rogue Mage; do
+            curl -fsSL "$character_base/$outfit.glb" -o "$outfit_dest/$outfit.glb"
+          done
+
           curl -fsSL "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/main/LICENSE.txt" \
             -o "$dest/LICENSE.txt"
+          cp "$dest/LICENSE.txt" "$outfit_dest/LICENSE.txt"
 
       - name: Record provenance
         shell: bash
@@ -56,8 +63,13 @@ jobs:
           swords, axes, dagger, crossbows, staff, wand, arrows, quiver,
           shields, smokebomb, and spellbook variants.
 
+          Imported lightweight character outfit variants from the same pack:
+          Knight.glb, Rogue.glb, Mage.glb.
+          These self-contained CC0 character GLBs are used as Reebo's alternate
+          game-store outfits; the default mannequin remains available when no
+          outfit is equipped.
+
           These files are intentionally limited to a lightweight subset.
-          They do not replace Reebo's existing character or animation rig.
           EOF
 
       - name: Commit imported assets
@@ -65,7 +77,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/src/main/assets/characters/KayKit/Accessories
+          git add app/src/main/assets/characters/KayKit/Accessories app/src/main/assets/characters/KayKit/Outfits
           if git diff --cached --quiet; then
             echo "No asset changes."
             exit 0
