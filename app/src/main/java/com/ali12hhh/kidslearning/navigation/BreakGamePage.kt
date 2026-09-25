@@ -121,6 +121,7 @@ fun BreakGamePage(onBack: () -> Unit) {
             onStore = { refreshGameBalance(); screen = BreakGameScreen.STORE },
             onInventory = { refreshGameBalance(); screen = BreakGameScreen.INVENTORY },
             onOpenXo = { screen = BreakGameScreen.XO },
+            onOpenXoShop = { screen = BreakGameScreen.XO_SHOP },
             onBack = onBack
         )
         BreakGameScreen.STORE -> BreakGameStore(
@@ -136,10 +137,11 @@ fun BreakGamePage(onBack: () -> Unit) {
         )
         BreakGameScreen.GAME -> BreakGamePlayPage(onBack = { refreshGameBalance(); screen = BreakGameScreen.HOME })
         BreakGameScreen.XO -> TicTacToeGamePage(onBack = { screen = BreakGameScreen.HOME })
+        BreakGameScreen.XO_SHOP -> TicTacToeGamePage(onBack = { screen = BreakGameScreen.HOME }, startInShop = true)
     }
 }
 
-private enum class BreakGameScreen { HOME, GAME, STORE, INVENTORY, XO }
+private enum class BreakGameScreen { HOME, GAME, STORE, INVENTORY, XO, XO_SHOP }
 
 @Composable
 private fun BreakGameHome(
@@ -149,6 +151,7 @@ private fun BreakGameHome(
     onStore: () -> Unit,
     onInventory: () -> Unit,
     onOpenXo: () -> Unit,
+    onOpenXoShop: () -> Unit,
     onBack: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF071421)) {
@@ -174,7 +177,7 @@ private fun BreakGameHome(
                         }
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             BreakMenuCard(Modifier.weight(1f), "×O", "لعبة XO", Color(0xFF36A9E1), onOpenXo)
-                            BreakMenuCard(Modifier.weight(1f), "🎨", "متجر XO", Color(0xFF8E5DE7), onOpenXo)
+                            BreakMenuCard(Modifier.weight(1f), "🎨", "متجر XO", Color(0xFF8E5DE7), onOpenXoShop)
                         }
                         BreakMenuWideButton("🎒", "مقتنياتي", Color(0xFF20A77A), onInventory)
                         BreakMenuWideButton("↩", "خروج", Color(0xFF607D8B), onBack)
