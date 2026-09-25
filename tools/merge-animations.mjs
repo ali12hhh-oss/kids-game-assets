@@ -16,11 +16,11 @@ const animDir = 'assets/characters/KayKit/Animations/gltf/Rig_Medium';
 
 // The ORDER below defines the animation index used by the app:
 // 0 Idle_A, 1 Idle_B, 2 Interact, 3 PickUp, 4 Use_Item, 5 Spawn_Ground,
-// 6 Waving, 7 Cheering, 8 Sit_Floor_Idle, 9 Jump_Full_Short, 10 Walking_A
+// 6 Waving, 7 Cheering, 8 Sit_Floor_Idle, 9 Jump_Full_Short, 10 Walking_A, 11 Running_A
 const WANTED = [
   ['Rig_Medium_General.glb', ['Idle_A', 'Idle_B', 'Interact', 'PickUp', 'Use_Item', 'Spawn_Ground']],
   ['Rig_Medium_Simulation.glb', ['Waving', 'Cheering', 'Sit_Floor_Idle']],
-  ['Rig_Medium_MovementBasic.glb', ['Jump_Full_Short', 'Walking_A']],
+  ['Rig_Medium_MovementBasic.glb', ['Jump_Full_Short', 'Walking_A', 'Running_A']],
 ];
 
 const io = new NodeIO();
