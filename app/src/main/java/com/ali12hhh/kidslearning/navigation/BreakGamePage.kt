@@ -260,7 +260,7 @@ fun BreakGamePage(onBack: () -> Unit) {
     LaunchedEffect(feedbackTick) {
         if (feedbackTick == 0) return@LaunchedEffect
         delay(850)
-        if (feedbackTick == tick) feedbackText = ""
+        feedbackText = ""
     }
 
     val smoothPlayerX = remember { Animatable(0f) }
@@ -694,6 +694,7 @@ private fun BreakGameStore(
                                     onPurchased()
                                 } else if (isOwned) {
                                     AppSettings.equipGameItem(context, id)
+                                    onPurchased()
                                 }
                             }) {
                                 Text(if (isOwned && AppSettings.equippedGameItem(context) == id) "مجهّز" else if (isOwned) "تجهيز" else "$price 💰")
