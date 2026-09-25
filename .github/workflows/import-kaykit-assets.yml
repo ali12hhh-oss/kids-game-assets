@@ -45,6 +45,9 @@ jobs:
 
           curl -fsSL "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/main/LICENSE.txt" \
             -o "$dest/LICENSE.txt"
+
+          # Extra lightweight CC0 weapons/shields already shipped by KayKit.
+          # Keep the original filenames so the game can reference them directly.
           cp "$dest/LICENSE.txt" "$outfit_dest/LICENSE.txt"
 
       - name: Record provenance
