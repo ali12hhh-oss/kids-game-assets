@@ -82,7 +82,10 @@ object LetterSpeech {
 object PhonicsSpeech {
     private val bundledPhonemes = mapOf(
         "e" to "phonics_e.ogg",
-        "i" to "phonics_i.ogg"
+        "i" to "phonics_i.ogg",
+        "q" to "phonics_q.ogg",
+        "s" to "phonics_s.ogg",
+        "z" to "phonics_z.ogg"
     )
 
     fun speakEnglish(
