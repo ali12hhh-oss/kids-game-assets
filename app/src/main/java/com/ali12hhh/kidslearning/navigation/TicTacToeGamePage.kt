@@ -229,10 +229,10 @@ private fun bestDeviceMove(board: List<Char>): Int {
 private enum class XoScreen { GAME, SHOP, INVENTORY }
 
 @Composable
-fun TicTacToeGamePage(onBack: () -> Unit) {
+fun TicTacToeGamePage(onBack: () -> Unit, startInShop: Boolean = false) {
     val context = androidx.compose.ui.platform.LocalContext.current
     LaunchedEffect(Unit) { initialXoInventory(context) }
-    var screen by remember { mutableStateOf(XoScreen.GAME) }
+    var screen by remember { mutableStateOf(if (startInShop) XoScreen.SHOP else XoScreen.GAME) }
     var refresh by remember { mutableIntStateOf(0) }
 
     when (screen) {
@@ -318,6 +318,7 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
     Surface(Modifier.fillMaxSize(), color = selectedFloor.top) {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(selectedFloor.top, selectedFloor.bottom)))) {
             XoAmbientEffect(selectedEffect, selectedColor.color)
+            XoBoardGuideGrid(selectedFrame.color, Modifier.fillMaxSize().padding(top = 150.dp, bottom = 185.dp))
             Scene(
                 modifier = Modifier.fillMaxSize().padding(top = 92.dp, bottom = 128.dp),
                 engine = engine, modelLoader = modelLoader, cameraNode = cameraNode,
@@ -367,15 +368,35 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
                     }
                 }
                 Spacer(Modifier.height(7.dp))
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                    Button(onClick = { board = List(9) { ' ' }; turn = 'X'; result = null; thinking = false; winningCells = emptySet() }, modifier = Modifier.weight(1f)) { Text("↻ جولة جديدة", fontWeight = FontWeight.Black) }
-                    OutlinedButton(onClick = onShop, modifier = Modifier.weight(1f)) { Text("🛍 متجر XO") }
-                }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                    OutlinedButton(onClick = onInventory, modifier = Modifier.weight(1f)) { Text("🎒 مقتنياتي") }
-                    OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) { Text("رجوع") }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { board = List(9) { ' ' }; turn = 'X'; result = null; thinking = false; winningCells = emptySet() }, modifier = Modifier.weight(1f),
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF1FA774), contentColor = Color.White)) {
+                        Text("↻ جولة جديدة", fontWeight = FontWeight.Black)
+                    }
+                    Button(onClick = onBack, modifier = Modifier.weight(1f),
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFFE45A4F), contentColor = Color.White)) {
+                        Text("رجوع", fontWeight = FontWeight.Black)
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun XoBoardGuideGrid(lineColor: Color, modifier: Modifier) {
+    Canvas(modifier) {
+        val left = size.width * .18f
+        val right = size.width * .82f
+        val top = size.height * .18f
+        val bottom = size.height * .82f
+        val cellW = (right - left) / 3f
+        val cellH = (bottom - top) / 3f
+        for (i in 1..2) {
+            val x = left + cellW * i
+            val y = top + cellH * i
+            drawLine(lineColor.copy(alpha = .95f), androidx.compose.ui.geometry.Offset(x, top), androidx.compose.ui.geometry.Offset(x, bottom), 6f)
+            drawLine(lineColor.copy(alpha = .95f), androidx.compose.ui.geometry.Offset(left, y), androidx.compose.ui.geometry.Offset(right, y), 6f)
         }
     }
 }
