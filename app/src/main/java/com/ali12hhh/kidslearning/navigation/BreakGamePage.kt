@@ -103,25 +103,33 @@ fun BreakGamePage(onBack: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var screen by remember { mutableStateOf(BreakGameScreen.HOME) }
     var storeRefresh by remember { mutableIntStateOf(0) }
+    var gameBalance by remember { mutableIntStateOf(AppSettings.gameStars(context)) }
+
+    fun refreshGameBalance() {
+        gameBalance = AppSettings.gameStars(context)
+    }
+
     when (screen) {
         BreakGameScreen.HOME -> BreakGameHome(
             context = context,
-            onStart = { screen = BreakGameScreen.GAME },
-            onStore = { screen = BreakGameScreen.STORE },
-            onInventory = { screen = BreakGameScreen.INVENTORY },
+            gameBalance = gameBalance,
+            onStart = { refreshGameBalance(); screen = BreakGameScreen.GAME },
+            onStore = { refreshGameBalance(); screen = BreakGameScreen.STORE },
+            onInventory = { refreshGameBalance(); screen = BreakGameScreen.INVENTORY },
             onBack = onBack
         )
         BreakGameScreen.STORE -> BreakGameStore(
             context = context,
             refreshKey = storeRefresh,
-            onPurchased = { storeRefresh++ },
-            onClose = { screen = BreakGameScreen.HOME }
+            gameBalance = gameBalance,
+            onPurchased = { refreshGameBalance(); storeRefresh++ },
+            onClose = { refreshGameBalance(); screen = BreakGameScreen.HOME }
         )
         BreakGameScreen.INVENTORY -> BreakGameInventory(
             context = context,
             onClose = { screen = BreakGameScreen.HOME }
         )
-        BreakGameScreen.GAME -> BreakGamePlayPage(onBack = { screen = BreakGameScreen.HOME })
+        BreakGameScreen.GAME -> BreakGamePlayPage(onBack = { refreshGameBalance(); screen = BreakGameScreen.HOME })
     }
 }
 
@@ -130,6 +138,7 @@ private enum class BreakGameScreen { HOME, GAME, STORE, INVENTORY }
 @Composable
 private fun BreakGameHome(
     context: android.content.Context,
+    gameBalance: Int,
     onStart: () -> Unit,
     onStore: () -> Unit,
     onInventory: () -> Unit,
@@ -151,7 +160,7 @@ private fun BreakGameHome(
                 Text("استراحة ممتعة! اختر ما تريد قبل أن تبدأ.", color = Color(0xFFD7F2F0), fontSize = 15.sp, textAlign = TextAlign.Center)
                 Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = Color(0xE610211E))) {
                     Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("💰 ${AppSettings.gameStars(context)} عملة المغامرة", color = Color(0xFFFFD54F), fontSize = 17.sp, fontWeight = FontWeight.Black)
+                        Text("💰 $gameBalance عملة المغامرة", color = Color(0xFFFFD54F), fontSize = 17.sp, fontWeight = FontWeight.Black)
                         Button(onClick = onStart, modifier = Modifier.fillMaxWidth()) { Text("▶ ابدأ المغامرة", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
                         OutlinedButton(onClick = onStore, modifier = Modifier.fillMaxWidth()) { Text("🛍 المتجر", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
                         OutlinedButton(onClick = onInventory, modifier = Modifier.fillMaxWidth()) { Text("🎒 مقتنياتي", fontSize = 17.sp, fontWeight = FontWeight.Bold) }
@@ -782,6 +791,7 @@ private fun BreakGamePlayPage(onBack: () -> Unit) {
 private fun BreakGameStore(
     context: android.content.Context,
     refreshKey: Int,
+    gameBalance: Int,
     onPurchased: () -> Unit,
     onClose: () -> Unit
 ) {
@@ -824,7 +834,7 @@ private fun BreakGameStore(
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column {
                         Text("متجر مغامرة ريبو", color = Color(0xFF102B3E), fontSize = 23.sp, fontWeight = FontWeight.Black)
-                        Text("💰 ${AppSettings.gameStars(context)} عملة اللعبة", color = Color(0xFFB77900), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        Text("💰 $gameBalance عملة اللعبة", color = Color(0xFFB77900), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                     IconButton(onClick = onClose) { Text("✕", fontSize = 22.sp) }
                 }
