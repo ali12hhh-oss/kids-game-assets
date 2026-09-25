@@ -60,6 +60,37 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 private data class BreakItem(val id: Int, var lane: Int, val type: Int, var progress: Float)
+private const val BREAK_TITLE_OWNED = "break_game_owned_titles"
+private const val BREAK_TITLE_EQUIPPED = "break_game_equipped_title"
+
+private fun gameOwnedTitles(context: android.content.Context): Set<String> =
+    context.getSharedPreferences("kids_learning_settings", android.content.Context.MODE_PRIVATE)
+        .getStringSet(BREAK_TITLE_OWNED, emptySet()) ?: emptySet()
+
+private fun equippedGameTitle(context: android.content.Context): String? =
+    context.getSharedPreferences("kids_learning_settings", android.content.Context.MODE_PRIVATE)
+        .getString(BREAK_TITLE_EQUIPPED, null)
+
+private fun buyGameTitle(context: android.content.Context, titleId: String, price: Int): Boolean {
+    val prefs = context.getSharedPreferences("kids_learning_settings", android.content.Context.MODE_PRIVATE)
+    val owned = gameOwnedTitles(context)
+    val balance = AppSettings.gameStars(context)
+    if (titleId in owned || balance < price) return false
+    prefs.edit()
+        .putInt("break_game_stars", balance - price)
+        .putStringSet(BREAK_TITLE_OWNED, owned + titleId)
+        .putString(BREAK_TITLE_EQUIPPED, titleId)
+        .apply()
+    return true
+}
+
+private fun equipGameTitle(context: android.content.Context, titleId: String) {
+    if (titleId in gameOwnedTitles(context)) {
+        context.getSharedPreferences("kids_learning_settings", android.content.Context.MODE_PRIVATE)
+            .edit().putString(BREAK_TITLE_EQUIPPED, titleId).apply()
+    }
+}
+
 private const val GAME_SECONDS = 45
 private const val STAR = 0
 private const val BARRIER = 1
@@ -685,6 +716,18 @@ private fun BreakGameStore(
         "rogue_outfit" to ("زي المغامر" to 600),
         "mage_outfit" to ("زي الساحر" to 700)
     )
+    val titles = listOf(
+        "title_reebo_star" to ("نجم ريبو" to 50),
+        "title_brave_hero" to ("البطل الشجاع" to 55),
+        "title_smart_explorer" to ("المستكشف الذكي" to 60),
+        "title_dodge_master" to ("سيد المراوغة" to 65),
+        "title_speed_champion" to ("بطل السرعة" to 70),
+        "title_reebo_friend" to ("صديق ريبو" to 80),
+        "title_challenge_hero" to ("بطل التحدي" to 85),
+        "title_shining_star" to ("النجم اللامع" to 90),
+        "title_trap_breaker" to ("قاهر الفخاخ" to 95),
+        "title_adventure_legend" to ("أسطورة المغامرة" to 100)
+    )
     var owned by remember(refreshKey) { mutableStateOf(AppSettings.gameOwnedItems(context)) }
     var ownedOutfits by remember(refreshKey) { mutableStateOf(AppSettings.gameOwnedOutfits(context)) }
     val equippedOutfit = AppSettings.equippedGameOutfit(context)
@@ -734,6 +777,40 @@ private fun BreakGameStore(
                         }
                     }
                 }
+                Text("الألقاب التشجيعية", color = Color(0xFF17384D), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                Text("اجمع الألقاب من متجر المغامرة واختر لقبك المفضل. الألقاب لا تؤثر على نجوم التعليم.", color = Color(0xFF5A7484), fontSize = 11.sp)
+                val ownedTitles = gameOwnedTitles(context)
+                val equippedTitle = equippedGameTitle(context)
+                titles.forEach { (id, data) ->
+                    val (name, price) = data
+                    val isOwned = id in ownedTitles
+                    Card(
+                        Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF4D9))
+                    ) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text("🏅 $name", color = Color(0xFF17384D), fontSize = 16.sp, fontWeight = FontWeight.Black)
+                                Text("لقب تشجيعي محفوظ في مقتنياتك", color = Color(0xFF5A7484), fontSize = 11.sp)
+                            }
+                            Button(onClick = {
+                                if (!isOwned) {
+                                    if (buyGameTitle(context, id, price)) onPurchased()
+                                } else {
+                                    equipGameTitle(context, id)
+                                    onPurchased()
+                                }
+                            }) {
+                                Text(if (isOwned && equippedTitle == id) "مجهّز" else if (isOwned) "تجهيز" else "$price 💰")
+                            }
+                        }
+                    }
+                )
                 Text("الأزياء", color = Color(0xFF17384D), fontSize = 18.sp, fontWeight = FontWeight.Black)
                 outfits.forEach { (id, data) ->
                     val (name, price) = data
@@ -788,7 +865,7 @@ private fun BreakGameStore(
                         }
                     }
                 }
-                Text("مقتنياتي: ${ownedOutfits.size} أزياء محفوظة • عند ارتداء زي آخر لا يُحذف الزي السابق.", color = Color(0xFF16806B), fontSize = 12.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                Text("مقتنياتي: ${ownedOutfits.size} أزياء • ${ownedTitles.size} ألقاب • عند تغيير التجهيز تبقى المقتنيات محفوظة.", color = Color(0xFF16806B), fontSize = 12.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             }
         }
     }
