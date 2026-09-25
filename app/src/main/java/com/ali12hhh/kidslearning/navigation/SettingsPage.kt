@@ -63,7 +63,7 @@ private fun MainSettings(context: Context, onBack: () -> Unit, onOpen: (Settings
             item { Header("🗣️", "النطق", secondary) }
             item { CardBox(card) {
                 ToggleItem("🗣️", "النطق الصوتي", "التحكم في النطق الصوتي", speech, text) { speech = it; AppSettings.setSpeechEnabled(context, it) }
-                Divider()
+                HorizontalDivider()
                 RowItem("🎙️", "إعدادات النطق", "سرعة النطق", text) { onOpen(SettingsScreen.SPEECH) }
             } }
             item { Header("🔒", "الخصوصية وحماية الطفل", secondary) }
