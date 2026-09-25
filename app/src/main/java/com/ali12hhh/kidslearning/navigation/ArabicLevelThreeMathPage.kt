@@ -84,7 +84,7 @@ Spacer(Modifier.height(8.dp));AnimatedContent(targetState=operation,transitionSp
 
 @Composable private fun LearnOperation(title:String,examples:List<ArithmeticExample>){
 var index by remember(title){mutableStateOf(0)};val context=LocalContext.current;var ready by remember{mutableStateOf(false)};var tts by remember{mutableStateOf<TextToSpeech?>(null)};val ex=examples[index]
-DisposableEffect(title){lateinit var e:TextToSpeech;e=TextToSpeech(context){s->if(s==TextToSpeech.SUCCESS){e.setLanguage(Locale.forLanguageTag("ar-XA"));e.setSpeechRate(0.82f);ready=true}};tts=e;onDispose{e.stop();e.shutdown()}}
+DisposableEffect(title){lateinit var e:TextToSpeech;e=TextToSpeech(context){s->if(s==TextToSpeech.SUCCESS){LessonSpeech.configure(e, LessonSpeech.ARABIC_LOCALE);ready=true}};tts=e;onDispose{e.stop();e.shutdown()}}
 LaunchedEffect(index){ tts?.stop() }
 Column(Modifier.fillMaxSize(),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(8.dp)){Text("مثال "+arDigits(index+1)+" من "+arDigits(examples.size),fontWeight=FontWeight.Bold,color=Color(0xFF65738A));
 Card(Modifier.fillMaxWidth().weight(1f).shadow(8.dp,RoundedCornerShape(26.dp)),shape=RoundedCornerShape(26.dp),colors=CardDefaults.cardColors(Color.White)){Column(Modifier.fillMaxSize().padding(18.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center){
@@ -109,7 +109,7 @@ private fun QuizOperation(title:String,quizzes:List<ArithmeticQuiz>){
 
     DisposableEffect(title){
         lateinit var e:TextToSpeech
-        e=TextToSpeech(context){s->if(s==TextToSpeech.SUCCESS){e.setLanguage(Locale.forLanguageTag("ar-XA"));e.setSpeechRate(0.82f);ready=true}}
+        e=TextToSpeech(context){s->if(s==TextToSpeech.SUCCESS){LessonSpeech.configure(e, LessonSpeech.ARABIC_LOCALE);ready=true}}
         tts=e
         onDispose{e.stop();e.shutdown()}
     }
