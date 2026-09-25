@@ -83,6 +83,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.11.0")
     implementation("androidx.navigation:navigation-compose:2.10.2")
     implementation("io.coil-kt:coil-compose:2.7.0")
+    //noinspection NewerVersionAvailable
     implementation("io.github.sceneview:sceneview:2.3.1")
     testImplementation("junit:junit:4.13.2")
     debugImplementation("androidx.compose.ui:ui-tooling")
