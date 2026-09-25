@@ -21,7 +21,7 @@ import kotlin.random.Random
 private data class RewardTitle(val id: String, val name: String, val cost: Int)
 private val premiumTitles = listOf(
     "تاج الملوك الصغار", "أسطورة المجرّة", "عبقري الحروف", "قائد الأحلام", "جوهرة التميّز",
-    "فارس الضوء", "بطل المستحيل", "صانع المعجزات", "العبقري اللامع", "أسطورة دبدوب"
+    "فارس الضوء", "بطل المستحيل", "صانع المعجزات", "العبقري اللامع", "أسطورة ريبو"
 ).mapIndexed { index, name -> RewardTitle("lucky_title_${(index + 1).toString().padStart(2, '0')}", name, 0) }
 private val regularTitles = listOf(
     "ملك النجوم", "أمير المعرفة", "نجم متألق", "بطل الماس", "نجم المستقبل", "كأس التفوق", "ساحر الكلمات", "حارس النجاح", "فارس الإنجاز", "بطل الشجاعة",
@@ -87,28 +87,22 @@ fun ShopPage(initialCollection: Boolean = false, onBack: () -> Unit) {
     fun refresh() { stars = AppSettings.childStars(context); owned = AppSettings.ownedItems(context) }
     fun openDaily() {
         if (!dailyReady) return
-        val prize = Random.nextInt(1, 11)
+        val prize = 5
         AppSettings.addStars(context, prize)
         val openedAt = System.currentTimeMillis()
         prefs.edit().putLong("daily_reward_last_open", openedAt).apply()
         lastDaily = openedAt; now = openedAt
-        message = "🎉 ربحت $prize نجوم من صندوق افتح واربح!"
+        message = "🎉 ربحت $prize نجوم من هدية اليوم!"
         refresh()
     }
     fun openLuck() {
         val price = 25
-        if (stars < price) { message = "تحتاج إلى $price نجمة لشراء صندوق الحظ."; return }
+        if (stars < price) { message = "تحتاج إلى $price نجمة لشراء المكافأة المميزة."; return }
+        val reward = premiumTitles.firstOrNull { it.id !in owned }
+        if (reward == null) { message = "لقد حصلت على جميع الألقاب المميزة."; return }
         AppSettings.addStars(context, -price)
-        val available = premiumTitles.filterNot { it.id in owned }
-        if (available.isNotEmpty() && Random.nextInt(100) < 35) {
-            val reward = available.random()
-            prefs.edit().putStringSet("owned_items", AppSettings.ownedItems(context) + reward.id).apply()
-            message = "✨ مبروك! حصلت على اللقب المميز: ${reward.name}"
-        } else {
-            val prize = Random.nextInt(10, 31)
-            AppSettings.addStars(context, prize)
-            message = "🌟 مبروك! ربحت $prize نجمة من صندوق الحظ!"
-        }
+        prefs.edit().putStringSet("owned_items", AppSettings.ownedItems(context) + reward.id).apply()
+        message = "✨ حصلت على اللقب المميز: ${reward.name}"
         refresh()
     }
 
@@ -138,8 +132,8 @@ fun ShopPage(initialCollection: Boolean = false, onBack: () -> Unit) {
         if (!collection) {
             LazyColumn(contentPadding = PaddingValues(bottom = 26.dp), verticalArrangement = Arrangement.spacedBy(11.dp)) {
                 item { ShopSectionHeading("🎁 هدايا ومفاجآت", "ابدأ بصناديق المكافآت واجمع النجوم والألقاب النادرة") }
-                item { RewardChestCard("صندوق الحظ", "🎁", "مفاجأة عشوائية في كل مرة: نجوم إضافية أو لقب مميز من مجموعة الألقاب النادرة.", "25 ⭐ • قابل للشراء بلا حد", "افتح الصندوق", stars >= 25, listOf(Color(0xFFFFE7A3), Color(0xFFFFF4D5)), ::openLuck) }
-                item { RewardChestCard("افتح واربح", "🌈", "هدية يومية مجانية تمنحك من نجمة واحدة إلى 10 نجوم.", if (dailyReady) "هدية اليوم جاهزة!" else "هدية جديدة كل 24 ساعة", "احصل على هديتك", dailyReady, listOf(Color(0xFFB9E8FF), Color(0xFFE3F6FF)), ::openDaily) }
+                item { RewardChestCard("مكافأة مميزة", "🎁", "مكافأة ثابتة وواضحة: تحصل على اللقب المميز التالي من المجموعة.", "25 ⭐ • بدون عشوائية", "احصل على المكافأة", stars >= 25, listOf(Color(0xFFFFE7A3), Color(0xFFFFF4D5)), ::openLuck) }
+                item { RewardChestCard("هدية اليوم", "🌈", "هدية يومية مجانية تمنحك 5 نجوم ثابتة.", if (dailyReady) "هدية اليوم جاهزة!" else "هدية جديدة كل 24 ساعة", "احصل على هديتك", dailyReady, listOf(Color(0xFFB9E8FF), Color(0xFFE3F6FF)), ::openDaily) }
                 if (message.isNotBlank()) item {
                     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFE1F7E8))) {
                         Text(message, Modifier.fillMaxWidth().padding(14.dp), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, color = Color(0xFF176534))
@@ -193,7 +187,7 @@ fun ShopPage(initialCollection: Boolean = false, onBack: () -> Unit) {
                                 }
                                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                                     Text(title.name, fontWeight = FontWeight.Black, fontSize = 16.sp, color = ink)
-                                    Text(if (title.id.startsWith("lucky_")) "لقب نادر • جائزة صندوق الحظ" else "لقب مكتسب", fontSize = 11.sp, color = muted)
+                                    Text(if (title.id.startsWith("lucky_")) "لقب مميز • مكافأة المتجر" else "لقب مكتسب", fontSize = 11.sp, color = muted)
                                 }
                                 Surface(shape = RoundedCornerShape(50), color = Color(0xFFDDF5E5)) {
                                     Text("مملوك ✓", Modifier.padding(horizontal = 10.dp, vertical = 7.dp), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF176534))
