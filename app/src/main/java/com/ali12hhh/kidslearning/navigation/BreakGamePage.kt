@@ -385,6 +385,7 @@ private fun BreakGamePlayPage(onBack: () -> Unit) {
                     if (item.lane == playerLane) {
                         if (item.type == STAR || item.type == GOLD_STAR) {
                             collected++
+                            GameSoundPlayer.play(context, GameSoundPlayer.Sound.COIN_PICKUP)
                             combo++
                             bestCombo = maxOf(bestCombo, combo)
                             score += (if (item.type == GOLD_STAR) 25 else 10) + (combo.coerceAtMost(8) - 1) * 2
@@ -393,6 +394,7 @@ private fun BreakGamePlayPage(onBack: () -> Unit) {
                             feedbackKind = if (item.type == GOLD_STAR) 2 else 1
                             feedbackTick = tick
                         } else if (!jumping) {
+                            GameSoundPlayer.play(context, GameSoundPlayer.Sound.TRAP_IMPACT)
                             misses++
                             trapHits++
                             combo = 0
