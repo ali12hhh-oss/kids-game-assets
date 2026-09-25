@@ -151,7 +151,7 @@ private fun LearnReadingSection(
             if (status == TextToSpeech.SUCCESS) {
                 val preferred = engine.setLanguage(Locale.forLanguageTag("ar-XA"))
                 if (preferred == TextToSpeech.LANG_NOT_SUPPORTED || preferred == TextToSpeech.LANG_MISSING_DATA) {
-                    engine.language = Locale("ar")
+                    engine.language = Locale.forLanguageTag("ar")
                 }
                 engine.setSpeechRate(0.78f)
                 engine.setPitch(0.98f)
