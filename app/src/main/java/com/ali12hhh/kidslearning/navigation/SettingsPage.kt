@@ -176,7 +176,7 @@ private fun PrivacyPolicyPage(onBack: () -> Unit) {
         Text("يمكن لولي الأمر حذف بيانات التطبيق من صفحة البيانات والتقدّم أو من إعدادات Android. لا يحتفظ التطبيق بحسابات مستخدمين.", fontSize = 16.sp, lineHeight = 25.sp)
         Text("المطور: Ali12hhh-oss. للتواصل وطلبات الخصوصية: مستودع المشروع العام على GitHub.", fontSize = 16.sp, lineHeight = 25.sp)
         Button(onClick = {
-            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/ali12hhh-oss/kids-game-assets")))
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/ali12hhh-oss/kids-game-assets/blob/main/docs/privacy-policy.html")))
         }, modifier = Modifier.fillMaxWidth()) { Text("فتح صفحة الخصوصية العامة") }
     }
 }
