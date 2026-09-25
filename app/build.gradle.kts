@@ -29,7 +29,10 @@ android {
             outputDir.mkdirs()
             val sources = mapOf(
                 "phonics_e.ogg" to "https://upload.wikimedia.org/wikipedia/commons/f/f4/Open-mid_front_unrounded_vowel%28%C9%9B%29.ogg",
-                "phonics_i.ogg" to "https://upload.wikimedia.org/wikipedia/commons/4/4c/Near-close_near-front_unrounded_vowel.ogg"
+                "phonics_i.ogg" to "https://upload.wikimedia.org/wikipedia/commons/4/4c/Near-close_near-front_unrounded_vowel.ogg",
+                "phonics_q.ogg" to "https://upload.wikimedia.org/wikipedia/commons/6/62/Labialized_voiceless_velar_plosive.ogg",
+                "phonics_s.ogg" to "https://upload.wikimedia.org/wikipedia/commons/a/ac/Voiceless_alveolar_sibilant.ogg",
+                "phonics_z.ogg" to "https://upload.wikimedia.org/wikipedia/commons/c/c0/Voiced_alveolar_sibilant.ogg"
             )
             sources.forEach { (name, source) ->
                 val target = outputDir.resolve(name)
