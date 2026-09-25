@@ -810,7 +810,7 @@ private fun BreakGameStore(
                             }
                         }
                     }
-                )
+                }
                 Text("الأزياء", color = Color(0xFF17384D), fontSize = 18.sp, fontWeight = FontWeight.Black)
                 outfits.forEach { (id, data) ->
                     val (name, price) = data
