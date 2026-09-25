@@ -15,6 +15,8 @@ object AppSettings {
     private const val GAME_STARS = "break_game_stars"
     private const val GAME_OWNED_ITEMS = "break_game_owned_items"
     private const val GAME_EQUIPPED_ITEM = "break_game_equipped_item"
+    private const val GAME_OWNED_OUTFITS = "break_game_owned_outfits"
+    private const val GAME_EQUIPPED_OUTFIT = "break_game_equipped_outfit"
     private const val PARENT_PIN = "parent_pin"
 
     private fun prefs(context: Context) =
@@ -79,6 +81,29 @@ object AppSettings {
     fun equipGameItem(context: Context, itemId: String) {
         if (itemId in gameOwnedItems(context)) {
             prefs(context).edit().putString(GAME_EQUIPPED_ITEM, itemId).apply()
+        }
+    }
+
+    fun gameOwnedOutfits(context: Context): Set<String> =
+        prefs(context).getStringSet(GAME_OWNED_OUTFITS, emptySet()) ?: emptySet()
+
+    fun buyGameOutfit(context: Context, outfitId: String, price: Int): Boolean {
+        val owned = gameOwnedOutfits(context)
+        if (outfitId in owned || gameStars(context) < price) return false
+        prefs(context).edit()
+            .putInt(GAME_STARS, gameStars(context) - price)
+            .putStringSet(GAME_OWNED_OUTFITS, owned + outfitId)
+            .putString(GAME_EQUIPPED_OUTFIT, outfitId)
+            .apply()
+        return true
+    }
+
+    fun equippedGameOutfit(context: Context): String? =
+        prefs(context).getString(GAME_EQUIPPED_OUTFIT, null)
+
+    fun equipGameOutfit(context: Context, outfitId: String) {
+        if (outfitId in gameOwnedOutfits(context)) {
+            prefs(context).edit().putString(GAME_EQUIPPED_OUTFIT, outfitId).apply()
         }
     }
 
