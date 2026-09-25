@@ -257,8 +257,13 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
         lookAt(Position(x = 0f, y = 0f, z = 0f))
     }
     val boardModel = remember { runCatching { modelLoader.createModelInstance("xo/xo_board.gltf") }.getOrNull() }
-    LaunchedEffect(boardModel, selectedFrame.color) {
-        boardModel?.materialInstances?.forEach { it.setParameter("baseColorFactor", selectedFrame.color.red, selectedFrame.color.green, selectedFrame.color.blue, 1f) }
+    LaunchedEffect(boardModel, selectedFrame.color, selectedFloor.top) {
+        val boardColor = Color(
+            red = selectedFrame.color.red * .68f + selectedFloor.top.red * .32f,
+            green = selectedFrame.color.green * .68f + selectedFloor.top.green * .32f,
+            blue = selectedFrame.color.blue * .68f + selectedFloor.top.blue * .32f
+        )
+        boardModel?.materialInstances?.forEach { it.setParameter("baseColorFactor", boardColor.red, boardColor.green, boardColor.blue, 1f) }
     }
     fun finishIfNeeded(next: List<Char>): Boolean {
         val win = winner(next)
@@ -325,7 +330,7 @@ private fun XoGame(context: Context, refreshKey: Int, onShop: () -> Unit, onInve
                                 val c = if (value == 'X') selectedColor.color else Color(0xFFFF4F72)
                                 it.materialInstances.forEach { m -> m.setParameter("baseColorFactor", c.red, c.green, c.blue, 1f) }
                                 add(ModelNode(modelInstance = it, autoAnimate = false, scaleToUnits = .72f).apply {
-                                    position = Position(x = (col - 1) * 1.0f, y = .52f, z = (row - 1) * 1.0f)
+                                    position = Position(x = (col - 1) * 1.0f, y = if (index in winningCells) .70f else .52f, z = (row - 1) * 1.0f)
                                     rotation = Rotation(x = 90f)
                                 })
                             }
