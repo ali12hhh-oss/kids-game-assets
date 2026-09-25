@@ -6,8 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -67,7 +67,7 @@ fun EnglishLevelTwoPage(onBack: () -> Unit, initialSection: Int = 0) {
         containerColor = Color(0xFFF4F8FF),
         topBar = {
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "رجوع") }
+                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "رجوع") }
                 Column(Modifier.weight(1f)) {
                     Text("الإنجليزية — المستوى الثاني", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
                     Text("تدريب الكتابة والتعرّف على الحروف والأرقام", fontSize = 11.sp, color = Color(0xFF5B6B82))
