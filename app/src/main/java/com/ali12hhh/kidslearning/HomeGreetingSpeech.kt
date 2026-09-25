@@ -35,7 +35,7 @@ object HomeGreetingSpeech {
                 if (result == TextToSpeech.LANG_NOT_SUPPORTED ||
                     result == TextToSpeech.LANG_MISSING_DATA
                 ) {
-                    speaker.language = Locale("ar", "SA")
+                    speaker.language = Locale.forLanguageTag("ar-SA")
                 }
                 speaker.setSpeechRate(AppSettings.speechRate(appContext))
                 speaker.setPitch(0.96f)
