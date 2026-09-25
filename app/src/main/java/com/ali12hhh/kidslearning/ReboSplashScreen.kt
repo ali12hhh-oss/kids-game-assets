@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.delay
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,7 +59,7 @@ fun ReboSplashScreen(onFinished: () -> Unit) {
         SplashCharacter(
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(340.dp)
+                .size(440.dp)
         )
 
         Column(
