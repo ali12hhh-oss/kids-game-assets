@@ -34,7 +34,7 @@ android {
         doLast {
             val navigationFile = file("src/main/java/com/ali12hhh/kidslearning/navigation/AppNavigation.kt")
             check(navigationFile.isFile && navigationFile.readText().contains("Mannequin_Medium_Anim.glb"))
-            check(!navigationFile.readText().contains("createModelInstance("Mannequin_Medium.glb")"))
+            check(!navigationFile.readText().contains("""createModelInstance("Mannequin_Medium.glb")"""))
 
             val generatedModel = layout.buildDirectory.file("generated/anim-assets/Mannequin_Medium_Anim.glb").get().asFile
             check(generatedModel.isFile && generatedModel.length() > 0L)
