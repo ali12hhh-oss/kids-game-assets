@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,7 +32,8 @@ import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
 
 private const val SPLASH_DURATION_MS = 4_500L
-private const val SPLASH_WAVE_CLIP = 6
+private const val SPLASH_JUMP_CLIP = 9
+private const val SPLASH_DANCE_CLIP = 7
 
 @Composable
 fun ReboSplashScreen(onFinished: () -> Unit) {
@@ -57,7 +59,7 @@ fun ReboSplashScreen(onFinished: () -> Unit) {
         SplashCharacter(
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(310.dp)
+                .size(340.dp)
         )
 
         Column(
@@ -103,7 +105,7 @@ private fun SplashCharacter(modifier: Modifier) {
                 modelInstance = instance,
                 autoAnimate = false,
                 // Deliberately smaller than the home character: balanced for a splash screen.
-                scaleToUnits = 1.52f,
+                scaleToUnits = 5.0f,
                 centerOrigin = Position(x = 0f, y = -0.02f, z = 0f)
             ).also {
                 it.position = Position(x = 0f, y = -0.08f, z = 0f)
@@ -115,10 +117,14 @@ private fun SplashCharacter(modifier: Modifier) {
 
     LaunchedEffect(characterNode) {
         val node = characterNode ?: return@LaunchedEffect
-        // Start the wave BEFORE rendering the Scene. This prevents the GLB bind/T-pose
-        // from being visible during startup.
-        runCatching { node.stopAnimation(SPLASH_WAVE_CLIP) }
-        runCatching { node.playAnimation(SPLASH_WAVE_CLIP, 1f, true) }
+        // Never render the bind/T-pose. Start with the jump, then switch to cheering
+        // as the second movement for the rest of the splash.
+        runCatching { node.stopAnimation(SPLASH_JUMP_CLIP) }
+        runCatching { node.stopAnimation(SPLASH_DANCE_CLIP) }
+        runCatching { node.playAnimation(SPLASH_JUMP_CLIP, 1f, false) }
+        delay(900)
+        runCatching { node.stopAnimation(SPLASH_JUMP_CLIP) }
+        runCatching { node.playAnimation(SPLASH_DANCE_CLIP, 1f, true) }
         animationReady = true
     }
 
