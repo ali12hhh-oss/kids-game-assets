@@ -6,8 +6,9 @@ License: CC0 1.0 Universal
 Official source: https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0
 Original asset page: https://kaylousberg.itch.io/kaykit-adventurers
 
-Imported free-tier accessory models:
-sword_1handed, sword_2handed, axe_1handed, axe_2handed,
-dagger, crossbow_1handed, staff, wand, arrow, arrow_bundle.
+Imported mobile-friendly accessory/equipment models:
+swords, axes, dagger, crossbows, staff, wand, arrows, quiver,
+shields, smokebomb, and spellbook variants.
 
-These files are intentionally limited to a small mobile-friendly subset.
+These files are intentionally limited to a lightweight subset.
+They do not replace Reebo's existing character or animation rig.
