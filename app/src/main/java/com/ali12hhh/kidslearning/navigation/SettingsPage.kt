@@ -172,10 +172,6 @@ private fun PrivacyPolicyPage(onBack: () -> Unit) {
         Text("تطبيق تعلم مع ريبو يحفظ اسم الطفل وصورته وإعدادات التطبيق والتقدّم والنجوم والمقتنيات محليًا على الجهاز. قد تتضمن النسخة المنشورة إعلانات عبر مزود إعلانات متوافق مع متطلبات Google Play لتطبيقات الأطفال؛ ولا تُستخدم بيانات ملف الطفل المحلية لتخصيص الإعلانات أو إعادة الاستهداف.", fontSize = 16.sp, lineHeight = 25.sp)
         Text("الصورة يختارها ولي الأمر من منتقي الملفات في النظام، ولا يرسلها التطبيق إلى الإنترنت. النطق الصوتي يستخدم محرك تحويل النص إلى كلام الموجود على الجهاز.", fontSize = 16.sp, lineHeight = 25.sp)
         Text("يمكن لولي الأمر حذف بيانات التطبيق من صفحة البيانات والتقدّم أو من إعدادات Android. لا يحتفظ التطبيق بحسابات مستخدمين.", fontSize = 16.sp, lineHeight = 25.sp)
-        Text("المطور: Ali12hhh-oss. للتواصل وطلبات الخصوصية: مستودع المشروع العام على GitHub.", fontSize = 16.sp, lineHeight = 25.sp)
-        Button(onClick = {
-            context.startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/ali12hhh-oss/kids-game-assets/blob/main/docs/privacy-policy.html".toUri()))
-        }, modifier = Modifier.fillMaxWidth()) { Text("فتح صفحة الخصوصية العامة") }
     }
 }
 
