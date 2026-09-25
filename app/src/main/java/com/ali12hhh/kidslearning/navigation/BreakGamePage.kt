@@ -285,8 +285,16 @@ fun BreakGamePage(onBack: () -> Unit) {
                 val horizon = h * 0.36f
                 val bottom = h * 1.02f
                 val center = w / 2f
-                // Glowing horizon and distant scenery silhouettes.
-                drawCircle(Color(0xFFFFD66B).copy(alpha = 0.24f), radius = w * 0.17f, center = Offset(center, horizon * 0.72f))
+                // Animated cinematic sky: sun, clouds and subtle atmosphere.
+                val skyPulse = 0.18f + ((tick % 80) / 80f) * 0.08f
+                drawCircle(Color(0xFFFFD66B).copy(alpha = skyPulse), radius = w * 0.17f, center = Offset(center, horizon * 0.72f))
+                for (cloud in 0..3) {
+                    val cloudX = ((w * (0.08f + cloud * 0.29f)) + (tick % 160) * (1f + cloud * 0.2f)) % (w * 1.18f) - w * 0.08f
+                    val cloudY = h * (0.10f + (cloud % 2) * 0.08f)
+                    drawCircle(Color.White.copy(alpha = 0.10f), w * 0.045f, Offset(cloudX, cloudY))
+                    drawCircle(Color.White.copy(alpha = 0.08f), w * 0.065f, Offset(cloudX + w * 0.035f, cloudY + 4f))
+                    drawCircle(Color.White.copy(alpha = 0.07f), w * 0.04f, Offset(cloudX + w * 0.075f, cloudY + 8f))
+                }
                 val skyline = listOf(0.04f to 0.17f, 0.13f to 0.24f, 0.23f to 0.14f, 0.76f to 0.20f, 0.86f to 0.13f, 0.95f to 0.25f)
                 skyline.forEachIndexed { i, pair ->
                     val bw = w * (if (i % 2 == 0) 0.09f else 0.07f)
@@ -296,7 +304,15 @@ fun BreakGamePage(onBack: () -> Unit) {
                         drawRect(Color(0xFFFFD66B).copy(alpha = 0.30f), Offset(w * pair.first + bw * (0.2f + col * 0.42f), horizon - bh + bh * (0.18f + row * 0.18f)), Size(bw * 0.12f, bh * 0.07f))
                     }
                 }
-                // Perspective track, shoulders and three playable lanes.
+                // Road shoulders, soft lane glow and three playable lanes.
+                val roadGlow = Path().apply {
+                    moveTo(w * 0.425f, horizon)
+                    lineTo(w * 0.575f, horizon)
+                    lineTo(w * 1.07f, bottom)
+                    lineTo(w * -0.07f, bottom)
+                    close()
+                }
+                drawPath(roadGlow, Color(0xFF3DD6C6).copy(alpha = 0.07f))
                 val road = Path().apply {
                     moveTo(w * 0.43f, horizon)
                     lineTo(w * 0.57f, horizon)
@@ -309,6 +325,7 @@ fun BreakGamePage(onBack: () -> Unit) {
                 val rightEdge = Path().apply { moveTo(w * 0.57f, horizon); lineTo(w * 1.04f, bottom) }
                 drawPath(leftEdge, Color(0xFF50D8D2).copy(alpha = 0.78f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 5f))
                 drawPath(rightEdge, Color(0xFF50D8D2).copy(alpha = 0.78f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 5f))
+                drawLine(Color(0xFFFFD54F).copy(alpha = 0.38f), Offset(w * 0.50f, horizon), Offset(w * 0.50f, bottom), strokeWidth = 2f)
                 for (laneLine in 1..2) {
                     val topX = w * (0.43f + 0.14f * laneLine)
                     val bottomX = w * (laneLine / 3f)
@@ -403,6 +420,36 @@ fun BreakGamePage(onBack: () -> Unit) {
                                 Text("المستوى $stage/3", color = Color(0xFF7FE6D9), fontSize = 11.sp, fontWeight = FontWeight.Black)
                                 Text("🔥 $combo", color = Color(0xFFFFD54F), fontSize = 12.sp, fontWeight = FontWeight.Black)
                             }
+                    }
+                }
+            }
+
+            Card(
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 111.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xA6071D2A))
+            ) {
+                Row(
+                    Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        when (stage) {
+                            1 -> "🌤 بداية المغامرة"
+                            2 -> "⚡ التحدي يتصاعد"
+                            else -> "🔥 المرحلة النهائية"
+                        },
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                    repeat(3) { index ->
+                        Box(
+                            Modifier.size(if (index < stage) 7.dp else 5.dp)
+                                .clip(CircleShape)
+                                .background(if (index < stage) Color(0xFFFFD54F) else Color.White.copy(alpha = 0.25f))
+                        )
                     }
                 }
             }
@@ -605,7 +652,8 @@ private fun LaneJoystick(lane: Int, onLaneChange: (Int) -> Unit) {
             },
         contentAlignment = Alignment.Center
     ) {
-        Box(Modifier.size(82.dp).clip(CircleShape).background(Color(0xB80A1720)))
+        Box(Modifier.size(92.dp).clip(CircleShape).background(Color(0x3510E0D0)))
+        Box(Modifier.size(82.dp).clip(CircleShape).background(Color(0xC00A1720)))
         Row(Modifier.align(Alignment.TopCenter).padding(top = 9.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             repeat(3) { index ->
                 Box(Modifier.size(if (index == lane) 8.dp else 6.dp).clip(CircleShape).background(if (index == lane) Color(0xFFFFD54F) else Color.White.copy(alpha = 0.3f)))
