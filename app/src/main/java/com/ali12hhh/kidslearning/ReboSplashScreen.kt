@@ -59,7 +59,7 @@ fun ReboSplashScreen(onFinished: () -> Unit) {
         SplashCharacter(
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(480.dp)
+                .size(440.dp)
         )
 
         Column(
@@ -108,7 +108,7 @@ private fun SplashCharacter(modifier: Modifier) {
                 scaleToUnits = 3.0f,
                 centerOrigin = Position(x = 0f, y = -0.02f, z = 0f)
             ).also {
-                it.position = Position(x = 0f, y = -0.45f, z = 0f)
+                it.position = Position(x = 0f, y = -1.14f, z = 0f)
             }
         }
     }
