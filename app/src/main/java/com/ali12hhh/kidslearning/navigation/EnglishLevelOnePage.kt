@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -84,7 +84,7 @@ fun EnglishLevelOnePage(onBack: () -> Unit, initialSection: Int = 0) {
                 Modifier.fillMaxWidth().background(Color(0xFFF4F8FF)).padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, "رجوع") }
+                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "رجوع") }
                 Column(Modifier.weight(1f)) {
                     Text("الإنجليزية — المستوى الأول", fontSize = 21.sp, fontWeight = FontWeight.ExtraBold)
                     Text("شرح عربي مع تعلّم الحروف والأرقام الإنجليزية", fontSize = 12.sp, color = Color(0xFF5B6B82))
@@ -96,7 +96,7 @@ fun EnglishLevelOnePage(onBack: () -> Unit, initialSection: Int = 0) {
             Modifier.fillMaxSize().padding(padding)
                 .background(Brush.verticalGradient(listOf(Color(0xFFF7FBFF), Color(0xFFE7F0FF))))
         ) {
-            TabRow(selectedTabIndex = section, containerColor = Color.White) {
+            PrimaryTabRow(selectedTabIndex = section, containerColor = Color.White) {
                 Tab(section == 0, { section = 0 }) {
                     Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("🔤", fontSize = 22.sp); Text("الحروف", fontWeight = FontWeight.Bold)
