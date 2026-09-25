@@ -156,8 +156,8 @@ private fun EnglishLettersSection() {
             textAlign = TextAlign.Center
         )
 
-        TabRow(
-            caseTab,
+        PrimaryTabRow(
+            selectedTabIndex = caseTab,
             modifier = Modifier.padding(top = 8.dp),
             containerColor = Color.White
         ) {
