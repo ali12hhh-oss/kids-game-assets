@@ -2,7 +2,8 @@
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="تعلّم مع ريبو"
+        android:name=".KidsLearningApp"
+        android:label="تعلم مع ريبو"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
