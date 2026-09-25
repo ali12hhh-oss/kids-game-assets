@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -668,7 +669,7 @@ private fun BreakGameStore(
 
     Box(Modifier.fillMaxSize().background(Color(0xD9000810)), contentAlignment = Alignment.Center) {
         Card(Modifier.fillMaxWidth(0.94f).padding(8.dp), shape = RoundedCornerShape(30.dp), colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FBFF))) {
-            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.padding(20.dp).verticalScroll(remember { androidx.compose.foundation.rememberScrollState() }), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column {
                         Text("متجر مغامرة ريبو", color = Color(0xFF102B3E), fontSize = 23.sp, fontWeight = FontWeight.Black)
