@@ -1,5 +1,7 @@
 package com.ali12hhh.kidslearning.navigation
 
+import android.content.Context
+import android.media.MediaPlayer
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
 import java.util.Locale
@@ -73,4 +75,44 @@ object LetterSpeech {
         tts?.speak(arabic(letter), TextToSpeech.QUEUE_FLUSH, null, id)
     fun speakEnglish(tts: TextToSpeech?, letter: String, id: String = "letter_sound") =
         tts?.speak(english(letter), TextToSpeech.QUEUE_FLUSH, null, id)
+}
+
+
+/** Plays bundled phoneme recordings where TTS cannot reliably synthesize an isolated English sound. */
+object PhonicsSpeech {
+    private val bundledPhonemes = mapOf(
+        "e" to "phonics_e.ogg",
+        "i" to "phonics_i.ogg"
+    )
+
+    fun speakEnglish(
+        context: Context,
+        tts: TextToSpeech?,
+        letter: String,
+        id: String = "letter_sound"
+    ) {
+        val key = letter.trim().lowercase().firstOrNull()?.toString()
+        val assetName = bundledPhonemes[key]
+        if (assetName == null) {
+            LetterSpeech.speakEnglish(tts, letter, id)
+            return
+        }
+
+        runCatching {
+            val descriptor = context.assets.openFd(assetName)
+            MediaPlayer().apply {
+                setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+                descriptor.close()
+                setOnCompletionListener { it.release() }
+                setOnErrorListener { player, _, _ ->
+                    player.release()
+                    true
+                }
+                prepare()
+                start()
+            }
+        }.onFailure {
+            LetterSpeech.speakEnglish(tts, letter, id)
+        }
+    }
 }
