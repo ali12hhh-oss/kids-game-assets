@@ -12,6 +12,9 @@ object AppSettings {
     private const val CHILD_IMAGE_URI = "child_image_uri"
     private const val LAST_SESSION_ID = "last_session_id"
     private const val OWNED_ITEMS = "owned_items"
+    private const val GAME_STARS = "break_game_stars"
+    private const val GAME_OWNED_ITEMS = "break_game_owned_items"
+    private const val GAME_EQUIPPED_ITEM = "break_game_equipped_item"
     private const val PARENT_PIN = "parent_pin"
 
     private fun prefs(context: Context) =
@@ -51,6 +54,34 @@ object AppSettings {
         prefs(context).edit().putInt(CHILD_STARS, childStars(context) - price).putStringSet(OWNED_ITEMS, owned + itemId).apply()
         return true
     }
+
+    // Break/Adventure game economy is intentionally separate from the app's educational stars.
+    fun gameStars(context: Context): Int = prefs(context).getInt(GAME_STARS, 0)
+    fun addGameStars(context: Context, amount: Int) =
+        prefs(context).edit().putInt(GAME_STARS, (gameStars(context) + amount).coerceAtLeast(0)).apply()
+
+    fun gameOwnedItems(context: Context): Set<String> =
+        prefs(context).getStringSet(GAME_OWNED_ITEMS, emptySet()) ?: emptySet()
+
+    fun buyGameItem(context: Context, itemId: String, price: Int): Boolean {
+        val owned = gameOwnedItems(context)
+        if (itemId in owned || gameStars(context) < price) return false
+        prefs(context).edit()
+            .putInt(GAME_STARS, gameStars(context) - price)
+            .putStringSet(GAME_OWNED_ITEMS, owned + itemId)
+            .apply()
+        return true
+    }
+
+    fun equippedGameItem(context: Context): String? =
+        prefs(context).getString(GAME_EQUIPPED_ITEM, null)
+
+    fun equipGameItem(context: Context, itemId: String) {
+        if (itemId in gameOwnedItems(context)) {
+            prefs(context).edit().putString(GAME_EQUIPPED_ITEM, itemId).apply()
+        }
+    }
+
     fun resetProgress(context: Context) =
         prefs(context).edit()
             .putInt(CHILD_STARS, 0)
