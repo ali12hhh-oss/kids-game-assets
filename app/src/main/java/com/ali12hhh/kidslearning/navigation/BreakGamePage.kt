@@ -82,6 +82,8 @@ fun BreakGamePage(onBack: () -> Unit) {
     var trapHits by remember { mutableIntStateOf(0) }
     var countdown by remember { mutableIntStateOf(3) }
     var roundId by remember { mutableIntStateOf(0) }
+    var showStore by remember { mutableStateOf(false) }
+    var storeRefresh by remember { mutableIntStateOf(0) }
     val items = remember { mutableStateListOf<BreakItem>() }
 
     fun resetGame() {
@@ -175,7 +177,7 @@ fun BreakGamePage(onBack: () -> Unit) {
             running = false
             finished = true
             val reward = (collected / 2).coerceIn(0, 12)
-            if (reward > 0) AppSettings.addStars(context, reward)
+            if (reward > 0) AppSettings.addGameStars(context, reward)
         }
     }
 
@@ -350,7 +352,7 @@ fun BreakGamePage(onBack: () -> Unit) {
                         }
                         Column(horizontalAlignment = Alignment.End) {
                             Text("⭐ $score", color = Color(0xFFFFD54F), fontSize = 18.sp, fontWeight = FontWeight.Black)
-                            Text("⏱ $remaining ث", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("💰 \${AppSettings.gameStars(context)}", color = Color(0xFFFFC857), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -380,6 +382,27 @@ fun BreakGamePage(onBack: () -> Unit) {
                         }
                     }
                 }
+            }
+
+            if (!finished) {
+                Card(
+                    modifier = Modifier.align(Alignment.TopEnd).padding(top = 112.dp, end = 12.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xE610211E))
+                ) {
+                    IconButton(onClick = { showStore = true }) {
+                        Text("🛍", fontSize = 25.sp)
+                    }
+                }
+            }
+
+            if (showStore) {
+                BreakGameStore(
+                    context = context,
+                    refreshKey = storeRefresh,
+                    onPurchased = { storeRefresh++ },
+                    onClose = { showStore = false }
+                )
             }
 
             if (countdown > 0 && !finished) {
@@ -416,7 +439,7 @@ fun BreakGamePage(onBack: () -> Unit) {
                             Text("تجاوزت $dodged فخًا  |  اصطدامات: $misses", color = Color(0xFF547083), fontSize = 13.sp)
                             Text("النجوم الذهبية: $goldCollected   •   خسائر الفخاخ: $trapHits", color = Color(0xFF547083), fontSize = 12.sp)
                             Text("أفضل سلسلة: $bestCombo", color = Color(0xFFB77900), fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                            Text("مكافأتك: ⭐ ${(collected / 2).coerceIn(0, 12)} من نجوم التطبيق", color = Color(0xFF163D56), fontSize = 14.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                            Text("مكافأتك: 💰 ${(collected / 2).coerceIn(0, 12)} نجمة للمتجر داخل اللعبة", color = Color(0xFF163D56), fontSize = 14.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                             Spacer(Modifier.height(3.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Button(onClick = { resetGame() }) { Text("العب مجددًا") }
@@ -425,6 +448,80 @@ fun BreakGamePage(onBack: () -> Unit) {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BreakGameStore(
+    context: android.content.Context,
+    refreshKey: Int,
+    onPurchased: () -> Unit,
+    onClose: () -> Unit
+) {
+    val items = listOf(
+        "speed_badge" to ("شارة الاندفاع" to 12),
+        "jump_badge" to ("شارة القفز" to 10),
+        "gold_badge" to ("شارة النجم الذهبي" to 18)
+    )
+    var owned by remember(refreshKey) { mutableStateOf(AppSettings.gameOwnedItems(context)) }
+    Box(Modifier.fillMaxSize().background(Color(0xD9000810)), contentAlignment = Alignment.Center) {
+        Card(
+            Modifier.fillMaxWidth(0.92f).padding(8.dp),
+            shape = RoundedCornerShape(30.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FBFF))
+        ) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text("متجر مغامرة ريبو", color = Color(0xFF102B3E), fontSize = 23.sp, fontWeight = FontWeight.Black)
+                        Text("💰 ${AppSettings.gameStars(context)} نجمة خاصة باللعبة", color = Color(0xFFB77900), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
+                    IconButton(onClick = onClose) { Text("✕", fontSize = 22.sp) }
+                }
+                Text("هذه النجوم منفصلة تمامًا عن نجوم التطبيق التعليمية.", color = Color(0xFF547083), fontSize = 12.sp)
+                items.forEach { (id, data) ->
+                    val (name, price) = data
+                    val isOwned = id in owned
+                    Card(
+                        Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF3F7))
+                    ) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(name, color = Color(0xFF17384D), fontSize = 16.sp, fontWeight = FontWeight.Black)
+                                Text("عنصر تجميلي للعبة — $price 💰", color = Color(0xFF5A7484), fontSize = 11.sp)
+                            }
+                            Button(onClick = {
+                                if (!isOwned && AppSettings.buyGameItem(context, id, price)) {
+                                    owned = AppSettings.gameOwnedItems(context)
+                                    onPurchased()
+                                } else if (isOwned) {
+                                    AppSettings.equipGameItem(context, id)
+                                }
+                            }) {
+                                Text(if (isOwned && AppSettings.equippedGameItem(context) == id) "مجهّز" else if (isOwned) "تجهيز" else "$price 💰")
+                            }
+                        }
+                    }
+                }
+                Text(
+                    "سنربط عناصر الملابس الفعلية بالشخصية بعد التأكد من الأصول المتاحة داخل المشروع.",
+                    color = Color(0xFF547083),
+                    fontSize = 11.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
