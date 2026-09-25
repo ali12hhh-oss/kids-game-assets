@@ -446,16 +446,16 @@ private fun XoBoard(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             repeat(3) { row ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(3f),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        .weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     repeat(3) { col ->
                         val index = row * 3 + col
@@ -466,7 +466,9 @@ private fun XoBoard(
                             frameColor = frameColor,
                             isWinning = index in winningCells,
                             effect = effect,
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxSize(),
                             onClick = { onMove(index) }
                         )
                     }
